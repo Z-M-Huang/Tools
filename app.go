@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/Z-M-Huang/Tools/api"
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/julienschmidt/httprouter"
 	"go.uber.org/zap"
@@ -50,6 +51,10 @@ func homePage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	tplt.ExecuteTemplate(w, "homepage.gohtml", cardList)
 }
 
+func loginPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	tplt.ExecuteTemplate(w, "login.gohtml", nil)
+}
+
 func main() {
 
 	router := httprouter.New()
@@ -58,6 +63,8 @@ func main() {
 	router.ServeFiles("/vendor/*filepath", http.Dir("node_modules/"))
 
 	router.GET("/", homePage)
+	router.GET("/login", loginPage)
+	router.POST("/login", api.Login)
 
 	logger.Fatal(http.ListenAndServe(":80", router).Error())
 }
