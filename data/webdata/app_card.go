@@ -1,4 +1,4 @@
-package data
+package webdata
 
 //AppCardList card list for single category
 type AppCardList struct {
