@@ -3,6 +3,9 @@ package main
 import (
 	"html/template"
 	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/julienschmidt/httprouter"
 	"go.uber.org/zap"
@@ -13,7 +16,12 @@ var tplt *template.Template
 var logger *zap.Logger
 
 func init() {
-	tplt = template.Must(template.ParseGlob("templates/*.gohtml"))
+	initLogger()
+	var err error
+	tplt, err = template.ParseFiles(getAlltemplates("templates/")...)
+	if err != nil {
+		logger.Fatal(err.Error())
+	}
 }
 
 func homePage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -21,7 +29,6 @@ func homePage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 }
 
 func main() {
-	initLogger()
 
 	router := httprouter.New()
 
@@ -38,4 +45,17 @@ func initLogger() {
 	config.EncoderConfig.EncodeTime = zapcore.RFC3339TimeEncoder
 	config.OutputPaths = []string{"stdout"}
 	logger, _ = config.Build()
+}
+
+func getAlltemplates(inputPath string) []string {
+	var ret []string
+	filepath.Walk(inputPath, func(path string, info os.FileInfo, err error) error {
+		if path != inputPath && info.IsDir() {
+			ret = append(ret, getAlltemplates(path)...)
+		} else if strings.Contains(info.Name(), ".gohtml") {
+			ret = append(ret, path)
+		}
+		return nil
+	})
+	return ret
 }
