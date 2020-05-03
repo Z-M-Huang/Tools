@@ -17,7 +17,7 @@ var onceRedis sync.Once
 //RedisClient redis instance
 var RedisClient *redis.Client
 
-//Logger global logger
+//Logger global Logger
 var Logger *zap.Logger
 
 //Config application config
@@ -55,8 +55,20 @@ func initConfig() {
 			ClientID:     strings.TrimSpace(os.Getenv("GOOGLE_CLIENT_ID")),
 			ClientSecret: strings.TrimSpace(os.Getenv("GOOGLE_CLIENT_SECRET")),
 		},
-		JwtKey: strings.TrimSpace(os.Getenv("JwtKEY")),
-		Host:   strings.TrimSpace(os.Getenv("Host")),
+		JwtKey: []byte(strings.TrimSpace(os.Getenv("JWT_KEY"))),
+		Host:   strings.TrimSpace(os.Getenv("HOST")),
+	}
+
+	if Config.RedisConfig.Addr == "" {
+		Logger.Fatal("REDIS_ADDR cannot be empty")
+	} else if Config.GoogleOauthConfig.ClientID == "" {
+		Logger.Fatal("GOOGLE_CLIENT_ID cannot be empty")
+	} else if Config.GoogleOauthConfig.ClientSecret == "" {
+		Logger.Fatal("GOOGLE_CLIENT_SECRET cannot be empty")
+	} else if len(Config.JwtKey) == 0 {
+		Logger.Fatal("JWT_KEY cannot be empty")
+	} else if Config.Host == "" {
+		Logger.Fatal("HOST cannot be empty")
 	}
 }
 

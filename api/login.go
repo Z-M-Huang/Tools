@@ -20,7 +20,7 @@ var authTokenKey = "session_token"
 
 func init() {
 	googleOauthConfig = &oauth2.Config{
-		RedirectURL:  fmt.Sprintf("%s/google_oauth", utils.Config.Host),
+		RedirectURL:  fmt.Sprintf("https://%s/google_oauth", utils.Config.Host),
 		ClientID:     utils.Config.GoogleOauthConfig.ClientID,
 		ClientSecret: utils.Config.GoogleOauthConfig.ClientSecret,
 		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"},

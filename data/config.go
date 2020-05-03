@@ -6,7 +6,7 @@ type Configuration struct {
 	GoogleOauthConfig *GoogleOauthConfiguration
 
 	Host   string
-	JwtKey string
+	JwtKey []byte
 }
 
 //RedisConfiguration redis config
