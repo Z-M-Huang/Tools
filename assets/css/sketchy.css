@@ -5104,6 +5104,7 @@
  
  .card-text:last-child {
    margin-bottom: 0;
+   text-overflow: ellipsis;
  }
  
  .card-link:hover {

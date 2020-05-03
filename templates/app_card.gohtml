@@ -1,0 +1,18 @@
+{{define "app_card"}}
+<div class="card-container col-md-3">
+  <div class="card text-white bg-info">
+    <a href="{{.Link}}">
+      <div class="card-header">
+        {{.Title}}
+      </div>
+    </a>
+    <div class="card-body">
+      <h4 class="card-title">{{.Title}}</h4>
+      <p class="card-text">{{.Description}}</p>
+    </div>
+    <div class="card-footer">
+      Up: {{.Up}} Saved: {{.Saved}}
+    </div>
+  </div>
+</div>
+{{end}}
