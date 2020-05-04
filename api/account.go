@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -94,12 +95,8 @@ func GoogleCallback(w http.ResponseWriter, r *http.Request, ps httprouter.Params
 	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 }
 
-//GetUserInfo get user info for page and renew token if needed
-func GetUserInfo(w http.ResponseWriter, r *http.Request) (*webdata.LoginData, error) {
-	cookies := r.Cookies()
-	for _, c := range cookies {
-		fmt.Println(fmt.Sprintf("%v, %v", c.Name, c.Value))
-	}
+//GetClaimFromToken get user claim from token
+func GetClaimFromToken(w http.ResponseWriter, r *http.Request) (*webdata.JWTClaim, error) {
 	cookie, err := r.Cookie(authTokenKey)
 	if err != nil {
 		return nil, nil
@@ -124,10 +121,21 @@ func GetUserInfo(w http.ResponseWriter, r *http.Request) (*webdata.LoginData, er
 		}
 	}
 
-	return &webdata.LoginData{
-		Username: claim.Subject,
-		ImageURL: claim.ImageURL,
-	}, nil
+	return claim, nil
+}
+
+//GetUserInfoFromDB get user info from database
+func GetUserInfoFromDB(emailAddress string) (*dbentity.User, error) {
+	user := &dbentity.User{}
+	if db := utils.DB.Where(dbentity.User{
+		Email: emailAddress,
+	}).First(&user); db.RecordNotFound() {
+		return nil, fmt.Errorf("User not found associated with email: %s", emailAddress)
+	} else if db.Error != nil {
+		utils.Logger.Error(db.Error.Error())
+		return nil, errors.New("Internal Error: failed to get user info, please try again later")
+	}
+	return user, nil
 }
 
 func getGoogleUserInfo(state string, code string) (*apidata.GoogleUserInfo, error) {

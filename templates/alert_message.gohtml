@@ -1,0 +1,16 @@
+{{define "alert_message"}}
+{{if ne .Message ""}}
+  {{if not .IsDanger}}
+  <div class="alert alert-dismissible alert-warning">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <h4 class="alert-heading">Warning!</h4>
+    <p class="mb-0">{{.Message}}</p>
+  </div>
+  {{else}}
+  <div class="alert alert-dismissible alert-danger">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <strong>Oh snap!</strong> {{.Message}}
+  </div>
+  {{end}}
+{{end}}
+{{end}}

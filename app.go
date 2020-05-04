@@ -46,15 +46,40 @@ func homePage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		cardList = append(cardList, cardCategory)
 	}
 	pageData.ContentData = cardList
-	loginInfo, err := api.GetUserInfo(w, r)
-	if err == nil && loginInfo != nil {
-		pageData.LoginInfo = *loginInfo
+	claim, err := api.GetClaimFromToken(w, r)
+	if err == nil && claim != nil {
+		pageData.LoginInfo = webdata.LoginData{
+			Username: claim.Subject,
+			ImageURL: claim.ImageURL,
+		}
 	}
 	tplt.ExecuteTemplate(w, "homepage.gohtml", pageData)
 }
 
 func loginPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	tplt.ExecuteTemplate(w, "login.gohtml", &webdata.PageData{})
+}
+
+func accountPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	pageData := &webdata.PageData{}
+	claim, err := api.GetClaimFromToken(w, r)
+	if err != nil {
+		pageData.AlertInfo.IsDanger = true
+		pageData.AlertInfo.Message = err.Error()
+	} else {
+		pageData.LoginInfo = webdata.LoginData{
+			Username: claim.Subject,
+			ImageURL: claim.ImageURL,
+		}
+		user, err := api.GetUserInfoFromDB(claim.Id)
+		if err != nil {
+			pageData.AlertInfo.IsDanger = true
+			pageData.AlertInfo.Message = err.Error()
+		} else {
+			pageData.ContentData = user
+		}
+	}
+	tplt.ExecuteTemplate(w, "account.gohtml", pageData)
 }
 
 func main() {
