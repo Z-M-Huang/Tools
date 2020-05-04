@@ -2,11 +2,14 @@ package data
 
 //Configuration app configuration
 type Configuration struct {
+	DatabaseConfig    *DatabaseConfiguration
 	RedisConfig       *RedisConfiguration
 	GoogleOauthConfig *GoogleOauthConfiguration
 
 	Host   string
 	JwtKey []byte
+
+	IsDebug bool
 }
 
 //RedisConfiguration redis config
@@ -20,4 +23,9 @@ type RedisConfiguration struct {
 type GoogleOauthConfiguration struct {
 	ClientID     string
 	ClientSecret string
+}
+
+type DatabaseConfiguration struct {
+	ConnectionString string
+	Driver           string
 }

@@ -8,8 +8,11 @@ import (
 	"time"
 
 	"github.com/Z-M-Huang/Tools/data/apidata"
+	"github.com/Z-M-Huang/Tools/data/dbentity"
+	"github.com/Z-M-Huang/Tools/data/webdata"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/jinzhu/gorm"
 	"github.com/julienschmidt/httprouter"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -52,20 +55,79 @@ func GoogleCallback(w http.ResponseWriter, r *http.Request, ps httprouter.Params
 	if err != nil {
 		utils.Logger.Error(err.Error())
 	}
-	tokenStr, expireAt, err := generateJWTToken("Google", user.Email, user.GivenName)
+	err = utils.DB.Transaction(func(tx *gorm.DB) error {
+		dbUser := &dbentity.User{
+			Email: user.Email,
+		}
+		if db := tx.Where(dbUser).First(&dbUser); db.RecordNotFound() {
+			dbUser.Username = user.Name
+			dbUser.GoogleID = user.ID
+			dbUser.Email = user.Email
+			if db = tx.Save(dbUser).Scan(&dbUser); db.Error != nil {
+				return fmt.Errorf(fmt.Sprintf("failed to save new user in GoogleCallBack %s", db.Error))
+			}
+		} else if db.Error != nil {
+			return fmt.Errorf(fmt.Sprintf("failed to save new user in GoogleCallBack %s", db.Error))
+		}
+		return nil
+	})
+	if err != nil {
+		utils.Logger.Error(err.Error())
+	}
+	tokenStr, expireAt, err := generateJWTToken("Google", user.Email, user.Name, user.Picture)
 	if err != nil {
 		utils.Logger.Sugar().Errorf("failed to generate jwt token %s", err.Error())
 	} else {
-		http.SetCookie(w, &http.Cookie{
+		cookie := &http.Cookie{
 			Name:       authTokenKey,
 			Value:      tokenStr,
 			Path:       "/",
 			Domain:     utils.Config.Host,
 			Expires:    expireAt,
 			RawExpires: expireAt.String(),
-		})
+		}
+		if utils.Config.IsDebug {
+			cookie.Domain = "localhost"
+		}
+		http.SetCookie(w, cookie)
 	}
 	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+}
+
+//GetUserInfo get user info for page and renew token if needed
+func GetUserInfo(w http.ResponseWriter, r *http.Request) (*webdata.LoginData, error) {
+	cookies := r.Cookies()
+	for _, c := range cookies {
+		fmt.Println(fmt.Sprintf("%v, %v", c.Name, c.Value))
+	}
+	cookie, err := r.Cookie(authTokenKey)
+	if err != nil {
+		return nil, nil
+	}
+	claim, err := isTokenValid(cookie.Value)
+	if err != nil {
+		return nil, err
+	}
+	if time.Now().UTC().Sub(time.Unix(claim.ExpiresAt, 0)).Hours() < 24 {
+		tokenStr, expireAt, err := generateJWTToken("Google", claim.Id, claim.Subject, claim.ImageURL)
+		if err != nil {
+			utils.Logger.Sugar().Errorf("failed to generate jwt token %s", err.Error())
+		} else {
+			http.SetCookie(w, &http.Cookie{
+				Name:       authTokenKey,
+				Value:      tokenStr,
+				Path:       "/",
+				Domain:     utils.Config.Host,
+				Expires:    expireAt,
+				RawExpires: expireAt.String(),
+			})
+		}
+	}
+
+	return &webdata.LoginData{
+		Username: claim.Subject,
+		ImageURL: claim.ImageURL,
+	}, nil
 }
 
 func getGoogleUserInfo(state string, code string) (*apidata.GoogleUserInfo, error) {
@@ -96,19 +158,41 @@ func getGoogleUserInfo(state string, code string) (*apidata.GoogleUserInfo, erro
 	return user, nil
 }
 
-func generateJWTToken(audience, emailAddress, username string) (string, time.Time, error) {
+func generateJWTToken(audience, emailAddress, username, imageURL string) (string, time.Time, error) {
 	expiresAt := time.Now().Add(24 * time.Hour)
-	claim := &jwt.StandardClaims{
-		ExpiresAt: expiresAt.Unix(),
-		Id:        emailAddress,
-		Audience:  audience,
-		Subject:   username,
-		Issuer:    utils.Config.Host,
+	claim := &webdata.JWTClaim{
+		ImageURL: imageURL,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expiresAt.Unix(),
+			Id:        emailAddress,
+			Audience:  audience,
+			Subject:   username,
+			Issuer:    utils.Config.Host,
+		},
 	}
+	claim.ImageURL = imageURL
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
 	tokenStr, err := token.SignedString(utils.Config.JwtKey)
 	if err != nil {
 		return "", time.Now(), fmt.Errorf("failed to generate token %s", err.Error())
 	}
 	return tokenStr, expiresAt, nil
+}
+
+func isTokenValid(token string) (*webdata.JWTClaim, error) {
+	claims := &webdata.JWTClaim{}
+	tkn, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
+		return utils.Config.JwtKey, nil
+	})
+
+	if err != nil {
+		utils.Logger.Error(err.Error())
+		return nil, fmt.Errorf("Unauthenticated")
+	}
+
+	if !tkn.Valid || !claims.VerifyIssuer(utils.Config.Host, true) {
+		return nil, fmt.Errorf("Invalid Token")
+	}
+
+	return claims, nil
 }

@@ -1,14 +1,14 @@
-{{template "header"}}
+{{template "header" .LoginInfo}}
 <ul class="nav nav-tabs">
   <!--Add tags-->
-  {{range $index, $element := .}}
+  {{range $index, $element := .ContentData}}
   <li class="nav-item">    
     <a class="nav-link {{if eq $index 0}} active {{end}}" data-toggle="tab" href="#appTab{{$element.Category}}">{{$element.Category}}</a>
   </li>
   {{end}}
 </ul>
 <div id="appTabContent" class="tab-content">
-  {{range $index, $element := .}}  
+  {{range $index, $element := .ContentData}}  
   <div class="tab-pane fade {{if eq $index 0}}active show{{end}}" id="appTab{{$element.Category}}">
       {{$length := add (len $element.AppCards) -1}}
       {{range $cardIndex, $card := $element.AppCards}}

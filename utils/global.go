@@ -7,12 +7,22 @@ import (
 	"sync"
 
 	"github.com/Z-M-Huang/Tools/data"
+	"github.com/Z-M-Huang/Tools/data/dbentity"
 	"github.com/go-redis/redis"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mssql" //supporting packages
+	_ "github.com/jinzhu/gorm/dialects/mysql"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
 var onceRedis sync.Once
+
+//DB database connection
+var DB *gorm.DB
 
 //RedisClient redis instance
 var RedisClient *redis.Client
@@ -27,6 +37,7 @@ func init() {
 	onceRedis.Do(func() {
 		initLogger()
 		initConfig()
+		initDB()
 		initRedis()
 	})
 }
@@ -46,6 +57,10 @@ func initConfig() {
 	}
 
 	Config = &data.Configuration{
+		DatabaseConfig: &data.DatabaseConfiguration{
+			ConnectionString: strings.TrimSpace(os.Getenv("CONNECTION_STRING")),
+			Driver:           strings.TrimSpace(os.Getenv("DB_DRIVER")),
+		},
 		RedisConfig: &data.RedisConfiguration{
 			Addr:     strings.TrimSpace(os.Getenv("REDIS_ADDR")),
 			Password: strings.TrimSpace(os.Getenv("REDIS_PASSWORD")),
@@ -55,8 +70,9 @@ func initConfig() {
 			ClientID:     strings.TrimSpace(os.Getenv("GOOGLE_CLIENT_ID")),
 			ClientSecret: strings.TrimSpace(os.Getenv("GOOGLE_CLIENT_SECRET")),
 		},
-		JwtKey: []byte(strings.TrimSpace(os.Getenv("JWT_KEY"))),
-		Host:   strings.TrimSpace(os.Getenv("HOST")),
+		JwtKey:  []byte(strings.TrimSpace(os.Getenv("JWT_KEY"))),
+		Host:    strings.TrimSpace(os.Getenv("HOST")),
+		IsDebug: os.Getenv("DEBUG") != "",
 	}
 
 	if Config.RedisConfig.Addr == "" {
@@ -70,6 +86,15 @@ func initConfig() {
 	} else if Config.Host == "" {
 		Logger.Fatal("HOST cannot be empty")
 	}
+}
+
+func initDB() {
+	var err error
+	DB, err = gorm.Open(Config.DatabaseConfig.Driver, Config.DatabaseConfig.ConnectionString)
+	if err != nil {
+		Logger.Sugar().Fatalf("failed to open database %s", err.Error())
+	}
+	DB.AutoMigrate(&dbentity.User{})
 }
 
 func initRedis() {

@@ -6,6 +6,29 @@
   justify-content: center;
   margin-left: auto;
   margin-right: auto;
-  margin-top: 15%;
+  margin-top: 10%;
   width: 50%;
+}
+
+.social-login {
+  justify-content: center;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 15px;
+}
+
+.social-login a {
+  margin-left: 15px;
+  margin-right: 15px;
+}
+
+.user-login-icon {
+  margin-right: 15px;
+}
+
+.user-login-icon img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: white;
 }

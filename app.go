@@ -28,6 +28,7 @@ func init() {
 }
 
 func homePage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	pageData := &webdata.PageData{}
 	var cardList []*webdata.AppCardList
 	for i := 0; i < 5; i++ {
 		cardCategory := &webdata.AppCardList{
@@ -44,12 +45,16 @@ func homePage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		}
 		cardList = append(cardList, cardCategory)
 	}
-
-	tplt.ExecuteTemplate(w, "homepage.gohtml", cardList)
+	pageData.ContentData = cardList
+	loginInfo, err := api.GetUserInfo(w, r)
+	if err == nil && loginInfo != nil {
+		pageData.LoginInfo = *loginInfo
+	}
+	tplt.ExecuteTemplate(w, "homepage.gohtml", pageData)
 }
 
 func loginPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	tplt.ExecuteTemplate(w, "login.gohtml", nil)
+	tplt.ExecuteTemplate(w, "login.gohtml", &webdata.PageData{})
 }
 
 func main() {
@@ -62,6 +67,8 @@ func main() {
 	router.GET("/", homePage)
 	router.GET("/login", loginPage)
 	router.POST("/login", api.Login)
+	router.GET("/google_login", api.GoogleLogin)
+	router.GET("/google_oauth", api.GoogleCallback)
 
 	utils.Logger.Fatal(http.ListenAndServe(":80", router).Error())
 }

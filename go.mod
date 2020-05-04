@@ -8,6 +8,7 @@ require (
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/go-redis/redis v6.15.7+incompatible
 	github.com/golang/protobuf v1.4.0 // indirect
+	github.com/jinzhu/gorm v1.9.12
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/kr/text v0.2.0 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
@@ -16,6 +17,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/stretchr/testify v1.5.1 // indirect
 	go.uber.org/zap v1.15.0
+	golang.org/x/crypto v0.0.0-20200429183012-4b2356b1ed79
 	golang.org/x/net v0.0.0-20200501053045-e0ff5e5a1de5 // indirect
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/sys v0.0.0-20200501145240-bc7a7d42d5c3 // indirect

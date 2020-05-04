@@ -23,9 +23,18 @@
       </ul>
       <div class="navbar-collapse collapse w-100 order-3 dual-collapse2">
         <ul class="navbar-nav ml-auto">
-            <li class="nav-item">
-                <a class="nav-link" href="/login">Login</a>
-            </li>
+          {{if ne .Username ""}}
+          <li class="user-login-icon">
+            <img src="{{.ImageURL}}"/>
+          </li>
+          <li class="text-info">
+              <h4 class="align-bottom">Hello, {{.Username}}</h4>
+          </li>
+          {{else}}
+          <li class="nav-item">
+            <a class="nav-link" href="/login">Login</a>
+          </li>
+          {{end}}
         </ul>
       </div>
     </div>

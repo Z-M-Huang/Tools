@@ -1,7 +1,7 @@
-{{template "header"}}
+{{template "header" .LoginInfo}}
 
 <div class="signin">
-  <div class="row d-flex justify-content-center">
+  <div class="row d-flex justify-content-center mb-md-5">
     <img src="./assets/img/icon.png" width="200" height="200" />
   </div>
   <div>
@@ -20,14 +20,15 @@
             placeholder="Password" disabled="">
         </div>
       </div>
+      <button type="submit" class="btn btn-primary" disabled="">Submit</button>
 
-      <div class="row">
+      <hr class="mb-md-3" />
+  
+      <div class="row social-login">
         <a href="./google_login">
-          <img href="./assets/img/google.png" width="50" height="50" />
+          <img src="./assets/img/google.png" width="50" height="50" />
         </a>
       </div>
-
-      <button type="submit" class="btn btn-primary" disabled="">Submit</button>
     </form>
   </div>
 
