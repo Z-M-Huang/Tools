@@ -1,31 +1,21 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"fmt"
-	"html/template"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
-	"github.com/Z-M-Huang/Tools/api"
+	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/webdata"
+	"github.com/Z-M-Huang/Tools/pages"
 	"github.com/Z-M-Huang/Tools/utils"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/julienschmidt/httprouter"
 )
-
-var tplt *template.Template
-
-func init() {
-	var err error
-	tplt = template.New("")
-	getTemplateFuncs()
-	tplt, err = tplt.ParseFiles(getAlltemplates("templates/")...)
-	if err != nil {
-		utils.Logger.Fatal(err.Error())
-	}
-}
 
 func homePage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	pageData := &webdata.PageData{}
@@ -46,40 +36,111 @@ func homePage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		cardList = append(cardList, cardCategory)
 	}
 	pageData.ContentData = cardList
-	claim, err := api.GetClaimFromToken(w, r)
-	if err == nil && claim != nil {
+	claim := r.Context().Value(utils.ClaimCtxKey).(*data.JWTClaim)
+	if !claim.IsNil() {
 		pageData.LoginInfo = webdata.LoginData{
 			Username: claim.Subject,
 			ImageURL: claim.ImageURL,
 		}
 	}
-	tplt.ExecuteTemplate(w, "homepage.gohtml", pageData)
+	utils.Templates.ExecuteTemplate(w, "homepage.gohtml", pageData)
 }
 
-func loginPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	tplt.ExecuteTemplate(w, "login.gohtml", &webdata.PageData{})
-}
-
-func accountPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	pageData := &webdata.PageData{}
-	claim, err := api.GetClaimFromToken(w, r)
-	if err != nil {
-		pageData.AlertInfo.IsDanger = true
-		pageData.AlertInfo.Message = err.Error()
-	} else {
-		pageData.LoginInfo = webdata.LoginData{
-			Username: claim.Subject,
-			ImageURL: claim.ImageURL,
+func apiAuthHandler(requireClaim bool, next httprouter.Handle) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		claim, err := getClaimFromHeaderAndRenew(w, r)
+		if err != nil && requireClaim {
+			http.Error(w, err.Error(), http.StatusUnauthorized)
 		}
-		user, err := api.GetUserInfoFromDB(claim.Id)
-		if err != nil {
+		ctx := context.WithValue(r.Context(), utils.ClaimCtxKey, claim)
+		next(w, r.WithContext(ctx), ps)
+	}
+}
+
+func pageAuthHandler(requireClaim bool, next httprouter.Handle) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		pageData := &webdata.PageData{}
+		claim, err := getClaimFromCookieAndRenew(w, r)
+		if err != nil && requireClaim {
 			pageData.AlertInfo.IsDanger = true
-			pageData.AlertInfo.Message = err.Error()
+			pageData.AlertInfo.Message = "Please login first"
+			utils.Templates.ExecuteTemplate(w, "login.gohtml", pageData)
+			return
+		}
+		ctx := context.WithValue(r.Context(), utils.ClaimCtxKey, claim)
+		next(w, r.WithContext(ctx), ps)
+	}
+}
+
+func getClaimFromCookieAndRenew(w http.ResponseWriter, r *http.Request) (*data.JWTClaim, error) {
+	cookie, err := r.Cookie(utils.SessionTokenKey)
+	if err != nil {
+		return nil, nil
+	}
+	claim, err := isTokenValid(cookie.Value)
+	if err != nil {
+		return nil, err
+	}
+	if time.Now().UTC().Sub(time.Unix(claim.ExpiresAt, 0)).Hours() < 24 {
+		tokenStr, expiresAt, err := utils.GenerateJWTToken(claim.Audience, claim.Id, claim.Subject, claim.ImageURL)
+		if err != nil {
+			utils.Logger.Sugar().Errorf("failed to generate jwt token %s", err.Error())
 		} else {
-			pageData.ContentData = user
+			setAuthCookie(w, tokenStr, expiresAt)
 		}
 	}
-	tplt.ExecuteTemplate(w, "account.gohtml", pageData)
+	return claim, nil
+}
+
+func getClaimFromHeaderAndRenew(w http.ResponseWriter, r *http.Request) (*data.JWTClaim, error) {
+	token := r.Header.Get("Authorization")
+	if token == "" || !strings.Contains(token, "Bearer ") {
+		return nil, errors.New("Unauthorized")
+	}
+
+	token = strings.ReplaceAll(token, "Bearer ", "")
+	claim, err := isTokenValid(token)
+	if err != nil {
+		return nil, errors.New("Unauthorized")
+	}
+	if time.Now().UTC().Sub(time.Unix(claim.ExpiresAt, 0)).Hours() < 24 {
+		tokenStr, expiresAt, err := utils.GenerateJWTToken(claim.Audience, claim.Id, claim.Subject, claim.ImageURL)
+		if err != nil {
+			utils.Logger.Sugar().Errorf("failed to generate jwt token %s", err.Error())
+		} else {
+			setAuthCookie(w, tokenStr, expiresAt)
+		}
+	}
+	return claim, nil
+}
+
+func isTokenValid(token string) (*data.JWTClaim, error) {
+	claims := &data.JWTClaim{}
+	tkn, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
+		return utils.Config.JwtKey, nil
+	})
+
+	if err != nil {
+		utils.Logger.Error(err.Error())
+		return nil, fmt.Errorf("Unauthenticated")
+	}
+
+	if !tkn.Valid || !claims.VerifyIssuer(utils.Config.Host, true) {
+		return nil, fmt.Errorf("Invalid Token")
+	}
+
+	return claims, nil
+}
+
+func setAuthCookie(w http.ResponseWriter, tokenStr string, expiresAt time.Time) {
+	http.SetCookie(w, &http.Cookie{
+		Name:       utils.SessionTokenKey,
+		Value:      tokenStr,
+		Path:       "/",
+		Domain:     utils.Config.Host,
+		Expires:    expiresAt,
+		RawExpires: expiresAt.String(),
+	})
 }
 
 func main() {
@@ -89,29 +150,13 @@ func main() {
 	router.ServeFiles("/assets/*filepath", http.Dir("assets/"))
 	router.ServeFiles("/vendor/*filepath", http.Dir("node_modules/"))
 
-	router.GET("/", homePage)
-	router.GET("/login", loginPage)
-	router.POST("/login", api.Login)
-	router.GET("/google_login", api.GoogleLogin)
-	router.GET("/google_oauth", api.GoogleCallback)
+	router.GET("/", pageAuthHandler(false, homePage))
+	router.GET("/login", pageAuthHandler(false, pages.LoginPage))
+	router.POST("/login", pageAuthHandler(false, pages.Login))
+	router.GET("/google_login", pages.GoogleLogin)
+	router.GET("/google_oauth", pages.GoogleCallback)
+
+	router.GET("/account", pageAuthHandler(true, pages.AccountPage))
 
 	utils.Logger.Fatal(http.ListenAndServe(":80", router).Error())
-}
-
-func getAlltemplates(inputPath string) []string {
-	var ret []string
-	filepath.Walk(inputPath, func(path string, info os.FileInfo, err error) error {
-		if path != inputPath && info.IsDir() {
-			ret = append(ret, getAlltemplates(path)...)
-		} else if strings.Contains(info.Name(), ".gohtml") {
-			ret = append(ret, path)
-		}
-		return nil
-	})
-	return ret
-}
-
-func getTemplateFuncs() {
-	tplt.Funcs(template.FuncMap{"add": func(i, j int) int { return i + j }})
-	tplt.Funcs(template.FuncMap{"mod": func(i, j int) int { return i % j }})
 }

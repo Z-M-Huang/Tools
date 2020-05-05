@@ -1,4 +1,4 @@
-package webdata
+package data
 
 import "github.com/dgrijalva/jwt-go"
 
@@ -6,4 +6,9 @@ import "github.com/dgrijalva/jwt-go"
 type JWTClaim struct {
 	ImageURL string `json:"image_url"`
 	jwt.StandardClaims
+}
+
+//IsNil return true is claim is nil
+func (c *JWTClaim) IsNil() bool {
+	return c == nil
 }
