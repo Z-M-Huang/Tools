@@ -18,7 +18,7 @@ import (
 )
 
 func homePage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	pageData := &webdata.PageData{}
+	pageData := &data.Response{}
 	var cardList []*webdata.AppCardList
 	for i := 0; i < 5; i++ {
 		cardCategory := &webdata.AppCardList{
@@ -35,10 +35,10 @@ func homePage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		}
 		cardList = append(cardList, cardCategory)
 	}
-	pageData.ContentData = cardList
+	pageData.Data = cardList
 	claim := r.Context().Value(utils.ClaimCtxKey).(*data.JWTClaim)
 	if !claim.IsNil() {
-		pageData.LoginInfo = webdata.LoginData{
+		pageData.Login = data.LoginData{
 			Username: claim.Subject,
 			ImageURL: claim.ImageURL,
 		}
@@ -49,7 +49,7 @@ func homePage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 func apiAuthHandler(requireClaim bool, next httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		claim, err := getClaimFromHeaderAndRenew(w, r)
-		if err != nil && requireClaim {
+		if (err != nil || claim.IsNil()) && requireClaim {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 		}
 		ctx := context.WithValue(r.Context(), utils.ClaimCtxKey, claim)
@@ -59,11 +59,11 @@ func apiAuthHandler(requireClaim bool, next httprouter.Handle) httprouter.Handle
 
 func pageAuthHandler(requireClaim bool, next httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-		pageData := &webdata.PageData{}
+		pageData := &data.Response{}
 		claim, err := getClaimFromCookieAndRenew(w, r)
-		if err != nil && requireClaim {
-			pageData.AlertInfo.IsDanger = true
-			pageData.AlertInfo.Message = "Please login first"
+		if (err != nil || claim.IsNil()) && requireClaim {
+			pageData.Alert.IsDanger = true
+			pageData.Alert.Message = "Please login first"
 			utils.Templates.ExecuteTemplate(w, "login.gohtml", pageData)
 			return
 		}

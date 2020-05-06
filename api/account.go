@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/Z-M-Huang/Tools/data"
-	"github.com/Z-M-Huang/Tools/data/apidata"
 	"github.com/Z-M-Huang/Tools/data/dbentity"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/jinzhu/gorm"
@@ -14,11 +13,11 @@ import (
 
 //UpdatePassword api
 func UpdatePassword(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	resp := &apidata.APIResponse{}
+	resp := &data.Response{}
 
 	token := r.Header.Get("Authorization")
 	if token == "" {
-		resp.Alert.IsAlert = true
+		resp.Alert.IsDanger = true
 		resp.Alert.Message = "Unauthorized"
 		resp.Data = false
 		writeResponse(w, resp)

@@ -1,6 +1,19 @@
-{{template "header" .LoginInfo}}
+{{template "header" .Login}}
 
 <div class="signin">
+  {{if ne .Alert.Message ""}}
+  {{if .Alert.IsDanger}}
+  <div class="alert alert-dismissible alert-danger">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <h4 class="alert-heading">Error!</h4>
+  {{else if .Alert.IsWarning}}
+  <div class="alert alert-dismissible alert-warning">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <h4 class="alert-heading">Warning!</h4>
+  {{end}}
+    <p class="mb-0">{{.Alert.Message}}</p>
+  </div>
+  {{end}}
   <div class="row d-flex justify-content-center mb-md-5">
     <img src="./assets/img/icon.png" width="200" height="200" />
   </div>
@@ -9,21 +22,21 @@
       <div class="form-group row">
         <label for="email" class="col-sm-2 col-form-label">Email</label>
         <div class="col-sm-10">
-          <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email" disabled="">
+          <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email"
+              disabled="">
         </div>
       </div>
-
       <div class="form-group row">
         <label for="password" class="col-sm-2 col-form-label">Password</label>
         <div class="col-sm-10">
           <input type="password" class="form-control" id="password" aria-describedby="passwordHelp"
-            placeholder="Password" disabled="">
+              placeholder="Password" disabled="">
         </div>
       </div>
       <button type="submit" class="btn btn-primary" disabled="">Submit</button>
 
       <hr class="mb-md-3" />
-  
+
       <div class="row social-login">
         <a href="./google_login">
           <img src="./assets/img/google.png" width="50" height="50" />
@@ -31,7 +44,6 @@
       </div>
     </form>
   </div>
-
 </div>
 
-{{template "footer"}}
+  {{template "footer"}}

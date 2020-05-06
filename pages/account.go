@@ -11,7 +11,6 @@ import (
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/apidata"
 	"github.com/Z-M-Huang/Tools/data/dbentity"
-	"github.com/Z-M-Huang/Tools/data/webdata"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/jinzhu/gorm"
 	"github.com/julienschmidt/httprouter"
@@ -96,23 +95,23 @@ func GoogleCallback(w http.ResponseWriter, r *http.Request, ps httprouter.Params
 
 //LoginPage /login
 func LoginPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	utils.Templates.ExecuteTemplate(w, "login.gohtml", &webdata.PageData{})
+	utils.Templates.ExecuteTemplate(w, "login.gohtml", &data.Response{})
 }
 
 //AccountPage /account requires claim
 func AccountPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	pageData := &webdata.PageData{}
+	pageData := &data.Response{}
 	claim := r.Context().Value(utils.ClaimCtxKey).(*data.JWTClaim)
-	pageData.LoginInfo = webdata.LoginData{
+	pageData.Login = data.LoginData{
 		Username: claim.Subject,
 		ImageURL: claim.ImageURL,
 	}
 	user, err := GetUserInfoFromDB(claim.Id)
 	if err != nil {
-		pageData.AlertInfo.IsDanger = true
-		pageData.AlertInfo.Message = err.Error()
+		pageData.Alert.IsDanger = true
+		pageData.Alert.Message = err.Error()
 	} else {
-		pageData.ContentData = user
+		pageData.Data = user
 	}
 	utils.Templates.ExecuteTemplate(w, "account.gohtml", pageData)
 }
