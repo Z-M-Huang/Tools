@@ -21,14 +21,6 @@
   </div>
 
   <script>
-    {{if .IsDanger}}
-      showAlertDanger("{{.Message}}");
-    {{else if .IsWarning}}
-      showAlertWarning("{{.Message}}");
-    {{else if .IsSuccess}}
-      showAlertSuccess("{{.Message}}");
-    {{else if .IsInfo}}
-      showAlertInfo("{{.Message}}");
-    {{end}}
+    showAlertCondition({{.}});
   </script>
 {{end}}

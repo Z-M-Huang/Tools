@@ -38,3 +38,19 @@ function showAlertInfo(message) {
   $("alertInfoMessage").innerHTML = message;
   $("#alertInfo").slideToggle();
 }
+
+function showAlertCondition(alert) {
+  if (alert != "" && alert != undefined && alert != null) {
+    if (alert.IsDanger) {
+      showAlertDanger(alert.Message);
+    } else if (alert.IsWarning) {
+      showAlertWarning(alert.Message);
+    } else if (alert.IsSuccess) {
+      showAlertSuccess(alert.Message);
+    } else if (alert.IsInfo) {
+      showAlertInfo(alert.message)
+    } else {
+      console.log("Unknown alert", alert);
+    }
+  }
+}
