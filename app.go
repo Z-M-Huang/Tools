@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Z-M-Huang/Tools/api"
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/webdata"
 	"github.com/Z-M-Huang/Tools/pages"
@@ -86,7 +87,7 @@ func getClaimFromCookieAndRenew(w http.ResponseWriter, r *http.Request) (*data.J
 		if err != nil {
 			utils.Logger.Sugar().Errorf("failed to generate jwt token %s", err.Error())
 		} else {
-			setAuthCookie(w, tokenStr, expiresAt)
+			api.SetAuthCookie(w, tokenStr, expiresAt)
 		}
 	}
 	return claim, nil
@@ -108,7 +109,7 @@ func getClaimFromHeaderAndRenew(w http.ResponseWriter, r *http.Request) (*data.J
 		if err != nil {
 			utils.Logger.Sugar().Errorf("failed to generate jwt token %s", err.Error())
 		} else {
-			setAuthCookie(w, tokenStr, expiresAt)
+			api.SetAuthCookie(w, tokenStr, expiresAt)
 		}
 	}
 	return claim, nil
@@ -132,17 +133,6 @@ func isTokenValid(token string) (*data.JWTClaim, error) {
 	return claims, nil
 }
 
-func setAuthCookie(w http.ResponseWriter, tokenStr string, expiresAt time.Time) {
-	http.SetCookie(w, &http.Cookie{
-		Name:       utils.SessionTokenKey,
-		Value:      tokenStr,
-		Path:       "/",
-		Domain:     utils.Config.Host,
-		Expires:    expiresAt,
-		RawExpires: expiresAt.String(),
-	})
-}
-
 func main() {
 
 	router := httprouter.New()
@@ -151,10 +141,12 @@ func main() {
 	router.ServeFiles("/vendor/*filepath", http.Dir("node_modules/"))
 
 	router.GET("/", pageAuthHandler(false, homePage))
+	router.GET("/signup", pageAuthHandler(false, pages.SignupPage))
+	router.POST("/signup", apiAuthHandler(false, api.SignUp))
 	router.GET("/login", pageAuthHandler(false, pages.LoginPage))
-	router.POST("/login", pageAuthHandler(false, pages.Login))
-	router.GET("/google_login", pages.GoogleLogin)
-	router.GET("/google_oauth", pages.GoogleCallback)
+	router.POST("/login", apiAuthHandler(false, api.Login))
+	router.GET("/google_login", api.GoogleLogin)
+	router.GET("/google_oauth", api.GoogleCallback)
 
 	router.GET("/account", pageAuthHandler(true, pages.AccountPage))
 

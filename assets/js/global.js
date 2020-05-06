@@ -15,6 +15,48 @@ function clearCookies() {
     }
 }
 
+function bindForm(id, url, callback) {
+  id = "#"+id;
+  $(id).on("submit", (e) => {
+    e.preventDefault();
+    var data = $(id).serialize();
+
+    $.ajax({
+      type: "POST",
+      url: url,
+      data: data,
+      dataType: "json",
+      beforeSend: (xhr) => {
+        var sessionToken = getCookieValue("session_token");
+        if (sessionToken != "" && sessionToken != null && sessionToken != undefined) {
+          xhr.setRequestHeader("Authorization", "Bearer " + sessionToken);
+        }
+      },
+      success: (data) => {
+        var res = JSON.parse(data);
+        if (res.Alert.Message != "") {
+          showAlertCondition(res.Alert);
+        } else if (callback != null && callback != undefined) {
+          callback(res.Data);
+        }
+      },
+      error: (xhr, status, error) => {
+        console.log(xhr.status + ":" + xhr.statusCode + ":" + xhr.statusText);
+        showAlertDanger("Failed to receive success response, please try again later.");
+      }
+    })
+  })
+}
+
+function getCookieValue(name) {
+  var value = "; " + document.cookie;
+  var parts = value.split("; " + name + "=");
+  if (parts.length == 2) return parts.pop().split(";").shift();
+}
+
+/*******************************************************
+ *                    Alert Section 
+ *******************************************************/
 function showAlertDanger(message) {
   $(".alert .alert-dismissible").hide();
   $("alertDangerMessage").innerHTML = message;
@@ -49,7 +91,7 @@ function showAlertCondition(alert) {
       showAlertSuccess(alert.Message);
     } else if (alert.IsInfo) {
       showAlertInfo(alert.message)
-    } else {
+    } else if (alert.Message != "") {
       console.log("Unknown alert", alert);
     }
   }

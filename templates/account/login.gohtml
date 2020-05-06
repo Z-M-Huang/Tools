@@ -1,9 +1,12 @@
 {{template "header" .Login}}
-
+<script src="./assets/js/account.js"></script>
 <div class="signin">
   {{template "alert_message" .Alert}}
   <div class="row d-flex justify-content-center mb-md-5">
     <img src="./assets/img/icon.png" width="200" height="200" />
+  </div>
+  <div class="row d-flex justify-content-center">
+    <p>Don't have an account yet? <a href="/signup">Click here to create one</a></p>
   </div>
   <div>
     <form method="POST">
@@ -21,6 +24,14 @@
               placeholder="Password" disabled="">
         </div>
       </div>
+      <div class="form-group row">
+        <div class="col-sm-2"></div>
+        <div class="custom-control custom-switch col-sm-10">
+          <input type="checkbox" class="custom-control-input" id="rememberMe" checked="">
+          <label class="custom-control-label" for="rememberMe">Remember Me</label>
+        </div>
+      </div>
+
       <button type="submit" class="btn btn-primary" disabled="">Submit</button>
 
       <hr class="mb-md-3" />
@@ -34,4 +45,4 @@
   </div>
 </div>
 
-  {{template "footer"}}
+{{template "footer"}}

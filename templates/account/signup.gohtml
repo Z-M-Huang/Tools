@@ -1,0 +1,59 @@
+{{template "header" .Login}}
+<script src="./assets/js/account.js"></script>
+<div class="createAccount">
+  {{template "alert_message" .Alert}}
+  <div class="row d-flex justify-content-center mb-md-5">
+    <img src="./assets/img/icon.png" width="200" height="200" />
+  </div>
+  <div>
+    <form method="POST" id="createAccountForm">
+      <div class="form-group row">
+        <label for="email" class="col-sm-4 col-form-label">Email</label>
+        <div class="col-sm-8">
+          <input type="email" class="form-control" id="email" aria-describedby="emailHelp"
+           placeholder="Enter email" onchange="onEmailChange('email')">
+          <div class="invalid-feedback" id="emailInvalidDiv" style="display: none;">Please enter a valid email address</div>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="email" class="col-sm-4 col-form-label">Username</label>
+        <div class="col-sm-8">
+          <input type="text" class="form-control" id="username" aria-describedby="usernameHelp"
+            placeholder="Enter username" onchange="onUsernameChange('username')">
+          <div class="invalid-feedback" id="usernameInvalidDiv" style="display: none;">Username has minimum length of 6
+            characters.</div>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="newPassword" class="col-sm-4 col-form-label">New Password</label>
+          <div class="col-sm-8">
+            <input type="password" class="form-control" id="newPassword" aria-describedby="newPasswordHelp"
+              placeholder="New Password" onchange="onNewPasswordChange('newPassword')">
+            <div class="invalid-feedback" id="newPasswordInvalidDiv" style="display: none;">Password has minimum length
+              of 12 characters.</div>
+          </div>
+      </div>
+
+      <div class="form-group row">
+        <label for="confirmPassword" class="col-sm-4 col-form-label">Confirm Password</label>
+          <div class="col-sm-8">
+            <input type="password" class="form-control" id="confirmPassword" aria-describedby="confirmPasswordHelp"
+              placeholder="Confirm Password" onchange="onConfirmePasswordChange('confirmPassword')">
+            <div class="invalid-feedback" id="confirmPasswordInvalidDiv" style="display: none;">Password doesn't match
+            </div>
+          </div>
+      </div>
+      <button type="submit" class="btn btn-primary">Sign me up!</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  bindForm("createAccountForm", "/signup", (d) => {
+    showAlertSuccess("Your account is created. Page will be redirected to home page in 3 seconds.... <a href='/'>Click here</a> to redirect now.");
+    window.setTimeout(() => {
+      document.location.href = "/login"
+    }, 3000);
+  });
+</script>
+{{template "footer"}}
