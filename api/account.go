@@ -103,7 +103,6 @@ func SignUp(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		writeResponse(w, response)
 		return
 	}
-
 	err = json.Unmarshal(body, &request)
 	if err != nil {
 		utils.Logger.Error(err.Error())
@@ -153,7 +152,10 @@ func SignUp(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		response.Alert.Message = "Username already taken. Can't you think of something else? Try harder"
 		writeResponse(w, response)
 		return
+	} else if db.RecordNotFound() {
+
 	} else if db.Error != nil {
+		utils.Logger.Error(db.Error.Error())
 		writeUnexpectedError(w, response)
 		return
 	}
@@ -164,6 +166,7 @@ func SignUp(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		Password: utils.HashAndSalt([]byte(request.Password)),
 	}
 	if db := utils.DB.Save(user).Scan(&user); db.Error != nil {
+		utils.Logger.Error(db.Error.Error())
 		writeUnexpectedError(w, response)
 		return
 	}
