@@ -28,11 +28,6 @@ function onConfirmePasswordChange(id) {
   var ele = $(id);
   var passwordInput = $("#newPassword");
   var passwordValid = isPasswordValid();
-  console.log(
-    passwordValid &&
-      ele.val() == passwordInput.val() &&
-      !ele.hasClass("is-invalid")
-  );
 
   if (ele.val() != "" && ele.val() == passwordInput.val()) {
     if (!ele.hasClass("is-valid")) {

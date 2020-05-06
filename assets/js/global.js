@@ -19,7 +19,7 @@ function bindForm(id, url, callback) {
   id = "#"+id;
   $(id).on("submit", (e) => {
     e.preventDefault();
-    var data = $(id).serialize();
+    var data = $(this).serialize();
 
     $.ajax({
       type: "POST",
