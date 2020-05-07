@@ -33,12 +33,13 @@
 }
 
 .user-login-icon {
-  margin-right: 15px;
+  margin-right: 5px;
 }
 
 .user-login-icon img {
   width: 30px;
   height: 30px;
   border-radius: 50%;
+  margin: auto;
   background-color: white;
 }
