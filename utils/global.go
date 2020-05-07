@@ -136,7 +136,7 @@ func initDB() {
 	if err != nil {
 		Logger.Sugar().Fatalf("failed to open database %s", err.Error())
 	}
-	DB.AutoMigrate(&dbentity.User{})
+	DB.AutoMigrate(&dbentity.User{}, &dbentity.Application{})
 }
 
 func initRedis() {

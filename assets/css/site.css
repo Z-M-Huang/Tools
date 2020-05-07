@@ -32,16 +32,24 @@
   margin-right: 15px;
 }
 
-.user-login-icon {
-  margin-right: 5px;
+@media (min-width: 992px) {
+  .user-login-icon {
+    margin-right: 5px;
+  }
+  
+  .user-login-icon img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin: auto;
+    background-color: white;
+  }  
 }
 
-.user-login-icon img {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  margin: auto;
-  background-color: white;
+@media (max-width: 991px) {
+  .user-login-icon {
+    display: none;
+  }
 }
 
 .mt-15 {
@@ -50,4 +58,8 @@
 
 .mb-15 {
   margin-bottom: 15px;
+}
+
+.nav-float-right {
+  float: right;
 }

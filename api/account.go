@@ -172,7 +172,7 @@ func SignUp(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	tokenStr, expiresAt, err := utils.GenerateJWTToken("Direct Login", request.Email, user.Username, "")
+	tokenStr, expiresAt, err := utils.GenerateJWTToken("Direct Login", request.Email, user.Username, getGravatarLink(request.Email, 50))
 	if err != nil {
 		utils.Logger.Error(err.Error())
 		writeUnexpectedError(w, response)
