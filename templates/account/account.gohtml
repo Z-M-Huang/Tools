@@ -18,7 +18,7 @@
       <div class="form-group row">
         <label for="currentPassword" class="col-sm-2 col-form-label">Current Password</label>
         <div class="col-sm-10">
-          <input type="password" class="form-control" id="currentPassword" aria-describedby="currentPasswordHelp"
+          <input type="password" class="form-control" id="currentPassword" name="currentPassword" aria-describedby="currentPasswordHelp"
             placeholder="current Password">
         </div>
       </div>
@@ -27,9 +27,9 @@
       <div class="form-group row">
         <label for="newPassword" class="col-sm-2 col-form-label">New Password</abel>
           <div class="col-sm-10">
-            <input type="password" class="form-control" id="newPassword" aria-describedby="newPasswordHelp"
-              placeholder="New Password" onchange="onNewPasswordChange('newPassword')">
-              <div class="invalid-feedback" id="newPasswordInvalidDiv" style="display: none;">Password has minimum length of 12 characters.</div>
+            <input type="password" class="form-control" id="password" name="password" aria-describedby="passwordHelp"
+              placeholder="New Password" onchange="onPasswordChange('password')">
+              <div class="invalid-feedback" id="passwordInvalidDiv" style="display: none;">Password has minimum length of 12 characters.</div>
           </div>
       </div>
 

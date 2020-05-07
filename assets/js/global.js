@@ -11,7 +11,7 @@ function clearCookies() {
     var cookie = cookies[i];
     var eqPos = cookie.indexOf("=");
     var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-    document.cookie = name + "session_token=; Max-age=0; path=/; domain=" + location.host;
+    document.cookie = name + "=; Max-age=0; path=/; domain=" + location.host;
   }
 }
 

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"crypto/md5"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -80,8 +81,7 @@ func Login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	//TODO implement some avatar service...
-	tokenStr, expiresAt, err := utils.GenerateJWTToken("Direct Login", request.Email, existingUser.Username, "")
+	tokenStr, expiresAt, err := utils.GenerateJWTToken("Direct Login", request.Email, existingUser.Username, getGravatarLink(request.Email, 50))
 	if err != nil {
 		utils.Logger.Error(err.Error())
 		writeUnexpectedError(w, response)
@@ -172,7 +172,6 @@ func SignUp(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	//TODO implement some avatar service...
 	tokenStr, expiresAt, err := utils.GenerateJWTToken("Direct Login", request.Email, user.Username, "")
 	if err != nil {
 		utils.Logger.Error(err.Error())
@@ -328,4 +327,9 @@ func SetAuthCookie(w http.ResponseWriter, tokenStr string, expiresAt time.Time) 
 		Expires:    expiresAt,
 		RawExpires: expiresAt.String(),
 	})
+}
+
+func getGravatarLink(email string, size uint) string {
+	hash := md5.Sum([]byte(email))
+	return fmt.Sprintf("https://www.gravatar.com/avatar/%x?s=%d", hash, size)
 }
