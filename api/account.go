@@ -67,11 +67,12 @@ func Login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		writeResponse(w, response)
 		return
 	} else if db.Error != nil {
+		utils.Logger.Error(db.Error.Error())
 		writeUnexpectedError(w, response)
 		return
 	}
 
-	if !utils.ComparePasswords(request.Password, []byte(existingUser.Password)) {
+	if !utils.ComparePasswords(existingUser.Password, []byte(request.Password)) {
 		utils.Logger.Sugar().Errorf("Invalid login attempt received for: %s", request.Email)
 		response.Alert.IsWarning = true
 		response.Alert.Message = `Incorrect password. Do you forget your password? If you forget your password, please <a href="#">Click here</a> to reset your password. Uh... We don't have that feature yet, sorry...`
@@ -280,22 +281,11 @@ func GoogleCallback(w http.ResponseWriter, r *http.Request, ps httprouter.Params
 	if err != nil {
 		utils.Logger.Error(err.Error())
 	}
-	tokenStr, expireAt, err := utils.GenerateJWTToken("Google", user.Email, user.Name, user.Picture)
+	tokenStr, expiresAt, err := utils.GenerateJWTToken("Google", user.Email, user.Name, user.Picture)
 	if err != nil {
 		utils.Logger.Sugar().Errorf("failed to generate jwt token %s", err.Error())
 	} else {
-		cookie := &http.Cookie{
-			Name:       utils.SessionTokenKey,
-			Value:      tokenStr,
-			Path:       "/",
-			Domain:     utils.Config.Host,
-			Expires:    expireAt,
-			RawExpires: expireAt.String(),
-		}
-		if utils.Config.IsDebug {
-			cookie.Domain = "localhost"
-		}
-		http.SetCookie(w, cookie)
+		SetAuthCookie(w, tokenStr, expiresAt)
 	}
 	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 }

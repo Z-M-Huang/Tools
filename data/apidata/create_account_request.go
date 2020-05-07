@@ -4,6 +4,6 @@ package apidata
 type CreateAccountRequest struct {
 	Email           string `json:"email"`
 	Username        string `json:"username"`
-	Password        string `json:"newPassword"`
+	Password        string `json:"password"`
 	ConfirmPassword string `json:"confirmPassword"`
 }

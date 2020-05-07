@@ -1,4 +1,4 @@
-function onNewPasswordChange(id) {
+function onPasswordChange(id) {
   id = "#" + id;
   var ele = $(id);
   var passwordValid = isPasswordValid();
@@ -6,17 +6,17 @@ function onNewPasswordChange(id) {
     if (!ele.hasClass("is-invalid")) {
       ele.removeClass("is-valid");
       ele.addClass("is-invalid");
-      $("#newPasswordInvalidDiv").show();
+      $("#passwordInvalidDiv").show();
     }
   } else if (!ele.hasClass("is-valid")) {
     ele.removeClass("is-invalid");
     ele.addClass("is-valid");
-    $("#newPasswordInvalidDiv").hide();
+    $("#passwordInvalidDiv").hide();
   }
 }
 
 function isPasswordValid() {
-  var ele = $("#newPassword");
+  var ele = $("#password");
   if (ele.val().length < 12) {
     return false;
   }
@@ -26,7 +26,7 @@ function isPasswordValid() {
 function onConfirmePasswordChange(id) {
   id = "#" + id;
   var ele = $(id);
-  var passwordInput = $("#newPassword");
+  var passwordInput = $("#password");
   var passwordValid = isPasswordValid();
 
   if (ele.val() != "" && ele.val() == passwordInput.val()) {

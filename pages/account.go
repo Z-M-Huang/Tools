@@ -22,7 +22,11 @@ func SignupPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 //LoginPage /login
 func LoginPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	utils.Templates.ExecuteTemplate(w, "login.gohtml", &data.Response{})
+	if r.Context().Value(utils.ClaimCtxKey).(*data.JWTClaim).IsNil() {
+		utils.Templates.ExecuteTemplate(w, "login.gohtml", &data.Response{})
+	} else {
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+	}
 }
 
 //AccountPage /account requires claim

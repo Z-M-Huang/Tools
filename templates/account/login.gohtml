@@ -9,40 +9,38 @@
     <p>Don't have an account yet? <a href="/signup">Click here to create one</a></p>
   </div>
   <div>
-    <form method="POST">
+    <form method="POST" id="signInForm">
       <div class="form-group row">
         <label for="email" class="col-sm-2 col-form-label">Email</label>
         <div class="col-sm-10">
-          <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email"
-              disabled="">
+          <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp" placeholder="Enter email">
         </div>
       </div>
       <div class="form-group row">
         <label for="password" class="col-sm-2 col-form-label">Password</label>
         <div class="col-sm-10">
-          <input type="password" class="form-control" id="password" aria-describedby="passwordHelp"
-              placeholder="Password" disabled="">
-        </div>
-      </div>
-      <div class="form-group row">
-        <div class="col-sm-2"></div>
-        <div class="custom-control custom-switch col-sm-10">
-          <input type="checkbox" class="custom-control-input" id="rememberMe" checked="">
-          <label class="custom-control-label" for="rememberMe">Remember Me</label>
+          <input type="password" class="form-control" id="password" name="password" aria-describedby="passwordHelp"
+              placeholder="Password">
         </div>
       </div>
 
-      <button type="submit" class="btn btn-primary" disabled="">Submit</button>
-
-      <hr class="mb-md-3" />
-
-      <div class="row social-login">
-        <a href="./google_login">
-          <img src="./assets/img/google.png" width="50" height="50" />
-        </a>
-      </div>
+      <button type="submit" class="btn btn-primary" >Log in</button>
     </form>
+
+    <hr class="mb-md-3" />
+
+    <div class="row social-login">
+      <a href="./google_login">
+        <img src="./assets/img/google.png" width="50" height="50" />
+      </a>
+    </div>
   </div>
 </div>
+
+<script>
+  bindForm("signInForm", "/api/login", (d) => {
+    document.location.href = "/"
+  })
+</script>
 
 {{template "footer"}}

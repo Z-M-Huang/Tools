@@ -142,11 +142,12 @@ func main() {
 
 	router.GET("/", pageAuthHandler(false, homePage))
 	router.GET("/signup", pageAuthHandler(false, pages.SignupPage))
-	router.POST("/signup", apiAuthHandler(false, api.SignUp))
 	router.GET("/login", pageAuthHandler(false, pages.LoginPage))
-	router.POST("/login", apiAuthHandler(false, api.Login))
 	router.GET("/google_login", api.GoogleLogin)
 	router.GET("/google_oauth", api.GoogleCallback)
+
+	router.POST("/api/login", apiAuthHandler(false, api.Login))
+	router.POST("/api/signup", apiAuthHandler(false, api.SignUp))
 
 	router.GET("/account", pageAuthHandler(true, pages.AccountPage))
 

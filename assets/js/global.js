@@ -11,7 +11,7 @@ function clearCookies() {
     var cookie = cookies[i];
     var eqPos = cookie.indexOf("=");
     var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-    document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    document.cookie = name + "session_token=; Max-age=0; path=/; domain=" + location.host;
   }
 }
 
@@ -20,6 +20,7 @@ function bindForm(id, url, callback) {
   $(id).on("submit", (e) => {
     e.preventDefault();
     var data = parseFormToJSON(id);
+    console.log(data);
     $.ajax({
       type: "POST",
       url: url,
@@ -37,7 +38,6 @@ function bindForm(id, url, callback) {
         }
       },
       success: (data) => {
-        console.log(data);
         if (data.Alert.Message != "") {
           showAlertCondition(data.Alert);
         } else if (callback != null && callback != undefined) {
@@ -64,25 +64,25 @@ function getCookieValue(name) {
  *                    Alert Section
  *******************************************************/
 function showAlertDanger(message) {
-  $(".alert .alert-dismissible").hide();
+  $(".alert").hide();
   $("#alertDangerMessage").text(message);
   $("#alertDanger").slideToggle();
 }
 
 function showAlertWarning(message) {
-  $(".alert .alert-dismissible").hide();
+  $(".alert").hide();
   $("#alertWarningMessage").text(message);
   $("#alertWarning").slideToggle();
 }
 
 function showAlertSuccess(message) {
-  $(".alert .alert-dismissible").hide();
+  $(".alert").hide();
   $("#alertSuccessMessage").text(message);
   $("#alertSuccess").slideToggle();
 }
 
 function showAlertInfo(message) {
-  $(".alert .alert-dismissible").hide();
+  $(".alert").hide();
   $("#alertInfoMessage").text(message);
   $("#alertInfo").slideToggle();
 }
