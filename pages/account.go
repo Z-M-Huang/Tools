@@ -7,6 +7,7 @@ import (
 
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/dbentity"
+	"github.com/Z-M-Huang/Tools/data/webdata"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/julienschmidt/httprouter"
 )
@@ -42,7 +43,9 @@ func AccountPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		pageData.Alert.IsDanger = true
 		pageData.Alert.Message = err.Error()
 	} else {
-		pageData.Data = user
+		pageData.Data = webdata.AccountPageData{
+			HasPassword: user.Password != "",
+		}
 	}
 	utils.Templates.ExecuteTemplate(w, "account.gohtml", pageData)
 }

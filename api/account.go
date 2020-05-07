@@ -186,60 +186,83 @@ func SignUp(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 //UpdatePassword api
 func UpdatePassword(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	resp := &data.Response{}
-
-	token := r.Header.Get("Authorization")
-	if token == "" {
-		resp.Alert.IsDanger = true
-		resp.Alert.Message = "Unauthorized"
-		resp.Data = false
-		writeResponse(w, resp)
+	response := &data.Response{}
+	request := &apidata.UpdatePasswordRequest{}
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		utils.Logger.Error(err.Error())
+		response.Alert.IsDanger = true
+		response.Alert.Message = "Invalid sign up request."
+		writeResponse(w, response)
+		return
+	}
+	err = json.Unmarshal(body, &request)
+	if err != nil {
+		utils.Logger.Error(err.Error())
+		response.Alert.IsDanger = true
+		response.Alert.Message = "Invalid sign up request."
+		writeResponse(w, response)
 		return
 	}
 
 	claim := r.Context().Value(utils.ClaimCtxKey).(*data.JWTClaim)
 
-	err := r.ParseForm()
-	if err != nil {
-		http.Error(w, "Failed to parse request data", http.StatusBadRequest)
+	if request.Password != request.ConfirmPassword {
+		response.Alert.IsWarning = true
+		response.Alert.Message = "Password doesn't match."
+		writeResponse(w, response)
+		return
+	} else if len(request.Password) < 12 {
+		response.Alert.IsWarning = true
+		response.Alert.Message = "Password has minimum length of 12."
+		writeResponse(w, response)
 		return
 	}
 
-	password := r.FormValue("newPassword")
-	confirmPassword := r.FormValue("confirmPassword")
-
-	if password != confirmPassword {
-		http.Error(w, "Password doesn't match.", http.StatusBadRequest)
+	dbUser := &dbentity.User{
+		Email: claim.Id,
+	}
+	if db := utils.DB.Where(dbUser).First(&dbUser); db.RecordNotFound() {
+		utils.Logger.Sugar().Errorf("User not found for %s", claim.Id)
+		writeUnexpectedError(w, response)
 		return
-	} else if len(password) < 12 {
-		http.Error(w, "Password has minimum length of 12", http.StatusBadRequest)
+	} else if db.Error != nil {
+		utils.Logger.Error(db.Error.Error())
+		writeUnexpectedError(w, response)
+		return
+	}
+
+	if !utils.ComparePasswords(dbUser.Password, []byte(request.CurrentPassword)) {
+		response.Alert.IsWarning = true
+		response.Alert.Message = "Current password is different compared to what's in database... Try harder..."
+		writeResponse(w, response)
+		return
+	}
+
+	if utils.ComparePasswords(dbUser.Password, []byte(request.Password)) {
+		response.Alert.IsWarning = true
+		response.Alert.Message = "New password is exactly the same as the old password..."
+		writeResponse(w, response)
 		return
 	}
 
 	err = utils.DB.Transaction(func(tx *gorm.DB) error {
-		dbUser := &dbentity.User{
-			Email: claim.Id,
-		}
-		if db := tx.Where(dbUser).First(&dbUser); db.RecordNotFound() {
-			return fmt.Errorf("user not found for email: %s", claim.Id)
-		} else if db.Error != nil {
-			return fmt.Errorf(fmt.Sprintf("failed to user in UpdatePassword %s", db.Error.Error()))
-		}
-
-		dbUser.Password = utils.HashAndSalt([]byte(password))
+		dbUser.Password = utils.HashAndSalt([]byte(request.Password))
 
 		if db := tx.Save(dbUser).Scan(&dbUser); db.Error != nil {
 			return fmt.Errorf(fmt.Sprintf("failed to update user with new password %s", db.Error.Error()))
 		}
-
 		return nil
 	})
 
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		http.Error(w, "Failed to update user information, please try again later.", http.StatusInternalServerError)
+		writeUnexpectedError(w, response)
 		return
 	}
+	response.Alert.IsSuccess = true
+	response.Alert.Message = "Password is updated."
+	writeResponse(w, response)
 }
 
 //GoogleLogin google login request

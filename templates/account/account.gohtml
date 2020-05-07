@@ -1,23 +1,19 @@
 {{template "header" .Login}}
 <script src="./assets/js/account.js"></script>
-<ul class="nav nav-tabs">
-  <li class="nav-item">
-    <a class="nav-link active" data-toggle="tab" href="#UserInfo">User Info</a>
-  </li>
+<ul class="nav nav-tabs mb-15">
   <li class="nav-item">
     <a class="nav-link" data-toggle="tab" href="#Security">Security</a>
   </li>
 </ul>
-<div id="myTabContent" class="tab-content">
-  <div class="tab-pane fade active show" id="UserInfo">
-    <h1>TODO</h1>
-  </div>
-  <div class="tab-pane fade" id="Security">
-    <form method="POST">
-      {{if ne .Password ""}}
+<div id="tabContent" class="tab-content">
+  {{template "alert_message" .Alert}}
+  {{ if not (isNil .Data) }}
+  <div class="tab-pane fade active show" id="Security">
+    <form method="POST" id="updatePassword">
+      {{if .Data.HasPassword}}
       <div class="form-group row">
-        <label for="currentPassword" class="col-sm-2 col-form-label">Current Password</label>
-        <div class="col-sm-10">
+        <label for="currentPassword" class="col-sm-3 col-form-label">Current Password</label>
+        <div class="col-sm-9">
           <input type="password" class="form-control" id="currentPassword" name="currentPassword" aria-describedby="currentPasswordHelp"
             placeholder="current Password">
         </div>
@@ -25,18 +21,18 @@
       {{end}}
 
       <div class="form-group row">
-        <label for="newPassword" class="col-sm-2 col-form-label">New Password</abel>
-          <div class="col-sm-10">
-            <input type="password" class="form-control" id="password" name="password" aria-describedby="passwordHelp"
-              placeholder="New Password" onchange="onPasswordChange('password')">
-              <div class="invalid-feedback" id="passwordInvalidDiv" style="display: none;">Password has minimum length of 12 characters.</div>
-          </div>
+        <label for="newPassword" class="col-sm-3 col-form-label">New Password</label>
+        <div class="col-sm-9">
+          <input type="password" class="form-control" id="password" name="password" aria-describedby="passwordHelp"
+            placeholder="New Password" onchange="onPasswordChange('password')">
+            <div class="invalid-feedback" id="passwordInvalidDiv" style="display: none;">Password has minimum length of 12 characters.</div>
+        </div>
       </div>
 
       <div class="form-group row">
-        <label for="confirmPassword" class="col-sm-2 col-form-label">Confirm Password</abel>
-          <div class="col-sm-10">
-            <input type="password" class="form-control" id="confirmPassword" aria-describedby="confirmPasswordHelp"
+        <label for="confirmPassword" class="col-sm-3 col-form-label">Confirm Password</label>
+          <div class="col-sm-9">
+            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" aria-describedby="confirmPasswordHelp"
               placeholder="Confirm Password" onchange="onConfirmePasswordChange('confirmPassword')">
               <div class="invalid-feedback" id="confirmPasswordInvalidDiv" style="display: none;">Password doesn't match</div>
           </div>
@@ -44,5 +40,14 @@
       <button type="submit" class="btn btn-primary">Save changes</button>
     </form>
   </div>
+  {{end}}
 </div>
+
+<script>
+  bindForm("updatePassword", "/api/account/update/password", (d) => {
+    $("#currentPassword").val("");
+    $("#password").val("");
+    $("#confirmPassword").val("");
+  })
+</script>
 {{template "footer"}}

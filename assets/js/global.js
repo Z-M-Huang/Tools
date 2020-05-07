@@ -30,7 +30,6 @@ function bindForm(id, url, callback) {
   $(id).on("submit", (e) => {
     e.preventDefault();
     var data = parseFormToJSON(id);
-    console.log(data);
     $.ajax({
       type: "POST",
       url: url,
@@ -47,18 +46,21 @@ function bindForm(id, url, callback) {
           xhr.setRequestHeader("Authorization", "Bearer " + sessionToken);
         }
       },
-      success: (data) => {
-        if (data.Alert.Message != "") {
-          showAlertCondition(data.Alert);
-        } else if (callback != null && callback != undefined) {
-          callback(data.Data);
-        }
+      statusCode: {
+        401: () => {
+          document.location.href = "/login";
+        },
+        200: (data) => {
+          if (data.Alert.Message != "") {
+            showAlertCondition(data.Alert);
+          } else if (callback != null && callback != undefined) {
+            callback(data.Data);
+          }
+        },
       },
       error: (xhr, status, error) => {
-        console.log(xhr.status + ":" + xhr.statusCode + ":" + xhr.statusText);
-        showAlertDanger(
-          "Failed to receive success response, please try again later."
-        );
+        console.log(xhr.status + ":" + xhr.statusText);
+        showAlertDanger("Failed to receive success response, please try again later.");
       },
     });
   });

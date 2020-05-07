@@ -148,6 +148,7 @@ func main() {
 
 	router.POST("/api/login", apiAuthHandler(false, api.Login))
 	router.POST("/api/signup", apiAuthHandler(false, api.SignUp))
+	router.POST("/api/account/update/password", apiAuthHandler(true, api.UpdatePassword))
 
 	router.GET("/account", pageAuthHandler(true, pages.AccountPage))
 
