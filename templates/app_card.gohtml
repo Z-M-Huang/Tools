@@ -1,18 +1,33 @@
 {{define "app_card"}}
-<div class="card-container col-md-3">
-  <div class="card text-white bg-info">
+<div class="card-container col-md-3 app-card">
+  <div class="card bg-info">
     <a href="{{.Link}}">
       <div class="card-header">
-        {{.Title}}
+        <div class="row justify-content-center">
+          {{if ne .ImageURL ""}}
+          <img src="{{.ImageURL}}" />
+          {{else if ne .FontsAwesomeTag ""}}
+          <h2><i class="{{.FontsAwesomeTag}}"></i></h2>
+          {{else}}
+          <h3>{{.Title}}</h3>
+          {{end}}
+        </div>
+      </div>
+      <div class="card-body">
+        <h4 class="card-title">{{.Title}}</h4>
+        <p class="card-text ellipsis-2">{{.Description}}</p>
+      </div>
+      <div class="card-footer">
+        <div class="row">
+          <div class="col">
+            <i class="fas fa-user"></i> {{.Usage}}
+          </div>
+          <div class="col">
+            <i class="fas fa-thumbs-up"></i> {{.Liked}}
+          </div>
+        </div>
       </div>
     </a>
-    <div class="card-body">
-      <h4 class="card-title">{{.Title}}</h4>
-      <p class="card-text">{{.Description}}</p>
-    </div>
-    <div class="card-footer">
-      <i class="fas fa-user"></i>: {{.Usage}} <i class="fas fa-user"></i>: {{.Liked}}
-    </div>
   </div>
 </div>
 {{end}}

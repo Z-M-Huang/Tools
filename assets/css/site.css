@@ -52,6 +52,19 @@
   }
 }
 
+.app-card {
+  transition: transform .2s; /* Animation */
+}
+
+.app-card:hover {
+  transform: scale(1.05);
+}
+
+.card-header img {
+  width: 40px;
+  height: 40px;
+}
+
 .mt-15 {
   margin-top: 15px;
 }
@@ -60,6 +73,10 @@
   margin-bottom: 15px;
 }
 
-.nav-float-right {
-  float: right;
+.ellipsis-2 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* number of lines to show */
+  -webkit-box-orient: vertical;
 }

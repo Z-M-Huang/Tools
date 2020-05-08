@@ -1,6 +1,8 @@
 package main
 
 import (
+	"sort"
+	"strings"
 	"time"
 
 	"github.com/Z-M-Huang/Tools/data/dbentity"
@@ -20,15 +22,26 @@ func getAnalyticTools() {
 	}
 
 	kelly := &webdata.AppCard{
-		FontsAwesomeTag: `<i class="fas fa-coins"></i>`,
+		FontsAwesomeTag: `fas fa-coins`,
 		Link:            "/app/kelly-criterion",
 		Title:           "Kelly Criterion",
 		Description:     "Simulator for Kelly criterion. Kelly Criterion is a formula for sizing bets or investments from which the investor expects a positive return.",
 		Usage:           0,
 		Liked:           0,
 	}
-
 	tools.AppCards = append(tools.AppCards, kelly)
+
+	martingale := &webdata.AppCard{
+		FontsAwesomeTag: `fas fa-comments-dollar`,
+		Link:            "/app/martingale",
+		Title:           "Martingale",
+		Description:     "Simulator for Martingale. The simplest of these strategies was designed for a game in which the gambler wins the stake if a coin comes up heads and loses it if the coin comes up tails.",
+		Usage:           0,
+		Liked:           0,
+	}
+	tools.AppCards = append(tools.AppCards, martingale)
+
+	sortAppCardSlice(tools.AppCards)
 	appList = append(appList, tools)
 }
 
@@ -64,4 +77,10 @@ func routineUpdateAppCardUsage(duration time.Duration) {
 		loadAppCardsUsage()
 		time.Sleep(duration)
 	}
+}
+
+func sortAppCardSlice(appCards []*webdata.AppCard) {
+	sort.Slice(appCards, func(i, j int) bool {
+		return strings.ToLower(appCards[i].Title) < strings.ToLower(appCards[j].Title)
+	})
 }
