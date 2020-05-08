@@ -2,6 +2,7 @@ package api
 
 import (
 	"crypto/md5"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -21,7 +22,7 @@ import (
 )
 
 var emailRe = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
-
+var minPasswordLength int = 12
 var googleOauthConfig *oauth2.Config
 
 func init() {
@@ -91,6 +92,70 @@ func Login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	writeResponse(w, response)
 }
 
+//APILogin api login
+func APILogin(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	authHeader := strings.TrimSpace(r.Header.Get("Authorization"))
+	if authHeader == "" || !strings.Contains(authHeader, "Basic ") {
+		http.Error(w, "Invalid Authorization Header", http.StatusBadRequest)
+		return
+	}
+	authHeader = strings.Replace(authHeader, "Basic ", "", 1)
+	decodedAuthBytes, err := base64.StdEncoding.DecodeString(authHeader)
+	if err != nil {
+		http.Error(w, "Invalid Authorization Header", http.StatusBadRequest)
+		return
+	}
+
+	decodedAuth := string(decodedAuthBytes)
+	if !strings.Contains(decodedAuth, ":") {
+		http.Error(w, "Invalid Authorization Header", http.StatusBadRequest)
+		return
+	}
+
+	authSplit := strings.Split(decodedAuth, ":")
+	if len(authSplit) != 2 && emailRe.Match([]byte(authSplit[0])) && len(authSplit[1]) < minPasswordLength {
+		http.Error(w, "Invalid Authorization Header", http.StatusBadRequest)
+		return
+	}
+
+	existingUser := &dbentity.User{}
+	if db := utils.DB.Where(dbentity.User{
+		Email: authSplit[0],
+	}).First(&existingUser); db.RecordNotFound() || existingUser == nil {
+		utils.Logger.Sugar().Errorf("APILogin: Email %s not found", authSplit[0])
+		http.Error(w, "User not found", http.StatusUnauthorized)
+		return
+	} else if db.Error != nil {
+		utils.Logger.Error(db.Error.Error())
+		http.Error(w, "Internal Error", http.StatusInternalServerError)
+		return
+	}
+
+	if !utils.ComparePasswords(existingUser.Password, []byte(authSplit[1])) {
+		http.Error(w, "Invalid Authorization Header", http.StatusBadRequest)
+		return
+	}
+
+	tokenStr, expiresAt, err := utils.GenerateJWTToken("APILogin", authSplit[0], existingUser.Username, getGravatarLink(authSplit[0], 50))
+	if err != nil {
+		utils.Logger.Error(err.Error())
+		http.Error(w, "Internal Error", http.StatusInternalServerError)
+		return
+	}
+
+	response := &apidata.APILoginResponse{
+		TokenType:   "bearer",
+		AccessToken: tokenStr,
+		ExpiresIn:   int64(expiresAt.Sub(time.Now().UTC()).Seconds()),
+	}
+
+	jsonBody, _ := json.Marshal(response)
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonBody)
+}
+
 //SignUp request
 func SignUp(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	defer r.Body.Close()
@@ -129,9 +194,9 @@ func SignUp(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	if len(request.Password) < 12 {
+	if len(request.Password) < minPasswordLength {
 		response.Alert.IsWarning = true
-		response.Alert.Message = "Password has minimum length of 12 characters."
+		response.Alert.Message = fmt.Sprintf("Password has minimum length of %d characters.", minPasswordLength)
 		writeResponse(w, response)
 		return
 	}
@@ -212,9 +277,9 @@ func UpdatePassword(w http.ResponseWriter, r *http.Request, ps httprouter.Params
 		response.Alert.Message = "Password doesn't match."
 		writeResponse(w, response)
 		return
-	} else if len(request.Password) < 12 {
+	} else if len(request.Password) < minPasswordLength {
 		response.Alert.IsWarning = true
-		response.Alert.Message = "Password has minimum length of 12."
+		response.Alert.Message = fmt.Sprintf("Password has minimum length of %d.", minPasswordLength)
 		writeResponse(w, response)
 		return
 	}
