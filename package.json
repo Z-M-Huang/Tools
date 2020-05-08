@@ -4,6 +4,7 @@
   "description": "Tools for fun",
   "main": "index.js",
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.13.0",
     "bootstrap": "^4.4.1",
     "jquery": "^3.5.1"
   },

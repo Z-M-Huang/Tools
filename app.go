@@ -5,13 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/Z-M-Huang/Tools/api"
 	"github.com/Z-M-Huang/Tools/data"
-	"github.com/Z-M-Huang/Tools/data/webdata"
 	"github.com/Z-M-Huang/Tools/pages"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/dgrijalva/jwt-go"
@@ -20,23 +18,7 @@ import (
 
 func homePage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	pageData := &data.Response{}
-	var cardList []*webdata.AppCardList
-	for i := 0; i < 5; i++ {
-		cardCategory := &webdata.AppCardList{
-			Category: strconv.Itoa(i),
-		}
-		for j := 0; j < 10; j++ {
-			cardCategory.AppCards = append(cardCategory.AppCards, &webdata.AppCard{
-				Link:        "#",
-				Title:       fmt.Sprintf("Card Title %d-%d", i, j),
-				Description: "Some quick example text to build on the card title and make up the bulk of the card's content.",
-				Up:          10000,
-				Saved:       10000,
-			})
-		}
-		cardList = append(cardList, cardCategory)
-	}
-	pageData.Data = cardList
+	pageData.Data = appList
 	claim := r.Context().Value(utils.ClaimCtxKey).(*data.JWTClaim)
 	if !claim.IsNil() {
 		pageData.Login = data.LoginData{

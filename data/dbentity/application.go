@@ -6,6 +6,6 @@ import "github.com/jinzhu/gorm"
 type Application struct {
 	gorm.Model
 	Name  string `gorm:"primary_key"`
-	Usage int64  `gorm:"not null;default:0"`
-	Liked int64  `gorm:"not null;default:0"`
+	Usage uint64 `gorm:"not null;default:0"`
+	Liked uint64 `gorm:"not null;default:0"`
 }

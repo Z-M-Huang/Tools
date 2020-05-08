@@ -1,0 +1,49 @@
+{{template "header" .Login}}
+<h1>Kelly Criterion</h1>
+
+<blockquote class="blockquote">
+  <p class="mb-0">In probability theory and intertemporal portfolio choice, the Kelly criterion (or Kelly strategy,
+    Kelly bet, ...), also known as the scientific gambling method, is a formula for bet sizing that leads almost surely
+    to higher wealth compared to any other strategy in the long run (i.e. approaching the limit as the number of bets
+    goes to infinity). The Kelly bet size is found by maximizing the expected value of the logarithm of wealth, which is
+    equivalent to maximizing the expected geometric growth rate. The Kelly Criterion is to bet a predetermined fraction
+    of assets, and it can seem counterintuitive.</p>
+  <footer class="blockquote-footer">wikipedia <a href="https://en.wikipedia.org/wiki/Kelly_criterion">Click hear to read
+      more</a></footer>
+</blockquote>
+</br>
+<p class="text-primary">This tool will be used to analyze hi-low game possibilities and bet sizes to possibly maximize
+  the profit.</p>
+<p class="text-danger">Please be advised: this tool can only be used as an analytic tool and will <b>not</b> guarantee
+  to gain profit.</p>
+<p class="text-danger">Gambling is a game, and please don't let gambling ruin your life.</p>
+
+<div class="row">
+  <div class="col-sm-4">
+    <form id="kellyForm">
+      <div class="form-group row">
+        <label for="stack" class="col-sm-3 col-form-label">Stack</label>
+        <div class="col-sm-9">
+          <input type="number" class="form-control" id="stack" name="stack" aria-describedby="stackHelp"
+            placeholder="20000">
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="maximumWinChance" class="col-sm-3 col-form-label">Max Win Chance</label>
+        <div class="col-sm-9">
+          <div class="input-group mb-3">
+            <input type="text" class="form-control" pattern="^\d*(\.\d{0,2})?$" aria-label="Percent">
+            <div class="input-group-append">
+              <span class="input-group-text">%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="col-sm-8">
+    Result shows here
+  </div>
+</div>
+
+{{template "footer"}}

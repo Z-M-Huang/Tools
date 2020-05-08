@@ -3,6 +3,7 @@ CACHE MANIFEST
 CACHE
 /vendor/jquery/dist/jquery.min.js
 /vendor/bootstrap/dist/js/bootstrap.bundle.min.js
+/vendor/@fortawesome/fontawesome-free/css/all.css
 /assets/img/favicon-16x16.png
 /assets/img/google.png
 /assets/img/icon.png
