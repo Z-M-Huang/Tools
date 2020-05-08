@@ -41,6 +41,8 @@ var Config *data.Configuration
 const (
 	//ClaimCtxKey claim context key
 	ClaimCtxKey string = "claim_context_key"
+	//ResponseCtxKey page data context key
+	ResponseCtxKey string = "response_context_key"
 	//SessionTokenKey auth token in session key
 	SessionTokenKey string = "session_token"
 )

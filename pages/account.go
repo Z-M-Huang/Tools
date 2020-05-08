@@ -23,8 +23,9 @@ func SignupPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 //LoginPage /login
 func LoginPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
 	if r.Context().Value(utils.ClaimCtxKey).(*data.JWTClaim).IsNil() {
-		utils.Templates.ExecuteTemplate(w, "login.gohtml", &data.Response{})
+		utils.Templates.ExecuteTemplate(w, "login.gohtml", response)
 	} else {
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 	}
@@ -32,22 +33,22 @@ func LoginPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 //AccountPage /account requires claim
 func AccountPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	pageData := &data.Response{}
+	response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
 	claim := r.Context().Value(utils.ClaimCtxKey).(*data.JWTClaim)
-	pageData.Login = data.LoginData{
+	response.Login = data.LoginData{
 		Username: claim.Subject,
 		ImageURL: claim.ImageURL,
 	}
 	user, err := GetUserInfoFromDB(claim.Id)
 	if err != nil {
-		pageData.Alert.IsDanger = true
-		pageData.Alert.Message = err.Error()
+		response.Alert.IsDanger = true
+		response.Alert.Message = err.Error()
 	} else {
-		pageData.Data = webdata.AccountPageData{
+		response.Data = webdata.AccountPageData{
 			HasPassword: user.Password != "",
 		}
 	}
-	utils.Templates.ExecuteTemplate(w, "account.gohtml", pageData)
+	utils.Templates.ExecuteTemplate(w, "account.gohtml", response)
 }
 
 //GetUserInfoFromDB get user info from database

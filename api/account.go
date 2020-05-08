@@ -38,7 +38,7 @@ func init() {
 //Login request
 func Login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	defer r.Body.Close()
-	response := &data.Response{}
+	response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
 	request := &apidata.LoginRequest{}
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -159,7 +159,7 @@ func APILogin(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 //SignUp request
 func SignUp(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	defer r.Body.Close()
-	response := &data.Response{}
+	response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
 	request := &apidata.CreateAccountRequest{}
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -251,7 +251,7 @@ func SignUp(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 //UpdatePassword api
 func UpdatePassword(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	response := &data.Response{}
+	response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
 	request := &apidata.UpdatePasswordRequest{}
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {

@@ -17,16 +17,16 @@ import (
 )
 
 func homePage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	pageData := &data.Response{}
-	pageData.Data = appList
+	response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
+	response.Data = appList
 	claim := r.Context().Value(utils.ClaimCtxKey).(*data.JWTClaim)
 	if !claim.IsNil() {
-		pageData.Login = data.LoginData{
+		response.Login = data.LoginData{
 			Username: claim.Subject,
 			ImageURL: claim.ImageURL,
 		}
 	}
-	utils.Templates.ExecuteTemplate(w, "homepage.gohtml", pageData)
+	utils.Templates.ExecuteTemplate(w, "homepage.gohtml", response)
 }
 
 func apiAuthHandler(requireClaim bool, next httprouter.Handle) httprouter.Handle {
@@ -36,21 +36,28 @@ func apiAuthHandler(requireClaim bool, next httprouter.Handle) httprouter.Handle
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 		}
 		ctx := context.WithValue(r.Context(), utils.ClaimCtxKey, claim)
+		ctx = context.WithValue(ctx, utils.ResponseCtxKey, &data.Response{})
 		next(w, r.WithContext(ctx), ps)
 	}
 }
 
 func pageAuthHandler(requireClaim bool, next httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-		pageData := &data.Response{}
+		response := &data.Response{}
 		claim, err := getClaimFromCookieAndRenew(w, r)
 		if (err != nil || claim.IsNil()) && requireClaim {
-			pageData.Alert.IsDanger = true
-			pageData.Alert.Message = "Please login first"
-			utils.Templates.ExecuteTemplate(w, "login.gohtml", pageData)
+			response.Alert.IsDanger = true
+			response.Alert.Message = "Please login first"
+			utils.Templates.ExecuteTemplate(w, "login.gohtml", response)
 			return
+		} else if claim != nil {
+			response.Login = data.LoginData{
+				Username: claim.Subject,
+				ImageURL: claim.ImageURL,
+			}
 		}
 		ctx := context.WithValue(r.Context(), utils.ClaimCtxKey, claim)
+		ctx = context.WithValue(ctx, utils.ResponseCtxKey, response)
 		next(w, r.WithContext(ctx), ps)
 	}
 }
