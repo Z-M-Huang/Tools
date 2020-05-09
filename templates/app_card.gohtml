@@ -22,9 +22,9 @@
         </div>
         <div class="col">
           {{if .Liked}}
-          <i class="fas fa-thumbs-up mr-1 hover-pointer hover-150" onclick="postLink('/app/{{.Name}}/dislike', null)"></i> {{.AmountLiked}}
+        <i class="fas fa-thumbs-up mr-1 hover-pointer hover-150" onclick="likeOnClick(this, '{{.Name}}')"></i> {{.AmountLiked}}
           {{else}}
-          <i class="far fa-thumbs-up mr-1 hover-pointer hover-150" onclick="postLink('/app/{{.Name}}/like', null)"></i> {{.AmountLiked}}
+          <i class="far fa-thumbs-up mr-1 hover-pointer hover-150" onclick="likeOnClick(this, '{{.Name}}')"></i> {{.AmountLiked}}
           {{end}}
         </div>
       </div>

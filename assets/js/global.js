@@ -25,6 +25,38 @@ function clearCookies() {
   }
 }
 
+function getCookieValue(name) {
+  var value = "; " + document.cookie;
+  var parts = value.split("; " + name + "=");
+  if (parts.length == 2) return parts.pop().split(";").shift();
+}
+
+function onClickRedirect(url) {
+  window.location.href = url
+}
+
+/*******************************************************
+ *                    Like/Dislike Section
+ *******************************************************/
+function likeOnClick(obj, name) {
+  var ele = $(obj);
+  if (ele.hasClass("fas")) {
+    //Unlike
+    postLink("/app/" + name + "/dislike", (d) => {
+      ele.parent().html("<i class=\"far fa-thumbs-up mr-1 hover-pointer hover-150\" onclick=\"likeOnClick(this, '" + name +  "')\"></i>" + d)
+    })
+  } else {
+    //like
+    postLink("/app/" + name + "/like", (d) => {
+      ele.parent().html("<i class=\"fas fa-thumbs-up mr-1 hover-pointer hover-150\" onclick=\"likeOnClick(this, '" + name +  "')\"></i>" + d)
+    })
+  }
+}
+
+
+/*******************************************************
+ *                    Ajax Section
+ *******************************************************/
 function bindForm(id, url, callback) {
   id = "#" + id;
   $(id).on("submit", (e) => {
@@ -53,7 +85,8 @@ function bindForm(id, url, callback) {
         200: (data) => {
           if (data.Alert.Message != "") {
             showAlertCondition(data.Alert);
-          } else if (callback != null && callback != undefined) {
+          } 
+          if (callback != null && callback != undefined) {
             callback(data.Data);
           }
         },
@@ -88,7 +121,8 @@ function postLink(url, callback) {
       200: (data) => {
         if (data.Alert.Message != "") {
           showAlertCondition(data.Alert);
-        } else if (callback != null && callback != undefined) {
+        } 
+        if (callback != null && callback != undefined) {
           callback(data.Data);
         }
       },
@@ -98,16 +132,6 @@ function postLink(url, callback) {
       showAlertDanger("Failed to receive success response, please try again later.");
     },
   });
-}
-
-function getCookieValue(name) {
-  var value = "; " + document.cookie;
-  var parts = value.split("; " + name + "=");
-  if (parts.length == 2) return parts.pop().split(";").shift();
-}
-
-function onClickRedirect(url) {
-  window.location.href = url
 }
 
 /*******************************************************

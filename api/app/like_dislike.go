@@ -78,6 +78,7 @@ func Like(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 	response.Alert.IsSuccess = true
 	response.Alert.Message = "Application saved! Thank you for support"
+	response.Data = appCard.AmountLiked
 	api.WriteResponse(w, response)
 }
 
@@ -123,7 +124,7 @@ func Dislike(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		}
 	}
 
-	if index > 0 {
+	if index > -1 {
 		user.LikedApps[index] = user.LikedApps[len(user.LikedApps)-1]
 		user.LikedApps = user.LikedApps[:len(user.LikedApps)-1]
 		err = utils.DB.Transaction(func(tx *gorm.DB) error {
@@ -145,11 +146,11 @@ func Dislike(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 	response.Alert.IsInfo = true
 	response.Alert.Message = "If there are anything you want us to improve about this app. Please let us know on the github bug tracker."
+	response.Data = appCard.AmountLiked
 	api.WriteResponse(w, response)
 }
 
 func addApplicationLike(tx *gorm.DB, app *webdata.AppCard) error {
-	app.AmountLiked++
 	dbApp := &dbentity.Application{
 		Name: app.Title,
 	}
@@ -164,11 +165,11 @@ func addApplicationLike(tx *gorm.DB, app *webdata.AppCard) error {
 		utils.Logger.Error(err.Error())
 		return err
 	}
+	app.AmountLiked = dbApp.Liked
 	return nil
 }
 
 func removeApplicationLike(tx *gorm.DB, app *webdata.AppCard) error {
-	app.AmountLiked--
 	dbApp := &dbentity.Application{
 		Name: app.Title,
 	}
@@ -183,5 +184,6 @@ func removeApplicationLike(tx *gorm.DB, app *webdata.AppCard) error {
 		utils.Logger.Error(err.Error())
 		return err
 	}
+	app.AmountLiked = dbApp.Liked
 	return nil
 }
