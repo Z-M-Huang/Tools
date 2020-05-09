@@ -15,6 +15,8 @@ type AppCard struct {
 	Link            string
 	Title           string
 	Description     string
-	Usage           uint64
-	Liked           uint64
+	Used            bool
+	AmountUsed      uint64
+	Liked           bool
+	AmountLiked     uint64
 }

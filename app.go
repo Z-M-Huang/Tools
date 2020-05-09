@@ -17,17 +17,10 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func homePage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
-	response.Data = utils.AppList
-	response.Header.Title = "Fun Apps"
-	utils.Templates.ExecuteTemplate(w, "homepage.gohtml", response)
-}
-
 func apiAuthHandler(requireClaim bool, next httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		claim, err := getClaimFromHeaderAndRenew(w, r)
-		if (err != nil || claim.IsNil()) && requireClaim {
+		if requireClaim && (err != nil || claim.IsNil()) {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 		}
 		ctx := context.WithValue(r.Context(), utils.ClaimCtxKey, claim)
@@ -71,7 +64,7 @@ func getClaimFromCookieAndRenew(w http.ResponseWriter, r *http.Request) (*data.J
 		if err != nil {
 			utils.Logger.Sugar().Errorf("failed to generate jwt token %s", err.Error())
 		} else {
-			api.SetAuthCookie(w, tokenStr, expiresAt)
+			utils.SetCookie(w, utils.SessionTokenKey, tokenStr, expiresAt)
 		}
 	}
 	return claim, nil
@@ -93,7 +86,7 @@ func getClaimFromHeaderAndRenew(w http.ResponseWriter, r *http.Request) (*data.J
 		if err != nil {
 			utils.Logger.Sugar().Errorf("failed to generate jwt token %s", err.Error())
 		} else {
-			api.SetAuthCookie(w, tokenStr, expiresAt)
+			utils.SetCookie(w, utils.SessionTokenKey, tokenStr, expiresAt)
 		}
 	}
 	return claim, nil
@@ -123,7 +116,7 @@ func main() {
 	router.ServeFiles("/assets/*filepath", http.Dir("assets/"))
 	router.ServeFiles("/vendor/*filepath", http.Dir("node_modules/"))
 
-	router.GET("/", pageAuthHandler(false, homePage))
+	router.GET("/", pageAuthHandler(false, pages.HomePage))
 	router.GET("/signup", pageAuthHandler(false, pages.SignupPage))
 	router.GET("/login", pageAuthHandler(false, pages.LoginPage))
 	router.GET("/google_login", api.GoogleLogin)
@@ -140,6 +133,7 @@ func main() {
 
 	//app api
 	router.POST("/api/kelly-criterion/simulate", apiAuthHandler(false, appApis.KellyCriterionSimulate))
+	router.GET("/app/:name/like", pageAuthHandler(true, appApis.Like))
 
 	utils.Logger.Fatal(http.ListenAndServe(":80", router).Error())
 }

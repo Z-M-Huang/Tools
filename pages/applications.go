@@ -1,7 +1,10 @@
 package pages
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/dbentity"
@@ -20,29 +23,41 @@ func RenderApplicationPage(w http.ResponseWriter, r *http.Request, ps httprouter
 		http.Error(w, "Not Found", http.StatusNotFound)
 	}
 
-	appCard := getApplicationsByName(name)
+	appCard := utils.GetApplicationsByName(name)
 	if appCard == nil {
 		http.Error(w, "Not Found", http.StatusNotFound)
 	}
 	response.Header.Title = appCard.Title + " - Fun Apps"
 
-	addApplicationUsage(appCard)
+	usedApps, err := utils.GetApplicationUsed(r)
+	if err == nil {
+		exists := false
+		for _, str := range usedApps {
+			if str == appCard.Title {
+				exists = true
+				break
+			}
+		}
+		if !exists {
+			addApplicationUsage(appCard)
+			usedApps = append(usedApps, appCard.Title)
+			usedAppsBytes, err := json.Marshal(usedApps)
+			encoded := base64.StdEncoding.EncodeToString(usedAppsBytes)
+			if err != nil {
+				utils.Logger.Error(err.Error())
+			} else {
+				utils.SetCookie(w, utils.UsedTokenKey, string(encoded), time.Date(2199, time.December, 31, 23, 59, 59, 0, time.UTC))
+			}
+		}
+	} else {
+		utils.Logger.Error(err.Error())
+	}
+
 	utils.Templates.ExecuteTemplate(w, appCard.TemplateName, response)
 }
 
-func getApplicationsByName(name string) *webdata.AppCard {
-	for _, category := range utils.AppList {
-		for _, app := range category.AppCards {
-			if app.Name == name {
-				return app
-			}
-		}
-	}
-	return nil
-}
-
 func addApplicationUsage(app *webdata.AppCard) {
-	app.Usage++
+	app.AmountUsed++
 	dbApp := &dbentity.Application{}
 	if db := utils.DB.Where(dbentity.Application{
 		Name: app.Title,

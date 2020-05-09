@@ -88,7 +88,7 @@ func Login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		WriteUnexpectedError(w, response)
 	}
 
-	SetAuthCookie(w, tokenStr, expiresAt)
+	utils.SetCookie(w, utils.SessionTokenKey, tokenStr, expiresAt)
 	WriteResponse(w, response)
 }
 
@@ -243,7 +243,7 @@ func SignUp(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		WriteUnexpectedError(w, response)
 	}
 
-	SetAuthCookie(w, tokenStr, expiresAt)
+	utils.SetCookie(w, utils.SessionTokenKey, tokenStr, expiresAt)
 	response.Data = true
 	WriteResponse(w, response)
 	return
@@ -370,7 +370,7 @@ func GoogleCallback(w http.ResponseWriter, r *http.Request, ps httprouter.Params
 	if err != nil {
 		utils.Logger.Sugar().Errorf("failed to generate jwt token %s", err.Error())
 	} else {
-		SetAuthCookie(w, tokenStr, expiresAt)
+		utils.SetCookie(w, utils.SessionTokenKey, tokenStr, expiresAt)
 	}
 	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 }
@@ -401,18 +401,6 @@ func getGoogleUserInfo(state string, code string) (*apidata.GoogleUserInfo, erro
 		return nil, fmt.Errorf("failed parsing response to struct %s", err.Error())
 	}
 	return user, nil
-}
-
-//SetAuthCookie set auth cookie
-func SetAuthCookie(w http.ResponseWriter, tokenStr string, expiresAt time.Time) {
-	http.SetCookie(w, &http.Cookie{
-		Name:       utils.SessionTokenKey,
-		Value:      tokenStr,
-		Path:       "/",
-		Domain:     utils.Config.Host,
-		Expires:    expiresAt,
-		RawExpires: expiresAt.String(),
-	})
 }
 
 func getGravatarLink(email string, size uint) string {

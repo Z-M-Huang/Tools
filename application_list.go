@@ -20,29 +20,14 @@ func getAnalyticTools() {
 		Category: "Analytic Tools",
 	}
 
-	kelly := &webdata.AppCard{
-		Name:            "kelly-criterion",
-		TemplateName:    "kelly_criterion.gohtml",
-		FontsAwesomeTag: `fas fa-coins`,
-		Link:            "/app/kelly-criterion",
-		Title:           "Kelly Criterion",
-		Description:     "Simulator for Kelly criterion. Kelly Criterion is a formula for sizing bets or investments from which the investor expects a positive return.",
-		Usage:           0,
-		Liked:           0,
-	}
+	kelly := newAppCart("kelly-criterion", "kelly_criterion.gohtml", "", "fas fa-coins",
+		"/app/kelly-criterion", "Kelly Criterion", "Simulator for Kelly criterion. Kelly Criterion is a formula for sizing bets or investments from which the investor expects a positive return.")
 	tools.AppCards = append(tools.AppCards, kelly)
 
-	martingale := &webdata.AppCard{
-		Name:            "martingale",
-		TemplateName:    "martingale.gohtml",
-		FontsAwesomeTag: `fas fa-comments-dollar`,
-		Link:            "/app/martingale",
-		Title:           "Martingale",
-		Description:     "Simulator for Martingale. The simplest of these strategies was designed for a game in which the gambler wins the stake if a coin comes up heads and loses it if the coin comes up tails.",
-		Usage:           0,
-		Liked:           0,
-	}
-	tools.AppCards = append(tools.AppCards, martingale)
+	betSimulator := newAppCart("bet-simulator", "bet_simulator.gohtml", "", "fas fa-coins",
+		"/app/bet-simulator", "Bet Simulator", "Simulate online betting website result(Provably fair only).")
+
+	tools.AppCards = append(tools.AppCards, betSimulator)
 
 	sortAppCardSlice(tools.AppCards)
 	utils.AppList = append(utils.AppList, tools)
@@ -63,8 +48,8 @@ func loadAppCardsUsage() {
 					utils.Logger.Sugar().Errorf("Failed to insert app %s into database. %s", appCard.Title, dbIns.Error.Error())
 				}
 			} else if app != nil {
-				appCard.Usage = app.Usage
-				appCard.Liked = app.Liked
+				appCard.AmountUsed = app.Usage
+				appCard.AmountLiked = app.Liked
 			} else {
 				utils.Logger.Sugar().Errorf("Failed to load app data from db for %s. %s", appCard.Title, db.Error.Error())
 			}
@@ -83,4 +68,19 @@ func sortAppCardSlice(appCards []*webdata.AppCard) {
 	sort.Slice(appCards, func(i, j int) bool {
 		return strings.ToLower(appCards[i].Title) < strings.ToLower(appCards[j].Title)
 	})
+}
+
+func newAppCart(name, templateName, imageURL, fontsAwesomeTag, link, title, description string) *webdata.AppCard {
+	return &webdata.AppCard{
+		Name:            name,
+		TemplateName:    templateName,
+		FontsAwesomeTag: fontsAwesomeTag,
+		Link:            link,
+		Title:           title,
+		Description:     description,
+		Used:            false,
+		AmountUsed:      0,
+		Liked:           false,
+		AmountLiked:     0,
+	}
 }

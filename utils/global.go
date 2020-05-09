@@ -49,6 +49,8 @@ const (
 	ResponseCtxKey string = "response_context_key"
 	//SessionTokenKey auth token in session key
 	SessionTokenKey string = "session_token"
+	//UsedTokenKey contains apps used. This is a slice of app titles
+	UsedTokenKey string = "used_token"
 )
 
 func init() {
