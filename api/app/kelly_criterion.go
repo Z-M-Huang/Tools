@@ -11,6 +11,7 @@ import (
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/apidata/application"
 	"github.com/Z-M-Huang/Tools/utils"
+	kellycriterion "github.com/Z-M-Huang/kelly-criterion"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -55,12 +56,12 @@ func KellyCriterionSimulate(w http.ResponseWriter, r *http.Request, ps httproute
 
 	total := maxChance * maxPayout / 100
 	for i := 0; i < 1000; i++ {
-		payout := float64(maxPayout) + (float64(i) * float64(0.01))
+		payout := float64(maxPayout) + (float64(i) * 0.01)
 		chance := float64(total / payout)
 		simulationResult = append(simulationResult, &application.KellyCriterionSimulationResponse{
 			Payout: math.Round(payout*100) / 100,
 			Chance: math.Round(chance*100) / 100,
-			Factor: math.Round(((chance*payout-(1-chance))/payout)*10000) / 10000,
+			Factor: math.Round(kellycriterion.Calculate(chance, payout)*10000) / 10000,
 		})
 	}
 	response.Data = simulationResult

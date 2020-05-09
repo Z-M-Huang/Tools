@@ -1,19 +1,18 @@
 {{define "app_card"}}
 <div class="card-container col-md-3 app-card">
-  <div class="card bg-info" onclick="onClickRedirect('{{.Link}}')">
-    <div class="card-header">
-      <div class="row justify-content-center">
+  <div class="card">
+    <div class="card-body hover-pointer" onclick="onClickRedirect('{{.Link}}')">
+      <div class="row">
         {{if ne .ImageURL ""}}
-        <img src="{{.ImageURL}}" />
+        <img src="{{.ImageURL}}" class="col-sm-3" />
+        <h4 class="card-title col-sm-9">{{.Title}}</h4>
         {{else if ne .FontsAwesomeTag ""}}
-        <h2><i class="{{.FontsAwesomeTag}}"></i></h2>
+        <h2 class="col-sm-3"><i class="{{.FontsAwesomeTag}}"></i></h2>
+        <h4 class="card-title col-sm-9">{{.Title}}</h4>
         {{else}}
-        <h3>{{.Title}}</h3>
-        {{end}}
+        <h4>{{.Title}}</h3>
+          {{end}}
       </div>
-    </div>
-    <div class="card-body">
-      <h4 class="card-title">{{.Title}}</h4>
       <p class="card-text ellipsis-2">{{.Description}}</p>
     </div>
     <div class="card-footer">

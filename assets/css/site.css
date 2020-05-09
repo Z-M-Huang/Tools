@@ -57,8 +57,11 @@
 }
 
 .app-card:hover {
-  cursor: pointer;
   transform: scale(1.05);
+}
+
+.hover-pointer:hover {
+  cursor: pointer;
 }
 
 .card-header img {
