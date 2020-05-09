@@ -24,13 +24,13 @@ func RenderApplicationPage(w http.ResponseWriter, r *http.Request, ps httprouter
 		http.Error(w, "Not Found", http.StatusNotFound)
 	}
 
-	appCard := utils.GetApplicationsByName(name)
+	appCard := applicationlogic.GetApplicationsByName(name)
 	if appCard == nil {
 		http.Error(w, "Not Found", http.StatusNotFound)
 	}
 	response.Header.Title = appCard.Title + " - Fun Apps"
 
-	usedApps, err := utils.GetApplicationUsed(r)
+	usedApps, err := applicationlogic.GetApplicationUsed(r)
 	if err == nil {
 		exists := false
 		for _, str := range usedApps {

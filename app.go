@@ -11,6 +11,7 @@ import (
 	"github.com/Z-M-Huang/Tools/api"
 	appApis "github.com/Z-M-Huang/Tools/api/app"
 	"github.com/Z-M-Huang/Tools/data"
+	userlogic "github.com/Z-M-Huang/Tools/logic/user"
 	"github.com/Z-M-Huang/Tools/pages"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/dgrijalva/jwt-go"
@@ -60,7 +61,7 @@ func getClaimFromCookieAndRenew(w http.ResponseWriter, r *http.Request) (*data.J
 		return nil, err
 	}
 	if time.Now().UTC().Sub(time.Unix(claim.ExpiresAt, 0)).Hours() < 24 {
-		tokenStr, expiresAt, err := utils.GenerateJWTToken(claim.Audience, claim.Id, claim.Subject, claim.ImageURL)
+		tokenStr, expiresAt, err := userlogic.GenerateJWTToken(claim.Audience, claim.Id, claim.Subject, claim.ImageURL)
 		if err != nil {
 			utils.Logger.Sugar().Errorf("failed to generate jwt token %s", err.Error())
 		} else {
@@ -82,7 +83,7 @@ func getClaimFromHeaderAndRenew(w http.ResponseWriter, r *http.Request) (*data.J
 		return nil, errors.New("Unauthorized")
 	}
 	if time.Now().UTC().Sub(time.Unix(claim.ExpiresAt, 0)).Hours() < 24 {
-		tokenStr, expiresAt, err := utils.GenerateJWTToken(claim.Audience, claim.Id, claim.Subject, claim.ImageURL)
+		tokenStr, expiresAt, err := userlogic.GenerateJWTToken(claim.Audience, claim.Id, claim.Subject, claim.ImageURL)
 		if err != nil {
 			utils.Logger.Sugar().Errorf("failed to generate jwt token %s", err.Error())
 		} else {

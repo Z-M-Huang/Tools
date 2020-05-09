@@ -84,7 +84,7 @@ func Login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	tokenStr, expiresAt, err := utils.GenerateJWTToken("Direct Login", request.Email, existingUser.Username, getGravatarLink(request.Email, 50))
+	tokenStr, expiresAt, err := userlogic.GenerateJWTToken("Direct Login", request.Email, existingUser.Username, getGravatarLink(request.Email, 50))
 	if err != nil {
 		utils.Logger.Error(err.Error())
 		WriteUnexpectedError(w, response)
@@ -139,7 +139,7 @@ func APILogin(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	tokenStr, expiresAt, err := utils.GenerateJWTToken("APILogin", authSplit[0], existingUser.Username, getGravatarLink(authSplit[0], 50))
+	tokenStr, expiresAt, err := userlogic.GenerateJWTToken("APILogin", authSplit[0], existingUser.Username, getGravatarLink(authSplit[0], 50))
 	if err != nil {
 		utils.Logger.Error(err.Error())
 		http.Error(w, "Internal Error", http.StatusInternalServerError)
@@ -246,7 +246,7 @@ func SignUp(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	tokenStr, expiresAt, err := utils.GenerateJWTToken("Direct Login", request.Email, user.Username, getGravatarLink(request.Email, 50))
+	tokenStr, expiresAt, err := userlogic.GenerateJWTToken("Direct Login", request.Email, user.Username, getGravatarLink(request.Email, 50))
 	if err != nil {
 		utils.Logger.Error(err.Error())
 		WriteUnexpectedError(w, response)
@@ -370,7 +370,7 @@ func GoogleCallback(w http.ResponseWriter, r *http.Request, ps httprouter.Params
 		utils.Logger.Error(err.Error())
 	}
 
-	tokenStr, expiresAt, err := utils.GenerateJWTToken("Google", user.Email, user.Name, user.Picture)
+	tokenStr, expiresAt, err := userlogic.GenerateJWTToken("Google", user.Email, user.Name, user.Picture)
 	if err != nil {
 		utils.Logger.Sugar().Errorf("failed to generate jwt token %s", err.Error())
 	} else {

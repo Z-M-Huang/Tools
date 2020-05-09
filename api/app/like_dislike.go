@@ -26,7 +26,7 @@ func Like(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		http.Error(w, "Not Found", http.StatusNotFound)
 	}
 
-	appCard := utils.GetApplicationsByName(name)
+	appCard := applicationlogic.GetApplicationsByName(name)
 	if appCard == nil {
 		http.Error(w, "Not Found", http.StatusNotFound)
 	}
@@ -85,7 +85,7 @@ func Dislike(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		http.Error(w, "Not Found", http.StatusNotFound)
 	}
 
-	appCard := utils.GetApplicationsByName(name)
+	appCard := applicationlogic.GetApplicationsByName(name)
 	if appCard == nil {
 		http.Error(w, "Not Found", http.StatusNotFound)
 	}

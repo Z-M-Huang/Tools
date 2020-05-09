@@ -42,13 +42,11 @@ var Config *data.Configuration
 //AppList in home page
 var AppList []*webdata.AppCardList
 
-type contextKey string
-
 const (
 	//ClaimCtxKey claim context key
-	ClaimCtxKey contextKey = "claim_context_key"
+	ClaimCtxKey string = "claim_context_key"
 	//ResponseCtxKey page data context key
-	ResponseCtxKey contextKey = "response_context_key"
+	ResponseCtxKey string = "response_context_key"
 	//SessionTokenKey auth token in session key
 	SessionTokenKey string = "session_token"
 	//UsedTokenKey contains apps used. This is a slice of app titles
