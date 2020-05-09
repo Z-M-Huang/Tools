@@ -57,6 +57,7 @@
 }
 
 .app-card:hover {
+  cursor: pointer;
   transform: scale(1.05);
 }
 
@@ -71,10 +72,6 @@
 
 .mb-15 {
   margin-bottom: 15px;
-}
-
-.mr-5 {
-  margin-right: 5px;
 }
 
 .ellipsis-2 {
