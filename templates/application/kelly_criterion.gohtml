@@ -55,26 +55,94 @@
 <div class="row justify-content-center">
   <h1>Analysis Result</h1>
 </div>
-<div class="row">
-  <table class="table table-hover">
-    <thead>
-      <tr>
-        <th scope="col">Payout</th>
-        <th scope="col">Win Chance</th>
-        <th scope="col">Bet Size Factor</th>
-      </tr>
-    </thead>
-    <tbody>
-    </tbody>
-  </table>
+
+<ul class="nav nav-tabs">
+  <li class="nav-item" >
+    <a class="nav-link active" data-toggle="tab" href="#trends">Trends</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" data-toggle="tab" href="#statistics">Statistics</a>
+  </li>
+</ul>
+<div id="analysisResult" class="tab-content">
+  <div class="tab-pane fade show active" id="trends">
+    <canvas id="trendChart"></canvas>
+  </div>
+  <div class="tab-pane fade" id="statistics">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th scope="col">Payout</th>
+          <th scope="col">Win Chance</th>
+          <th scope="col">Bet Size Factor</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+  </div>
 </div>
+
 <script>
   bindForm("kellyForm", "/api/kelly-criterion/simulate", (d) => {
     var table = $("table tbody");
     $.each(d, (i, val) => {
-      var markup = "<tr><td>" + val.Payout + "</td><td>" + val.Chance + "</td><td>" + val.Factor + "</td></tr>";
+      var markup = "<tr><td>" + val.Payout + "</td><td>" + val.Chance * 100 + "%</td><td>" + val.Factor + "</td></tr>";
       table.append(markup);
     });
+
+    var ctx = $("#trendChart")[0];
+    var chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: d.map(x => x.Payout),
+        datasets: [
+          {
+          label: "Chance",
+          fill: false,
+          backgroundColor: window.chartColors.blue,
+          borderColor: window.chartColors.blue,
+          data: d.map(x => x.Chance),
+          yAxisID: 'y-axis-1'
+        },
+        {
+          label: "Factor",
+          fill: false,
+          backgroundColor: window.chartColors.green,
+          borderColor: window.chartColors.green,
+          data: d.map(x => x.Factor),
+          yAxisID: 'y-axis-2'
+        }
+        ]
+      },
+      options: {
+					responsive: true,
+					hoverMode: 'index',
+					stacked: false,
+					title: {
+						display: true,
+						text: 'Chances, Factors vs Payouts'
+					},
+					scales: {
+						yAxes: [{
+							type: 'linear',
+							display: true,
+							position: 'left',
+							id: 'y-axis-1',
+						}, {
+							type: 'linear', 
+							display: true,
+							position: 'right',
+							id: 'y-axis-2',
+
+							gridLines: {
+								drawOnChartArea: false, 
+							},
+						}],
+					}
+				}
+    });
+    chart.update();
   });
 </script>
 {{template "footer"}}
