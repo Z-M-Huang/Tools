@@ -297,14 +297,12 @@ func UpdatePassword(w http.ResponseWriter, r *http.Request, ps httprouter.Params
 		return
 	}
 
-	if !utils.ComparePasswords(dbUser.Password, []byte(request.CurrentPassword)) {
+	if dbUser.Password != "" && !utils.ComparePasswords(dbUser.Password, []byte(request.CurrentPassword)) {
 		response.Alert.IsWarning = true
 		response.Alert.Message = "Current password is different compared to what's in database... Try harder..."
 		WriteResponse(w, response)
 		return
-	}
-
-	if utils.ComparePasswords(dbUser.Password, []byte(request.Password)) {
+	} else if dbUser.Password != "" && utils.ComparePasswords(dbUser.Password, []byte(request.Password)) {
 		response.Alert.IsWarning = true
 		response.Alert.Message = "New password is exactly the same as the old password..."
 		WriteResponse(w, response)
