@@ -52,12 +52,14 @@
   }
 }
 
-.app-card {
+.hover-105:hover {
   transition: transform .2s; /* Animation */
+  transform: scale(1.05);
 }
 
-.app-card:hover {
-  transform: scale(1.05);
+.hover-150:hover {
+  transition: transform .2s; /* Animation */
+  transform: scale(1.5);
 }
 
 .hover-pointer:hover {

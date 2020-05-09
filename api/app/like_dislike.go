@@ -70,8 +70,15 @@ func Like(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 			}
 			return nil
 		})
-		utils.Logger.Error(err.Error())
+		if err != nil {
+			api.WriteUnexpectedError(w, response)
+			utils.Logger.Error(err.Error())
+			return
+		}
 	}
+	response.Alert.IsSuccess = true
+	response.Alert.Message = "Application saved! Thank you for support"
+	api.WriteResponse(w, response)
 }
 
 //Dislike /app/:name/dislike
@@ -124,14 +131,21 @@ func Dislike(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 			if err != nil {
 				return fmt.Errorf("failed to remove liked app %s from user %s", appCard.Title, claim.Id)
 			}
-			err = addApplicationDislike(tx, appCard)
+			err = removeApplicationLike(tx, appCard)
 			if err != nil {
 				return fmt.Errorf("failed to remove like from app %s", appCard.Title)
 			}
 			return nil
 		})
-		utils.Logger.Error(err.Error())
+		if err != nil {
+			api.WriteUnexpectedError(w, response)
+			utils.Logger.Error(err.Error())
+			return
+		}
 	}
+	response.Alert.IsInfo = true
+	response.Alert.Message = "If there are anything you want us to improve about this app. Please let us know on the github bug tracker."
+	api.WriteResponse(w, response)
 }
 
 func addApplicationLike(tx *gorm.DB, app *webdata.AppCard) error {
@@ -153,7 +167,7 @@ func addApplicationLike(tx *gorm.DB, app *webdata.AppCard) error {
 	return nil
 }
 
-func addApplicationDislike(tx *gorm.DB, app *webdata.AppCard) error {
+func removeApplicationLike(tx *gorm.DB, app *webdata.AppCard) error {
 	app.AmountLiked--
 	dbApp := &dbentity.Application{
 		Name: app.Title,

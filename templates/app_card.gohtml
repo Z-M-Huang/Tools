@@ -1,5 +1,5 @@
 {{define "app_card"}}
-<div class="card-container col-md-3 app-card">
+<div class="card-container col-md-3 hover-105">
   <div class="card">
     <div class="card-body hover-pointer" onclick="onClickRedirect('{{.Link}}')">
       <div class="row">
@@ -21,7 +21,11 @@
           <i class="fas fa-user mr-1"></i> {{.AmountUsed}}
         </div>
         <div class="col">
-          <i class="fas fa-thumbs-up mr-1"></i> {{.AmountLiked}}
+          {{if .Liked}}
+          <i class="fas fa-thumbs-up mr-1 hover-pointer hover-150" onclick="postLink('/app/{{.Name}}/dislike', null)"></i> {{.AmountLiked}}
+          {{else}}
+          <i class="far fa-thumbs-up mr-1 hover-pointer hover-150" onclick="postLink('/app/{{.Name}}/like', null)"></i> {{.AmountLiked}}
+          {{end}}
         </div>
       </div>
     </div>

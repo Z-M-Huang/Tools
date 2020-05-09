@@ -34,7 +34,7 @@ func pageAuthHandler(requireClaim bool, next httprouter.Handle) httprouter.Handl
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		response := &data.Response{}
 		claim, err := getClaimFromCookieAndRenew(w, r)
-		if (err != nil || claim.IsNil()) && requireClaim {
+		if requireClaim && (err != nil || claim.IsNil()) {
 			response.Alert.IsDanger = true
 			response.Alert.Message = "Please login first"
 			utils.Templates.ExecuteTemplate(w, "login.gohtml", response)
@@ -134,8 +134,8 @@ func main() {
 
 	//app api
 	router.POST("/api/kelly-criterion/simulate", apiAuthHandler(false, appApis.KellyCriterionSimulate))
-	router.GET("/app/:name/like", pageAuthHandler(true, appApis.Like))
-	router.GET("/app/:name/dislike", pageAuthHandler(true, appApis.Dislike))
+	router.POST("/app/:name/like", apiAuthHandler(true, appApis.Like))
+	router.POST("/app/:name/dislike", apiAuthHandler(true, appApis.Dislike))
 
 	utils.Logger.Fatal(http.ListenAndServe(":80", router).Error())
 }

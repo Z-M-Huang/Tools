@@ -8,6 +8,7 @@ import (
 	"github.com/Z-M-Huang/Tools/data/dbentity"
 	"github.com/Z-M-Huang/Tools/data/webdata"
 	"github.com/Z-M-Huang/Tools/utils"
+	"github.com/jinzhu/copier"
 	"github.com/jinzhu/gorm"
 )
 
@@ -58,4 +59,40 @@ func GetApplicationsByName(name string) *webdata.AppCard {
 		}
 	}
 	return nil
+}
+
+//GetApplicationWithLiked get application with liked populated
+func GetApplicationWithLiked(user *dbentity.User) []*webdata.AppCardList {
+	if user != nil && len(user.LikedApps) > 0 {
+		appList := GetNewInstancesOfAppList()
+		for _, category := range appList {
+			for _, app := range category.AppCards {
+				for _, likedApp := range user.LikedApps {
+					if app.Title == likedApp {
+						app.Liked = true
+					}
+				}
+			}
+		}
+		return appList
+	}
+	return nil
+}
+
+//GetNewInstancesOfAppList get new instance
+func GetNewInstancesOfAppList() []*webdata.AppCardList {
+	var appList []*webdata.AppCardList
+	for _, category := range utils.AppList {
+		c := &webdata.AppCardList{
+			Category: category.Category,
+		}
+		for _, app := range category.AppCards {
+			temp := &webdata.AppCard{}
+			copier.Copy(temp, app)
+			c.AppCards = append(c.AppCards, temp)
+		}
+
+		appList = append(appList, c)
+	}
+	return appList
 }

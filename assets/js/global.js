@@ -66,6 +66,40 @@ function bindForm(id, url, callback) {
   });
 }
 
+function postLink(url, callback) {
+  $.ajax({
+    type: "POST",
+    url: url,
+    dataType: "json",
+    beforeSend: (xhr) => {
+      var sessionToken = getCookieValue("session_token");
+      if (
+        sessionToken != "" &&
+        sessionToken != null &&
+        sessionToken != undefined
+      ) {
+        xhr.setRequestHeader("Authorization", "Bearer " + sessionToken);
+      }
+    },
+    statusCode: {
+      401: () => {
+        showAlertDanger("Please login first");
+      },
+      200: (data) => {
+        if (data.Alert.Message != "") {
+          showAlertCondition(data.Alert);
+        } else if (callback != null && callback != undefined) {
+          callback(data.Data);
+        }
+      },
+    },
+    error: (xhr, status, error) => {
+      console.log(xhr.status + ":" + xhr.statusText);
+      showAlertDanger("Failed to receive success response, please try again later.");
+    },
+  });
+}
+
 function getCookieValue(name) {
   var value = "; " + document.cookie;
   var parts = value.split("; " + name + "=");
@@ -112,7 +146,7 @@ function showAlertCondition(alert) {
     } else if (alert.IsSuccess) {
       showAlertSuccess(alert.Message);
     } else if (alert.IsInfo) {
-      showAlertInfo(alert.message);
+      showAlertInfo(alert.Message);
     } else if (alert.Message != "") {
       console.log("Unknown alert", alert);
     }
