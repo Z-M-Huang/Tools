@@ -41,7 +41,7 @@ func loadAppCardsUsage() {
 			app := &dbentity.Application{
 				Name: appCard.Title,
 			}
-			err := applicationlogic.Save(utils.DB, app)
+			err := applicationlogic.Find(utils.DB, app)
 			if err == gorm.ErrRecordNotFound {
 				app.Name = appCard.Title
 				app.Usage = 0

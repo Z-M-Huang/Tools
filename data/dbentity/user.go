@@ -2,6 +2,7 @@ package dbentity
 
 import (
 	"github.com/jinzhu/gorm"
+	"github.com/lib/pq"
 )
 
 //User database entity
@@ -11,5 +12,5 @@ type User struct {
 	Password  string
 	Email     string `gorm:"primary_key"`
 	GoogleID  string
-	LikedApps []string `gorm:"type:text[]"`
+	LikedApps pq.StringArray `gorm:"type:text[]"`
 }
