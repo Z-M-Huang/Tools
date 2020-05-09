@@ -10,6 +10,7 @@ import (
 
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/dbentity"
+	"github.com/Z-M-Huang/Tools/data/webdata"
 	"github.com/go-redis/redis"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -37,6 +38,9 @@ var Logger *zap.Logger
 
 //Config application config
 var Config *data.Configuration
+
+//AppList in home page
+var AppList []*webdata.AppCardList
 
 const (
 	//ClaimCtxKey claim context key

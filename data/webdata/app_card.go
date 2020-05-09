@@ -8,6 +8,8 @@ type AppCardList struct {
 
 //AppCard used to render app card in pages
 type AppCard struct {
+	Name            string
+	TemplateName    string
 	ImageURL        string
 	FontsAwesomeTag string
 	Link            string

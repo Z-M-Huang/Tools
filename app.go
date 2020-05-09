@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/Z-M-Huang/Tools/api"
+	appApis "github.com/Z-M-Huang/Tools/api/app"
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/pages"
 	"github.com/Z-M-Huang/Tools/utils"
@@ -18,7 +19,7 @@ import (
 
 func homePage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
-	response.Data = appList
+	response.Data = utils.AppList
 	claim := r.Context().Value(utils.ClaimCtxKey).(*data.JWTClaim)
 	if !claim.IsNil() {
 		response.Login = data.LoginData{
@@ -123,7 +124,6 @@ func isTokenValid(token string) (*data.JWTClaim, error) {
 }
 
 func main() {
-
 	router := httprouter.New()
 
 	router.ServeFiles("/assets/*filepath", http.Dir("assets/"))
@@ -140,6 +140,12 @@ func main() {
 	router.POST("/api/account/update/password", apiAuthHandler(true, api.UpdatePassword))
 
 	router.GET("/account", pageAuthHandler(true, pages.AccountPage))
+
+	//app
+	router.GET("/app/:name", pageAuthHandler(false, pages.RenderApplicationPage))
+
+	//app api
+	router.POST("/api/kelly-criterion/simulate", apiAuthHandler(false, appApis.KellyCriterionSimulate))
 
 	utils.Logger.Fatal(http.ListenAndServe(":80", router).Error())
 }

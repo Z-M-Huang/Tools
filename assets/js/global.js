@@ -72,6 +72,10 @@ function getCookieValue(name) {
   if (parts.length == 2) return parts.pop().split(";").shift();
 }
 
+function onClickRedirect(url) {
+  window.location.href = url
+}
+
 /*******************************************************
  *                    Alert Section
  *******************************************************/

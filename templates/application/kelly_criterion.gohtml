@@ -8,8 +8,8 @@
     goes to infinity). The Kelly bet size is found by maximizing the expected value of the logarithm of wealth, which is
     equivalent to maximizing the expected geometric growth rate. The Kelly Criterion is to bet a predetermined fraction
     of assets, and it can seem counterintuitive.</p>
-  <footer class="blockquote-footer">wikipedia <a href="https://en.wikipedia.org/wiki/Kelly_criterion">Click hear to read
-      more</a></footer>
+  <footer class="blockquote-footer text-right">wikipedia <a href="https://en.wikipedia.org/wiki/Kelly_criterion">Click
+      hear to read more</a></footer>
 </blockquote>
 </br>
 <p class="text-primary">This tool will be used to analyze hi-low game possibilities and bet sizes to possibly maximize
@@ -17,33 +17,64 @@
 <p class="text-danger">Please be advised: this tool can only be used as an analytic tool and will <b>not</b> guarantee
   to gain profit.</p>
 <p class="text-danger">Gambling is a game, and please don't let gambling ruin your life.</p>
-
-<div class="row">
-  <div class="col-sm-4">
-    <form id="kellyForm">
-      <div class="form-group row">
-        <label for="stack" class="col-sm-3 col-form-label">Stack</label>
-        <div class="col-sm-9">
-          <input type="number" class="form-control" id="stack" name="stack" aria-describedby="stackHelp"
-            placeholder="20000">
+<br/>
+<hr/>
+<br/>
+<form id="kellyForm">
+  <div class="row">
+    <div class="form-group col-sm-5">
+      <div class="row">
+        <label for="maxWinChancePayout" class="col-sm-8 col-form-label">Max Win Chance Payout</label>
+        <div class="col-sm-4">
+          <input type="number" class="form-control" id="maxWinChancePayout" name="maxWinChancePayout"
+            aria-describedby="maxWinChancePayoutHelp" value="1">
         </div>
       </div>
-      <div class="form-group row">
-        <label for="maximumWinChance" class="col-sm-3 col-form-label">Max Win Chance</label>
-        <div class="col-sm-9">
+    </div>
+    <div class="form-group col-sm-5">
+      <div class="row">
+        <label for="maxWinChance" class="col-sm-8 col-form-label">Max Win Chance</label>
+        <div class="col-sm-4">
           <div class="input-group mb-3">
-            <input type="text" class="form-control" pattern="^\d*(\.\d{0,2})?$" aria-label="Percent">
+            <input type="number" class="form-control" step="0.01" id="maxWinChance" name="maxWinChance"
+              aria-describedby="maxWinChancetHelp" value="95">
             <div class="input-group-append">
               <span class="input-group-text">%</span>
             </div>
           </div>
         </div>
-      </div>
-    </form>
+      </div>      
+    </div>
+    <div class="col-sm-2">
+      <button type="submit" class="btn btn-primary">Simulate</button>
+    </div>
   </div>
-  <div class="col-sm-8">
-    Result shows here
-  </div>
-</div>
+</form>
 
+
+<div class="row justify-content-center">
+  <h1>Analysis Result</h1>
+</div>
+<div class="row">
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th scope="col">Payout</th>
+        <th scope="col">Win Chance</th>
+        <th scope="col">Bet Size Factor</th>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+</div>
+<script>
+  bindForm("kellyForm", "/api/kelly-criterion/simulate", (d) => {
+    var table = $("table tbody");
+    $.each(d, (i, val) => {
+      var markup = "<tr><td>" + val.Payout + "</td><td>" + val.Chance + "</td><td>" + val.Factor + "</td></tr>";
+      table.append(markup);
+    });
+  });
+</script>
 {{template "footer"}}

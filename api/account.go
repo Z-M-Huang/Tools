@@ -45,7 +45,7 @@ func Login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		utils.Logger.Error(err.Error())
 		response.Alert.IsDanger = true
 		response.Alert.Message = "Invalid login request."
-		writeResponse(w, response)
+		WriteResponse(w, response)
 		return
 	}
 
@@ -54,7 +54,7 @@ func Login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		utils.Logger.Error(err.Error())
 		response.Alert.IsDanger = true
 		response.Alert.Message = "Invalid login request."
-		writeResponse(w, response)
+		WriteResponse(w, response)
 		return
 	}
 
@@ -66,11 +66,11 @@ func Login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}).First(&existingUser); db.RecordNotFound() || existingUser == nil {
 		response.Alert.IsDanger = true
 		response.Alert.Message = "We couldn't find any account for this email address... Maybe you need to create one"
-		writeResponse(w, response)
+		WriteResponse(w, response)
 		return
 	} else if db.Error != nil {
 		utils.Logger.Error(db.Error.Error())
-		writeUnexpectedError(w, response)
+		WriteUnexpectedError(w, response)
 		return
 	}
 
@@ -78,18 +78,18 @@ func Login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		utils.Logger.Sugar().Errorf("Invalid login attempt received for: %s", request.Email)
 		response.Alert.IsWarning = true
 		response.Alert.Message = `Incorrect password. Do you forget your password? If you forget your password, please <a href="#">Click here</a> to reset your password. Uh... We don't have that feature yet, sorry...`
-		writeResponse(w, response)
+		WriteResponse(w, response)
 		return
 	}
 
 	tokenStr, expiresAt, err := utils.GenerateJWTToken("Direct Login", request.Email, existingUser.Username, getGravatarLink(request.Email, 50))
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		writeUnexpectedError(w, response)
+		WriteUnexpectedError(w, response)
 	}
 
 	SetAuthCookie(w, tokenStr, expiresAt)
-	writeResponse(w, response)
+	WriteResponse(w, response)
 }
 
 //APILogin api login
@@ -166,7 +166,7 @@ func SignUp(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		utils.Logger.Error(err.Error())
 		response.Alert.IsDanger = true
 		response.Alert.Message = "Invalid sign up request."
-		writeResponse(w, response)
+		WriteResponse(w, response)
 		return
 	}
 	err = json.Unmarshal(body, &request)
@@ -174,7 +174,7 @@ func SignUp(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		utils.Logger.Error(err.Error())
 		response.Alert.IsDanger = true
 		response.Alert.Message = "Invalid sign up request."
-		writeResponse(w, response)
+		WriteResponse(w, response)
 		return
 	}
 
@@ -183,21 +183,21 @@ func SignUp(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	if !emailRe.Match([]byte(request.Email)) {
 		response.Alert.IsDanger = true
 		response.Alert.Message = "Invalid email address."
-		writeResponse(w, response)
+		WriteResponse(w, response)
 		return
 	}
 
 	if request.ConfirmPassword != request.Password {
 		response.Alert.IsWarning = true
 		response.Alert.Message = "Password doesn't match"
-		writeResponse(w, response)
+		WriteResponse(w, response)
 		return
 	}
 
 	if len(request.Password) < minPasswordLength {
 		response.Alert.IsWarning = true
 		response.Alert.Message = fmt.Sprintf("Password has minimum length of %d characters.", minPasswordLength)
-		writeResponse(w, response)
+		WriteResponse(w, response)
 		return
 	}
 
@@ -207,7 +207,7 @@ func SignUp(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}).First(&existingUser); !db.RecordNotFound() {
 		response.Alert.IsWarning = true
 		response.Alert.Message = "Email address already exists, please try to remember the password, since password recovery function is not yet built. If you cant remember your password, good luck... The password is hashed, and even as an admin, I have no clue what's your password could be... See ya."
-		writeResponse(w, response)
+		WriteResponse(w, response)
 		return
 	}
 
@@ -216,13 +216,13 @@ func SignUp(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}).First(&existingUser); !db.RecordNotFound() {
 		response.Alert.IsWarning = true
 		response.Alert.Message = "Username already taken. Can't you think of something else? Try harder"
-		writeResponse(w, response)
+		WriteResponse(w, response)
 		return
 	} else if db.RecordNotFound() {
 
 	} else if db.Error != nil {
 		utils.Logger.Error(db.Error.Error())
-		writeUnexpectedError(w, response)
+		WriteUnexpectedError(w, response)
 		return
 	}
 
@@ -233,19 +233,19 @@ func SignUp(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 	if db := utils.DB.Save(user).Scan(&user); db.Error != nil {
 		utils.Logger.Error(db.Error.Error())
-		writeUnexpectedError(w, response)
+		WriteUnexpectedError(w, response)
 		return
 	}
 
 	tokenStr, expiresAt, err := utils.GenerateJWTToken("Direct Login", request.Email, user.Username, getGravatarLink(request.Email, 50))
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		writeUnexpectedError(w, response)
+		WriteUnexpectedError(w, response)
 	}
 
 	SetAuthCookie(w, tokenStr, expiresAt)
 	response.Data = true
-	writeResponse(w, response)
+	WriteResponse(w, response)
 	return
 }
 
@@ -258,7 +258,7 @@ func UpdatePassword(w http.ResponseWriter, r *http.Request, ps httprouter.Params
 		utils.Logger.Error(err.Error())
 		response.Alert.IsDanger = true
 		response.Alert.Message = "Invalid sign up request."
-		writeResponse(w, response)
+		WriteResponse(w, response)
 		return
 	}
 	err = json.Unmarshal(body, &request)
@@ -266,7 +266,7 @@ func UpdatePassword(w http.ResponseWriter, r *http.Request, ps httprouter.Params
 		utils.Logger.Error(err.Error())
 		response.Alert.IsDanger = true
 		response.Alert.Message = "Invalid sign up request."
-		writeResponse(w, response)
+		WriteResponse(w, response)
 		return
 	}
 
@@ -275,12 +275,12 @@ func UpdatePassword(w http.ResponseWriter, r *http.Request, ps httprouter.Params
 	if request.Password != request.ConfirmPassword {
 		response.Alert.IsWarning = true
 		response.Alert.Message = "Password doesn't match."
-		writeResponse(w, response)
+		WriteResponse(w, response)
 		return
 	} else if len(request.Password) < minPasswordLength {
 		response.Alert.IsWarning = true
 		response.Alert.Message = fmt.Sprintf("Password has minimum length of %d.", minPasswordLength)
-		writeResponse(w, response)
+		WriteResponse(w, response)
 		return
 	}
 
@@ -289,25 +289,25 @@ func UpdatePassword(w http.ResponseWriter, r *http.Request, ps httprouter.Params
 	}
 	if db := utils.DB.Where(dbUser).First(&dbUser); db.RecordNotFound() {
 		utils.Logger.Sugar().Errorf("User not found for %s", claim.Id)
-		writeUnexpectedError(w, response)
+		WriteUnexpectedError(w, response)
 		return
 	} else if db.Error != nil {
 		utils.Logger.Error(db.Error.Error())
-		writeUnexpectedError(w, response)
+		WriteUnexpectedError(w, response)
 		return
 	}
 
 	if !utils.ComparePasswords(dbUser.Password, []byte(request.CurrentPassword)) {
 		response.Alert.IsWarning = true
 		response.Alert.Message = "Current password is different compared to what's in database... Try harder..."
-		writeResponse(w, response)
+		WriteResponse(w, response)
 		return
 	}
 
 	if utils.ComparePasswords(dbUser.Password, []byte(request.Password)) {
 		response.Alert.IsWarning = true
 		response.Alert.Message = "New password is exactly the same as the old password..."
-		writeResponse(w, response)
+		WriteResponse(w, response)
 		return
 	}
 
@@ -322,12 +322,12 @@ func UpdatePassword(w http.ResponseWriter, r *http.Request, ps httprouter.Params
 
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		writeUnexpectedError(w, response)
+		WriteUnexpectedError(w, response)
 		return
 	}
 	response.Alert.IsSuccess = true
 	response.Alert.Message = "Password is updated."
-	writeResponse(w, response)
+	WriteResponse(w, response)
 }
 
 //GoogleLogin google login request

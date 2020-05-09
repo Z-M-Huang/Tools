@@ -73,6 +73,10 @@
   margin-bottom: 15px;
 }
 
+.mr-5 {
+  margin-right: 5px;
+}
+
 .ellipsis-2 {
   overflow: hidden;
   text-overflow: ellipsis;

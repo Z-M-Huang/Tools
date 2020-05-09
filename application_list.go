@@ -10,10 +10,9 @@ import (
 	"github.com/Z-M-Huang/Tools/utils"
 )
 
-var appList []*webdata.AppCardList
-
 func init() {
 	getAnalyticTools()
+	loadAppCardsUsage()
 }
 
 func getAnalyticTools() {
@@ -22,6 +21,8 @@ func getAnalyticTools() {
 	}
 
 	kelly := &webdata.AppCard{
+		Name:            "kelly-criterion",
+		TemplateName:    "kelly_criterion.gohtml",
 		FontsAwesomeTag: `fas fa-coins`,
 		Link:            "/app/kelly-criterion",
 		Title:           "Kelly Criterion",
@@ -32,6 +33,8 @@ func getAnalyticTools() {
 	tools.AppCards = append(tools.AppCards, kelly)
 
 	martingale := &webdata.AppCard{
+		Name:            "martingale",
+		TemplateName:    "martingale.gohtml",
 		FontsAwesomeTag: `fas fa-comments-dollar`,
 		Link:            "/app/martingale",
 		Title:           "Martingale",
@@ -42,13 +45,11 @@ func getAnalyticTools() {
 	tools.AppCards = append(tools.AppCards, martingale)
 
 	sortAppCardSlice(tools.AppCards)
-	appList = append(appList, tools)
+	utils.AppList = append(utils.AppList, tools)
 }
 
 func loadAppCardsUsage() {
-	var tempAppList []*webdata.AppCardList
-	copy(tempAppList, appList)
-	for _, category := range tempAppList {
+	for _, category := range utils.AppList {
 		for _, appCard := range category.AppCards {
 			app := &dbentity.Application{}
 			if db := utils.DB.Where(dbentity.Application{
@@ -69,7 +70,6 @@ func loadAppCardsUsage() {
 			}
 		}
 	}
-	appList = tempAppList
 }
 
 func routineUpdateAppCardUsage(duration time.Duration) {
