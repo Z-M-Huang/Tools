@@ -1,6 +1,8 @@
 package dbentity
 
-import "github.com/jinzhu/gorm"
+import (
+	"github.com/jinzhu/gorm"
+)
 
 //User database entity
 type User struct {

@@ -1,13 +1,12 @@
 package pages
 
 import (
-	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/dbentity"
 	"github.com/Z-M-Huang/Tools/data/webdata"
+	userlogic "github.com/Z-M-Huang/Tools/logic/user"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/julienschmidt/httprouter"
 )
@@ -39,7 +38,10 @@ func AccountPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
 	response.Header.Title = "Account - Fun Apps"
 	claim := r.Context().Value(utils.ClaimCtxKey).(*data.JWTClaim)
-	user, err := GetUserInfoFromDB(claim.Id)
+	user := &dbentity.User{
+		Email: claim.Id,
+	}
+	err := userlogic.Find(utils.DB, user)
 	if err != nil {
 		response.Alert.IsDanger = true
 		response.Alert.Message = err.Error()
@@ -49,18 +51,4 @@ func AccountPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		}
 	}
 	utils.Templates.ExecuteTemplate(w, "account.gohtml", response)
-}
-
-//GetUserInfoFromDB get user info from database
-func GetUserInfoFromDB(emailAddress string) (*dbentity.User, error) {
-	user := &dbentity.User{}
-	if db := utils.DB.Where(dbentity.User{
-		Email: emailAddress,
-	}).First(&user); db.RecordNotFound() {
-		return nil, fmt.Errorf("User not found associated with email: %s", emailAddress)
-	} else if db.Error != nil {
-		utils.Logger.Error(db.Error.Error())
-		return nil, errors.New("Internal Error: failed to get user info, please try again later")
-	}
-	return user, nil
 }

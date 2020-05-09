@@ -14,6 +14,7 @@ import (
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/apidata"
 	"github.com/Z-M-Huang/Tools/data/dbentity"
+	userlogic "github.com/Z-M-Huang/Tools/logic/user"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/jinzhu/gorm"
 	"github.com/julienschmidt/httprouter"
@@ -60,16 +61,17 @@ func Login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	request.Email = strings.TrimSpace(strings.ToLower(request.Email))
 
-	existingUser := &dbentity.User{}
-	if db := utils.DB.Where(dbentity.User{
+	existingUser := &dbentity.User{
 		Email: request.Email,
-	}).First(&existingUser); db.RecordNotFound() || existingUser == nil {
+	}
+	err = userlogic.Find(utils.DB, existingUser)
+	if err == gorm.ErrRecordNotFound {
 		response.Alert.IsDanger = true
 		response.Alert.Message = "We couldn't find any account for this email address... Maybe you need to create one"
 		WriteResponse(w, response)
 		return
-	} else if db.Error != nil {
-		utils.Logger.Error(db.Error.Error())
+	} else if err != nil {
+		utils.Logger.Error(err.Error())
 		WriteUnexpectedError(w, response)
 		return
 	}
@@ -118,15 +120,16 @@ func APILogin(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	existingUser := &dbentity.User{}
-	if db := utils.DB.Where(dbentity.User{
+	existingUser := &dbentity.User{
 		Email: authSplit[0],
-	}).First(&existingUser); db.RecordNotFound() || existingUser == nil {
+	}
+	err = userlogic.Find(utils.DB, existingUser)
+	if err == gorm.ErrRecordNotFound {
 		utils.Logger.Sugar().Errorf("APILogin: Email %s not found", authSplit[0])
 		http.Error(w, "User not found", http.StatusUnauthorized)
 		return
-	} else if db.Error != nil {
-		utils.Logger.Error(db.Error.Error())
+	} else if err != nil {
+		utils.Logger.Error(err.Error())
 		http.Error(w, "Internal Error", http.StatusInternalServerError)
 		return
 	}
@@ -201,27 +204,32 @@ func SignUp(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	existingUser := &dbentity.User{}
-	if db := utils.DB.Where(dbentity.User{
+	existingUser := &dbentity.User{
 		Email: request.Email,
-	}).First(&existingUser); !db.RecordNotFound() {
+	}
+	err = userlogic.Find(utils.DB, existingUser)
+	if err == nil {
 		response.Alert.IsWarning = true
 		response.Alert.Message = "Email address already exists, please try to remember the password, since password recovery function is not yet built. If you cant remember your password, good luck... The password is hashed, and even as an admin, I have no clue what's your password could be... See ya."
 		WriteResponse(w, response)
 		return
+	} else if err != nil && err != gorm.ErrRecordNotFound {
+		utils.Logger.Error(err.Error())
+		WriteUnexpectedError(w, response)
+		return
 	}
 
-	if db := utils.DB.Where(dbentity.User{
+	existingUser = &dbentity.User{
 		Username: request.Username,
-	}).First(&existingUser); !db.RecordNotFound() {
+	}
+	err = userlogic.Find(utils.DB, existingUser)
+	if err == nil {
 		response.Alert.IsWarning = true
 		response.Alert.Message = "Username already taken. Can't you think of something else? Try harder"
 		WriteResponse(w, response)
 		return
-	} else if db.RecordNotFound() {
-
-	} else if db.Error != nil {
-		utils.Logger.Error(db.Error.Error())
+	} else if err != nil && err != gorm.ErrRecordNotFound {
+		utils.Logger.Error(err.Error())
 		WriteUnexpectedError(w, response)
 		return
 	}
@@ -231,8 +239,9 @@ func SignUp(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		Email:    request.Email,
 		Password: utils.HashAndSalt([]byte(request.Password)),
 	}
-	if db := utils.DB.Save(user).Scan(&user); db.Error != nil {
-		utils.Logger.Error(db.Error.Error())
+	err = userlogic.Save(utils.DB, user)
+	if err != nil {
+		utils.Logger.Error(err.Error())
 		WriteUnexpectedError(w, response)
 		return
 	}
@@ -287,12 +296,13 @@ func UpdatePassword(w http.ResponseWriter, r *http.Request, ps httprouter.Params
 	dbUser := &dbentity.User{
 		Email: claim.Id,
 	}
-	if db := utils.DB.Where(dbUser).First(&dbUser); db.RecordNotFound() {
-		utils.Logger.Sugar().Errorf("User not found for %s", claim.Id)
+	err = userlogic.Find(utils.DB, dbUser)
+	if err == gorm.ErrRecordNotFound {
+		utils.Logger.Sugar().Errorf("User not found for %s in UpdatePassword", claim.Id)
 		WriteUnexpectedError(w, response)
 		return
-	} else if db.Error != nil {
-		utils.Logger.Error(db.Error.Error())
+	} else if err != nil {
+		utils.Logger.Error(err.Error())
 		WriteUnexpectedError(w, response)
 		return
 	}
@@ -309,14 +319,8 @@ func UpdatePassword(w http.ResponseWriter, r *http.Request, ps httprouter.Params
 		return
 	}
 
-	err = utils.DB.Transaction(func(tx *gorm.DB) error {
-		dbUser.Password = utils.HashAndSalt([]byte(request.Password))
-
-		if db := tx.Save(dbUser).Scan(&dbUser); db.Error != nil {
-			return fmt.Errorf(fmt.Sprintf("failed to update user with new password %s", db.Error.Error()))
-		}
-		return nil
-	})
+	dbUser.Password = utils.HashAndSalt([]byte(request.Password))
+	err = userlogic.Save(utils.DB, dbUser)
 
 	if err != nil {
 		utils.Logger.Error(err.Error())
@@ -347,25 +351,25 @@ func GoogleCallback(w http.ResponseWriter, r *http.Request, ps httprouter.Params
 	if err != nil {
 		utils.Logger.Error(err.Error())
 	}
-	err = utils.DB.Transaction(func(tx *gorm.DB) error {
-		dbUser := &dbentity.User{
-			Email: user.Email,
+
+	dbUser := &dbentity.User{
+		Email: user.Email,
+	}
+	err = userlogic.Find(utils.DB, dbUser)
+	if err == gorm.ErrRecordNotFound {
+		//User not found
+		dbUser.Username = user.Name
+		dbUser.GoogleID = user.ID
+		dbUser.Email = user.Email
+		err = userlogic.Save(utils.DB, dbUser)
+		if err != nil {
+			utils.Logger.Error(err.Error())
 		}
-		if db := tx.Where(dbUser).First(&dbUser); db.RecordNotFound() {
-			dbUser.Username = user.Name
-			dbUser.GoogleID = user.ID
-			dbUser.Email = user.Email
-			if db = tx.Save(dbUser).Scan(&dbUser); db.Error != nil {
-				return fmt.Errorf(fmt.Sprintf("failed to save new user in GoogleCallBack %s", db.Error))
-			}
-		} else if db.Error != nil {
-			return fmt.Errorf(fmt.Sprintf("failed to save new user in GoogleCallBack %s", db.Error))
-		}
-		return nil
-	})
-	if err != nil {
+	} else if err != nil {
+		//Something else happend
 		utils.Logger.Error(err.Error())
 	}
+
 	tokenStr, expiresAt, err := utils.GenerateJWTToken("Google", user.Email, user.Name, user.Picture)
 	if err != nil {
 		utils.Logger.Sugar().Errorf("failed to generate jwt token %s", err.Error())

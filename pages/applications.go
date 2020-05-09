@@ -9,6 +9,7 @@ import (
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/dbentity"
 	"github.com/Z-M-Huang/Tools/data/webdata"
+	applicationlogic "github.com/Z-M-Huang/Tools/logic/application"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/julienschmidt/httprouter"
 )
@@ -58,17 +59,17 @@ func RenderApplicationPage(w http.ResponseWriter, r *http.Request, ps httprouter
 
 func addApplicationUsage(app *webdata.AppCard) {
 	app.AmountUsed++
-	dbApp := &dbentity.Application{}
-	if db := utils.DB.Where(dbentity.Application{
+	dbApp := &dbentity.Application{
 		Name: app.Title,
-	}).First(&dbApp); db.Error != nil {
-		utils.Logger.Error(db.Error.Error())
-	} else if dbApp != nil {
-		dbApp.Usage++
-		if savedb := utils.DB.Save(dbApp).Scan(&dbApp); savedb.Error != nil {
-			utils.Logger.Error(savedb.Error.Error())
-		}
-	} else {
-		utils.Logger.Sugar().Errorf("failed to update application usage for %s", app.Title)
+	}
+	err := applicationlogic.Find(utils.DB, dbApp)
+	if err != nil {
+		utils.Logger.Error(err.Error())
+	}
+
+	dbApp.Usage++
+	err = applicationlogic.Save(utils.DB, dbApp)
+	if err != nil {
+		utils.Logger.Error(err.Error())
 	}
 }

@@ -7,7 +7,9 @@ import (
 
 	"github.com/Z-M-Huang/Tools/data/dbentity"
 	"github.com/Z-M-Huang/Tools/data/webdata"
+	applicationlogic "github.com/Z-M-Huang/Tools/logic/application"
 	"github.com/Z-M-Huang/Tools/utils"
+	"github.com/jinzhu/gorm"
 )
 
 func init() {
@@ -36,22 +38,23 @@ func getAnalyticTools() {
 func loadAppCardsUsage() {
 	for _, category := range utils.AppList {
 		for _, appCard := range category.AppCards {
-			app := &dbentity.Application{}
-			if db := utils.DB.Where(dbentity.Application{
+			app := &dbentity.Application{
 				Name: appCard.Title,
-			}).First(&app); db.RecordNotFound() {
-				//Not found, let's insert
+			}
+			err := applicationlogic.Save(utils.DB, app)
+			if err == gorm.ErrRecordNotFound {
 				app.Name = appCard.Title
 				app.Usage = 0
 				app.Liked = 0
-				if dbIns := utils.DB.Save(app).Scan(&app); dbIns.Error != nil {
-					utils.Logger.Sugar().Errorf("Failed to insert app %s into database. %s", appCard.Title, dbIns.Error.Error())
+				err = applicationlogic.Save(utils.DB, app)
+				if err != nil {
+					utils.Logger.Sugar().Errorf("Failed to insert app %s into database. %s", appCard.Title, err.Error())
 				}
-			} else if app != nil {
+			} else if err != nil {
+				utils.Logger.Sugar().Errorf("Failed to load app data from db for %s. %s", appCard.Title, err.Error())
+			} else {
 				appCard.AmountUsed = app.Usage
 				appCard.AmountLiked = app.Liked
-			} else {
-				utils.Logger.Sugar().Errorf("Failed to load app data from db for %s. %s", appCard.Title, db.Error.Error())
 			}
 		}
 	}

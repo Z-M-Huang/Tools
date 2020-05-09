@@ -134,6 +134,7 @@ func main() {
 	//app api
 	router.POST("/api/kelly-criterion/simulate", apiAuthHandler(false, appApis.KellyCriterionSimulate))
 	router.GET("/app/:name/like", pageAuthHandler(true, appApis.Like))
+	router.GET("/app/:name/dislike", pageAuthHandler(true, appApis.Dislike))
 
 	utils.Logger.Fatal(http.ListenAndServe(":80", router).Error())
 }
