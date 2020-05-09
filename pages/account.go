@@ -15,7 +15,9 @@ import (
 //SignupPage /signup
 func SignupPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	if r.Context().Value(utils.ClaimCtxKey).(*data.JWTClaim).IsNil() {
-		utils.Templates.ExecuteTemplate(w, "signup.gohtml", data.Response{})
+		response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
+		response.Header.Title = "Signup - Fun Apps"
+		utils.Templates.ExecuteTemplate(w, "signup.gohtml", response)
 	} else {
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 	}
@@ -24,6 +26,7 @@ func SignupPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 //LoginPage /login
 func LoginPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
+	response.Header.Title = "Login - Fun Apps"
 	if r.Context().Value(utils.ClaimCtxKey).(*data.JWTClaim).IsNil() {
 		utils.Templates.ExecuteTemplate(w, "login.gohtml", response)
 	} else {
@@ -34,11 +37,8 @@ func LoginPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 //AccountPage /account requires claim
 func AccountPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
+	response.Header.Title = "Account - Fun Apps"
 	claim := r.Context().Value(utils.ClaimCtxKey).(*data.JWTClaim)
-	response.Login = data.LoginData{
-		Username: claim.Subject,
-		ImageURL: claim.ImageURL,
-	}
 	user, err := GetUserInfoFromDB(claim.Id)
 	if err != nil {
 		response.Alert.IsDanger = true

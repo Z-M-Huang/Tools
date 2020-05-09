@@ -20,13 +20,7 @@ import (
 func homePage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
 	response.Data = utils.AppList
-	claim := r.Context().Value(utils.ClaimCtxKey).(*data.JWTClaim)
-	if !claim.IsNil() {
-		response.Login = data.LoginData{
-			Username: claim.Subject,
-			ImageURL: claim.ImageURL,
-		}
-	}
+	response.Header.Title = "Fun Apps"
 	utils.Templates.ExecuteTemplate(w, "homepage.gohtml", response)
 }
 
@@ -52,7 +46,7 @@ func pageAuthHandler(requireClaim bool, next httprouter.Handle) httprouter.Handl
 			utils.Templates.ExecuteTemplate(w, "login.gohtml", response)
 			return
 		} else if claim != nil {
-			response.Login = data.LoginData{
+			response.Header.Login = data.LoginData{
 				Username: claim.Subject,
 				ImageURL: claim.ImageURL,
 			}

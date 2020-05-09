@@ -1,9 +1,16 @@
 package data
 
+//Response page and api response
 type Response struct {
+	Header HeaderData
+	Alert  AlertData
+	Data   interface{}
+}
+
+//HeaderData header data
+type HeaderData struct {
+	Title string
 	Login LoginData
-	Alert AlertData
-	Data  interface{}
 }
 
 //LoginData page login info

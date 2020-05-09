@@ -24,6 +24,7 @@ func RenderApplicationPage(w http.ResponseWriter, r *http.Request, ps httprouter
 	if appCard == nil {
 		http.Error(w, "Not Found", http.StatusNotFound)
 	}
+	response.Header.Title = appCard.Title + " - Fun Apps"
 
 	addApplicationUsage(appCard)
 	utils.Templates.ExecuteTemplate(w, appCard.TemplateName, response)
