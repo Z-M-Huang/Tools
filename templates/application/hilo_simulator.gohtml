@@ -298,9 +298,7 @@
       "Nonce": nonce,
       "Roll": roll
     };
-    console.log(serverSeed, clientSeed, nonce, roll);
     postJSONData("/api/hilo-simulator/verify", data, (d) => {
-      console.log(d);
       if (d != null && d != undefined && d) {
         alert("The roll is verified and indeed valid roll result.");
       } else {
