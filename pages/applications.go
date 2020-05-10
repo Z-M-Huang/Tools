@@ -22,11 +22,13 @@ func RenderApplicationPage(w http.ResponseWriter, r *http.Request, ps httprouter
 
 	if name == "" {
 		http.Error(w, "Not Found", http.StatusNotFound)
+		return
 	}
 
 	appCard := applicationlogic.GetApplicationsByName(name)
 	if appCard == nil {
 		http.Error(w, "Not Found", http.StatusNotFound)
+		return
 	}
 	response.Header.Title = appCard.Title + " - Fun Apps"
 

@@ -51,6 +51,7 @@
   </div>
 </form>
 
+{{template "alert_message" .Alert}}
 
 <div class="row justify-content-center">
   <h1>Analysis Result</h1>
@@ -84,20 +85,51 @@
 </div>
 
 <script>
+  var ctx = $("#trendChart")[0];
+  var chart = new Chart(ctx, {
+    type: 'line',
+    options: {
+      responsive: true,
+      hoverMode: 'index',
+      stacked: false,
+      title: {
+        display: true,
+        text: 'Chances, Factors vs Payouts'
+      },
+      scales: {
+        yAxes: [{
+          type: 'linear',
+          display: true,
+          position: 'left',
+          id: 'y-axis-1',
+        }, {
+          type: 'linear',
+          display: true,
+          position: 'right',
+          id: 'y-axis-2',
+
+          gridLines: {
+            drawOnChartArea: false,
+          },
+        }],
+      }
+    }
+  });
   bindForm("kellyForm", "/api/kelly-criterion/simulate", (d) => {
+    if (d == null || d == undefined) {
+      return;
+    }
+    hideAllAlerts();
     var table = $("table tbody");
     $.each(d, (i, val) => {
       var markup = "<tr><td>" + val.Payout + "</td><td>" + val.Chance * 100 + "%</td><td>" + val.Factor + "</td></tr>";
       table.append(markup);
     });
 
-    var ctx = $("#trendChart")[0];
-    var chart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: d.map(x => x.Payout),
-        datasets: [
-          {
+    chart.data = {
+      labels: d.map(x => x.Payout),
+      datasets: [
+        {
           label: "Chance",
           fill: false,
           backgroundColor: window.chartColors.blue,
@@ -113,35 +145,8 @@
           data: d.map(x => x.Factor),
           yAxisID: 'y-axis-2'
         }
-        ]
-      },
-      options: {
-					responsive: true,
-					hoverMode: 'index',
-					stacked: false,
-					title: {
-						display: true,
-						text: 'Chances, Factors vs Payouts'
-					},
-					scales: {
-						yAxes: [{
-							type: 'linear',
-							display: true,
-							position: 'left',
-							id: 'y-axis-1',
-						}, {
-							type: 'linear', 
-							display: true,
-							position: 'right',
-							id: 'y-axis-2',
-
-							gridLines: {
-								drawOnChartArea: false, 
-							},
-						}],
-					}
-				}
-    });
+      ]
+    };
     chart.update();
   });
 </script>

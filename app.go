@@ -134,6 +134,8 @@ func main() {
 
 	//app api
 	router.POST("/api/kelly-criterion/simulate", apiAuthHandler(false, appApis.KellyCriterionSimulate))
+	router.POST("/api/hilo-simulator/simulate", apiAuthHandler(false, appApis.HILOSimulate))
+	router.POST("/api/hilo-simulator/verify", apiAuthHandler(false, appApis.HILOVerify))
 	router.POST("/app/:name/like", apiAuthHandler(true, appApis.Like))
 	router.POST("/app/:name/dislike", apiAuthHandler(true, appApis.Dislike))
 

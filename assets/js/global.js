@@ -161,6 +161,10 @@ function showAlertInfo(message) {
   $("#alertInfo").slideToggle();
 }
 
+function hideAllAlerts() {  
+  $(".alert").hide();
+}
+
 function showAlertCondition(alert) {
   if (alert != "" && alert != undefined && alert != null) {
     if (alert.IsDanger) {

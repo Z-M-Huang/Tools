@@ -26,8 +26,8 @@ func getAnalyticTools() {
 		"/app/kelly-criterion", "Kelly Criterion", "Simulator for Kelly criterion. Kelly Criterion is a formula for sizing bets or investments from which the investor expects a positive return.")
 	tools.AppCards = append(tools.AppCards, kelly)
 
-	betSimulator := newAppCart("bet-simulator", "bet_simulator.gohtml", "", "fas fa-coins",
-		"/app/bet-simulator", "Bet Simulator", "Simulate online betting website result(Provably fair only).")
+	betSimulator := newAppCart("hilo-simulator", "hilo_simulator.gohtml", "", "fas fa-coins",
+		"/app/hilo-simulator", "HiLo Simulator", "Simulate online hi/low betting website result(Provably fair only).")
 
 	tools.AppCards = append(tools.AppCards, betSimulator)
 
