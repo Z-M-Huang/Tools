@@ -270,7 +270,8 @@
       rollDetail += "<p>WinChance: " + val.WinChance + "</p>";
       rollDetail += "<p>Won: " + val.Won + "</p>";
       rollDetail += "<p>Please check our reference project: <a href='https://github.com/Z-M-Huang/provablyfair'>Click here to Github Project</a></p>";
-      modal = '<div class="modal fade" id="verify' + (i + 1) + '"><div class="modal-dialog" role="document"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Verify Roll #' + i + '</h5><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button></div><div class="modal-body">' + rollDetail + '</div><div class="modal-footer"><button type="button" class="btn btn-primary" onclick="verifyRoll(\'' + val.ServerSeed + '\', \'' + val.ClientSeed + '\', ' + val.Nonce + ', ' + val.Roll + 1 + ')">Verify</button><button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button></div></div></div></div>';
+      modal = getModalHTML("verify" + (i+1), "Verify Roll #" + (i+1), rollDetail, "verifyRoll('" + val.ServerSeed + "', '" + val.ClientSeed + "', " + val.Nonce + ", " + val.Roll + ")", "Verify");
+      // modal = '<div class="modal fade" id="verify' + (i + 1) + '"><div class="modal-dialog" role="document"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Verify Roll #' + i + '</h5><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button></div><div class="modal-body">' + rollDetail + '</div><div class="modal-footer"><button type="button" class="btn btn-primary" onclick="verifyRoll(\'' + val.ServerSeed + '\', \'' + val.ClientSeed + '\', ' + val.Nonce + ', ' + val.Roll + 1 + ')">Verify</button><button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button></div></div></div></div>';
       markup += "<td><button type=\"button\" class=\"btn btn-info\" data-toggle=\"modal\" data-target=\"#verify" + (i + 1) + "\">Verify</button>" + modal + "</td>";
       markup += "</tr>";
       table.append(markup);
@@ -297,7 +298,9 @@
       "Nonce": nonce,
       "Roll": roll
     };
+    console.log(serverSeed, clientSeed, nonce, roll);
     postJSONData("/api/hilo-simulator/verify", data, (d) => {
+      console.log(d);
       if (d != null && d != undefined && d) {
         alert("The roll is verified and indeed valid roll result.");
       } else {
