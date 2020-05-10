@@ -212,6 +212,7 @@
           <th>Won</th>
           <th>Profit</th>
           <th>Stack</th>
+          <th>Verify</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -250,15 +251,27 @@
     $.each(d, (i, val) => {
       var markup = "";
       if (val.Won) {
-        markup = "<tr class=\"table-success\"><th scope=\"row\">" + i + "</th>";
+        markup = "<tr class=\"table-success\"><th scope=\"row\">" + (i + 1) + "</th>";
       } else {
-        markup = "<tr class=\"table-danger\"><th scope=\"row\">" + i + "</th>";
+        markup = "<tr class=\"table-danger\"><th scope=\"row\">" + (i + 1) + "</th>";
       }
       markup += "<td>" + val.Roll + "</td>";
       markup += "<td>" + val.Bet + "</td>";
       markup += "<td>" + val.Won + "</td>";
       markup += "<td>" + val.Profit + "</td>";
       markup += "<td>" + val.Stack + "</td>";
+
+      rollDetail = "<p>Server Seed: " + val.ServerSeed + "</p>";
+      rollDetail += "<p>Client Seed: " + val.ClientSeed + "</p>";
+      rollDetail += "<p>Nonce: " + val.Nonce + "</p>";
+      rollDetail += "<p>Roll #: " + val.Roll + "</p>";
+      rollDetail += "<p>Bet: " + val.Bet + "</p>";
+      rollDetail += "<p>Odds: " + val.Odds + "</p>";
+      rollDetail += "<p>WinChance: " + val.WinChance + "</p>";
+      rollDetail += "<p>Won: " + val.Won + "</p>";
+      rollDetail += "<p>Please check our reference project: <a href='https://github.com/Z-M-Huang/provablyfair'>Click here to Github Project</a></p>";
+      modal = '<div class="modal fade" id="verify' + (i + 1) + '"><div class="modal-dialog" role="document"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Verify Roll #' + i + '</h5><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button></div><div class="modal-body">' + rollDetail + '</div><div class="modal-footer"><button type="button" class="btn btn-primary" onclick="verifyRoll(\'' + val.ServerSeed + '\', \'' + val.ClientSeed + '\', ' + val.Nonce + ', ' + val.Roll + 1 + ')">Verify</button><button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button></div></div></div></div>';
+      markup += "<td><button type=\"button\" class=\"btn btn-info\" data-toggle=\"modal\" data-target=\"#verify" + (i + 1) + "\">Verify</button>" + modal + "</td>";
       markup += "</tr>";
       table.append(markup);
     });
@@ -276,5 +289,21 @@
     };
     chart.update();
   })
+
+  function verifyRoll(serverSeed, clientSeed, nonce, roll) {
+    var data = {
+      "ServerSeed": serverSeed,
+      "ClientSeed": clientSeed,
+      "Nonce": nonce,
+      "Roll": roll
+    };
+    postJSONData("/api/hilo-simulator/verify", data, (d) => {
+      if (d != null && d != undefined && d) {
+        alert("The roll is verified and indeed valid roll result.");
+      } else {
+        alert("The roll is not verified and have some problem. Please contact administrator to investigate.");
+      }
+    })
+  }
 </script>
 {{template "footer"}}

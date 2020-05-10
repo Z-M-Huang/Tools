@@ -99,6 +99,43 @@ function bindForm(id, url, callback) {
   });
 }
 
+function postJSONData(url, data, callback) {
+  $.ajax({
+    type: "POST",
+    url: url,
+    data: JSON.stringify(data),
+    dataType: "json",
+    contentType: "application/json",
+    beforeSend: (xhr) => {
+      var sessionToken = getCookieValue("session_token");
+      if (
+        sessionToken != "" &&
+        sessionToken != null &&
+        sessionToken != undefined
+      ) {
+        xhr.setRequestHeader("Authorization", "Bearer " + sessionToken);
+      }
+    },
+    statusCode: {
+      401: () => {
+        document.location.href = "/login";
+      },
+      200: (data) => {
+        if (data.Alert.Message != "") {
+          showAlertCondition(data.Alert);
+        } 
+        if (callback != null && callback != undefined) {
+          callback(data.Data);
+        }
+      },
+    },
+    error: (xhr, status, error) => {
+      console.log(xhr.status + ":" + xhr.statusText);
+      showAlertDanger("Failed to receive success response, please try again later.");
+    },
+  });
+}
+
 function postLink(url, callback) {
   $.ajax({
     type: "POST",
