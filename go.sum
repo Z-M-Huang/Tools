@@ -28,6 +28,8 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/Z-M-Huang/kelly-criterion v0.0.0-20200509173924-78264e8a8100 h1:7fcQlhfIDSXrRPMlwkJSCwGfvXfzl5R5VbXB3IkTWno=
 github.com/Z-M-Huang/kelly-criterion v0.0.0-20200509173924-78264e8a8100/go.mod h1:1oHzCvsGx5hAe32qU4zPGE8oFfn6dLhQ1ZvtGcJRlUU=
+github.com/Z-M-Huang/provablyfair v0.0.0-20200510015846-f9cd4eca347a h1:piv+L4rhEJbMvplmeGzKlp39LL5lkhxHzVYn4AbjP0o=
+github.com/Z-M-Huang/provablyfair v0.0.0-20200510015846-f9cd4eca347a/go.mod h1:SdEJU4jmZPTenTVKBQRx9DYcfrN1KmJy6ko6eR50kf8=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/chzyer/logex v1.1.10/go.mod h1:+Ywpsq7O8HXn0nuIou7OrIPyXbp3wmkHB+jjWRnGsAI=
 github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e/go.mod h1:nSuG5e5PlCu98SY8svDHJxuZscDgtXS6KTTbou5AhLI=

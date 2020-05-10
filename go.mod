@@ -5,6 +5,7 @@ go 1.14
 require (
 	cloud.google.com/go v0.57.0 // indirect
 	github.com/Z-M-Huang/kelly-criterion v0.0.0-20200509173924-78264e8a8100
+	github.com/Z-M-Huang/provablyfair v0.0.0-20200510015846-f9cd4eca347a // indirect
 	github.com/denisenkom/go-mssqldb v0.0.0-20200428022330-06a60b6afbbc // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
