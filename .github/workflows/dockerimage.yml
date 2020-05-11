@@ -41,7 +41,7 @@ jobs:
         JWT_KEY: ${{ secrets.JWT_KEY }}
         REDIS_ADDR: $ {{ secrets.REDIS_ADDR }}
       with:
-        host: "tools.zh-code.com"
+        host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USERNAME }}
         key: ${{ secrets.SSH_KEY }}
         passphrase: ${{ secrets.SSH_PASS }}
