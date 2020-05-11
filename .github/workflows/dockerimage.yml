@@ -29,8 +29,8 @@ jobs:
     name: deploy
     runs-on: ubuntu-latest
     steps:
-    - name: Deploy to server
     - uses: appleboy/ssh-action@master
+    - name: Deploy to server
       env:
         CONNECTION_STRING: ${{ secrets.CONNECTION_STRING }}
         DB_DRIVER: ${{ secrets.DB_DRIVER }}
