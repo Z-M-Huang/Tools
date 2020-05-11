@@ -27,10 +27,11 @@ jobs:
         tags: "latest"
   deploy:
     name: deploy
+    needs: build
     runs-on: ubuntu-latest
     steps:
-    - uses: appleboy/ssh-action@master
     - name: Deploy to server
+      uses: appleboy/ssh-action@master
       env:
         CONNECTION_STRING: ${{ secrets.CONNECTION_STRING }}
         DB_DRIVER: ${{ secrets.DB_DRIVER }}
