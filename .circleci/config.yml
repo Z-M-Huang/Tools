@@ -1,7 +1,0 @@
-version: 2.0
-
-- run:
-  command: |-
-    docker-compose build 
-    docker-compose push
-    docker stack deploy -f docker-compose.yml Tools
