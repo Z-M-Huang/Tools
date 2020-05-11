@@ -49,7 +49,7 @@ jobs:
         script_stop: true
         script: |
           cd ~/Github/Tools
-          echo $"HOST" > host.txt
+          echo "$HOST" > host.txt
           printenv > env.txt
           git pull
           
