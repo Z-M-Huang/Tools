@@ -33,13 +33,13 @@ jobs:
     - name: Deploy to server
       uses: appleboy/ssh-action@master
       env:
-        CONNECTION_STRING: ${{ secrets.CONNECTION_STRING }}
         DB_DRIVER: ${{ secrets.DB_DRIVER }}
         GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
         GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
         HOST: ${{ secrets.HOST }}
         JWT_KEY: ${{ secrets.JWT_KEY }}
         REDIS_ADDR: ${{ secrets.REDIS_ADDR }}
+        CONNECTION_STRING: ${{ secrets.CONNECTION_STRING }}
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.SSH_USERNAME }}
@@ -49,6 +49,7 @@ jobs:
         script_stop: true
         script: |
           cd ~/Github/Tools
+          echo $"HOST" > host.txt
           printenv > env.txt
           git pull
           
