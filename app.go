@@ -1,6 +1,7 @@
 package main
 
 import (
+	"compress/gzip"
 	"context"
 	"errors"
 	"fmt"
@@ -11,6 +12,7 @@ import (
 	"github.com/Z-M-Huang/Tools/api"
 	appApis "github.com/Z-M-Huang/Tools/api/app"
 	"github.com/Z-M-Huang/Tools/data"
+	"github.com/Z-M-Huang/Tools/logic"
 	userlogic "github.com/Z-M-Huang/Tools/logic/user"
 	"github.com/Z-M-Huang/Tools/pages"
 	"github.com/Z-M-Huang/Tools/utils"
@@ -33,7 +35,11 @@ func apiAuthHandler(requireClaim bool, next httprouter.Handle) httprouter.Handle
 
 func pageAuthHandler(requireClaim bool, next httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-		response := &data.Response{}
+		response := &data.Response{
+			Header: data.HeaderData{
+				ResourceVersion: utils.Config.ResourceVersion,
+			},
+		}
 		claim, err := getClaimFromCookieAndRenew(w, r)
 		if requireClaim && (err != nil || claim.IsNil()) {
 			response.Alert.IsDanger = true
@@ -52,6 +58,21 @@ func pageAuthHandler(requireClaim bool, next httprouter.Handle) httprouter.Handl
 	}
 }
 
+func gzipHandler(next httprouter.Handle) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+			next(w, r, ps)
+			return
+		}
+		w.Header().Set("Content-Encoding", "gzip")
+		w.Header().Set("Vary", "Accept-Encoding")
+		gz := gzip.NewWriter(w)
+		defer gz.Close()
+		gzw := logic.GzipResponseWriter{Writer: gz, ResponseWriter: w}
+		next(gzw, r, ps)
+	}
+}
+
 func getClaimFromCookieAndRenew(w http.ResponseWriter, r *http.Request) (*data.JWTClaim, error) {
 	cookie, err := r.Cookie(utils.SessionTokenKey)
 	if err != nil {
@@ -66,7 +87,7 @@ func getClaimFromCookieAndRenew(w http.ResponseWriter, r *http.Request) (*data.J
 		if err != nil {
 			utils.Logger.Sugar().Errorf("failed to generate jwt token %s", err.Error())
 		} else {
-			utils.SetCookie(w, utils.SessionTokenKey, tokenStr, expiresAt)
+			logic.SetCookie(w, utils.SessionTokenKey, tokenStr, expiresAt)
 		}
 	}
 	return claim, nil
@@ -88,7 +109,7 @@ func getClaimFromHeaderAndRenew(w http.ResponseWriter, r *http.Request) (*data.J
 		if err != nil {
 			utils.Logger.Sugar().Errorf("failed to generate jwt token %s", err.Error())
 		} else {
-			utils.SetCookie(w, utils.SessionTokenKey, tokenStr, expiresAt)
+			logic.SetCookie(w, utils.SessionTokenKey, tokenStr, expiresAt)
 		}
 	}
 	return claim, nil
@@ -115,30 +136,45 @@ func isTokenValid(token string) (*data.JWTClaim, error) {
 func main() {
 	router := httprouter.New()
 
-	router.ServeFiles("/assets/*filepath", http.Dir("assets/"))
-	router.ServeFiles("/vendor/*filepath", http.Dir("node_modules/"))
+	assetsServer := http.FileServer(http.Dir("assets/"))
+	vendorServer := http.FileServer(http.Dir("node_modules/"))
 
-	router.GET("/", pageAuthHandler(false, pages.HomePage))
-	router.GET("/signup", pageAuthHandler(false, pages.SignupPage))
-	router.GET("/login", pageAuthHandler(false, pages.LoginPage))
+	router.GET(fmt.Sprintf("/assets/%s/*filepath", utils.Config.ResourceVersion),
+		gzipHandler(func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+			w.Header().Set("Vary", "Accept-Encoding")
+			w.Header().Set("Cache-Control", "public, max-age=604800")
+			r.URL.Path = ps.ByName("filepath")
+			assetsServer.ServeHTTP(w, r)
+		}))
+
+	router.GET(fmt.Sprintf("/vendor/%s/*filepath", utils.Config.ResourceVersion),
+		gzipHandler(func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+			w.Header().Set("Vary", "Accept-Encoding")
+			w.Header().Set("Cache-Control", "public, max-age=604800")
+			r.URL.Path = ps.ByName("filepath")
+			vendorServer.ServeHTTP(w, r)
+		}))
+
+	router.GET("/", gzipHandler(pageAuthHandler(false, pages.HomePage)))
+	router.GET("/signup", gzipHandler(pageAuthHandler(false, pages.SignupPage)))
+	router.GET("/login", gzipHandler(pageAuthHandler(false, pages.LoginPage)))
+	router.GET("/account", gzipHandler(pageAuthHandler(true, pages.AccountPage)))
+
 	router.GET("/google_login", api.GoogleLogin)
 	router.GET("/google_oauth", api.GoogleCallback)
-
 	router.POST("/api/login", apiAuthHandler(false, api.Login))
 	router.POST("/api/signup", apiAuthHandler(false, api.SignUp))
 	router.POST("/api/account/update/password", apiAuthHandler(true, api.UpdatePassword))
 
-	router.GET("/account", pageAuthHandler(true, pages.AccountPage))
-
 	//app
-	router.GET("/app/:name", pageAuthHandler(false, pages.RenderApplicationPage))
+	router.GET("/app/:name", gzipHandler(pageAuthHandler(false, pages.RenderApplicationPage)))
 
 	//app api
-	router.POST("/api/kelly-criterion/simulate", apiAuthHandler(false, appApis.KellyCriterionSimulate))
-	router.POST("/api/hilo-simulator/simulate", apiAuthHandler(false, appApis.HILOSimulate))
-	router.POST("/api/hilo-simulator/verify", apiAuthHandler(false, appApis.HILOVerify))
-	router.POST("/app/:name/like", apiAuthHandler(true, appApis.Like))
-	router.POST("/app/:name/dislike", apiAuthHandler(true, appApis.Dislike))
+	router.POST("/api/kelly-criterion/simulate", gzipHandler(apiAuthHandler(false, appApis.KellyCriterionSimulate)))
+	router.POST("/api/hilo-simulator/simulate", gzipHandler(apiAuthHandler(false, appApis.HILOSimulate)))
+	router.POST("/api/hilo-simulator/verify", gzipHandler(apiAuthHandler(false, appApis.HILOVerify)))
+	router.POST("/app/:name/like", gzipHandler(apiAuthHandler(true, appApis.Like)))
+	router.POST("/app/:name/dislike", gzipHandler(apiAuthHandler(true, appApis.Dislike)))
 
 	utils.Logger.Fatal(http.ListenAndServe(":80", router).Error())
 }

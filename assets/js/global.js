@@ -1,35 +1,10 @@
-var cacheVersion = 'v1';
-if ('caches' in window) {
-  caches.open('v1').then(function(cache) {
-    return cache.addAll([
-      '/vendor/jquery/dist/jquery.min.js',
-      '/vendor/bootstrap/dist/js/bootstrap.bundle.min.js',
-      '/vendor/chart.js/dist/Chart.js',
-      '/vendor/@fortawesome/fontawesome-free/css/all.css',
-      '/assets/img/favicon-16x16.png',
-      '/assets/img/google.png',
-      '/assets/img/icon.png',
-      '/assets/css/sketchy.css'
-    ]);
-  })
-}
-
-
 function logout() {
-  clearCookies();
+  clearCookie("session_token");
   document.location.href = "/";
 }
 
-function clearCookies() {
-  //Clear all cookies
-  var cookies = document.cookie.split(";");
-
-  for (var i = 0; i < cookies.length; i++) {
-    var cookie = cookies[i];
-    var eqPos = cookie.indexOf("=");
-    var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-    document.cookie = name + "=; Max-age=0; path=/; domain=" + location.host;
-  }
+function clearCookie(name) {
+  document.cookie = name + "=; Max-age=0; path=/; domain=" + location.host;
 }
 
 function getCookieValue(name) {

@@ -6,8 +6,9 @@ type Configuration struct {
 	RedisConfig       *RedisConfiguration
 	GoogleOauthConfig *GoogleOauthConfiguration
 
-	Host   string
-	JwtKey []byte
+	JwtKey          []byte
+	Host            string
+	ResourceVersion string
 
 	IsDebug bool
 }
@@ -25,6 +26,7 @@ type GoogleOauthConfiguration struct {
 	ClientSecret string
 }
 
+//DatabaseConfiguration gorm
 type DatabaseConfiguration struct {
 	ConnectionString string
 	Driver           string

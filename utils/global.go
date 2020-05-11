@@ -120,9 +120,10 @@ func initConfig() {
 			ClientID:     strings.TrimSpace(os.Getenv("GOOGLE_CLIENT_ID")),
 			ClientSecret: strings.TrimSpace(os.Getenv("GOOGLE_CLIENT_SECRET")),
 		},
-		JwtKey:  []byte(strings.TrimSpace(os.Getenv("JWT_KEY"))),
-		Host:    strings.TrimSpace(os.Getenv("HOST")),
-		IsDebug: os.Getenv("DEBUG") != "",
+		JwtKey:          []byte(strings.TrimSpace(os.Getenv("JWT_KEY"))),
+		Host:            strings.TrimSpace(os.Getenv("HOST")),
+		ResourceVersion: strings.TrimSpace(os.Getenv("RESOURCE_VERSION")),
+		IsDebug:         os.Getenv("DEBUG") != "",
 	}
 
 	if Config.RedisConfig.Addr == "" {

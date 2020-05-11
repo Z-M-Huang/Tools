@@ -14,6 +14,7 @@ import (
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/apidata"
 	"github.com/Z-M-Huang/Tools/data/dbentity"
+	"github.com/Z-M-Huang/Tools/logic"
 	userlogic "github.com/Z-M-Huang/Tools/logic/user"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/jinzhu/gorm"
@@ -90,7 +91,7 @@ func Login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		WriteUnexpectedError(w, response)
 	}
 
-	utils.SetCookie(w, utils.SessionTokenKey, tokenStr, expiresAt)
+	logic.SetCookie(w, utils.SessionTokenKey, tokenStr, expiresAt)
 	WriteResponse(w, response)
 }
 
@@ -252,7 +253,7 @@ func SignUp(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		WriteUnexpectedError(w, response)
 	}
 
-	utils.SetCookie(w, utils.SessionTokenKey, tokenStr, expiresAt)
+	logic.SetCookie(w, utils.SessionTokenKey, tokenStr, expiresAt)
 	response.Data = true
 	WriteResponse(w, response)
 	return
@@ -374,7 +375,7 @@ func GoogleCallback(w http.ResponseWriter, r *http.Request, ps httprouter.Params
 	if err != nil {
 		utils.Logger.Sugar().Errorf("failed to generate jwt token %s", err.Error())
 	} else {
-		utils.SetCookie(w, utils.SessionTokenKey, tokenStr, expiresAt)
+		logic.SetCookie(w, utils.SessionTokenKey, tokenStr, expiresAt)
 	}
 	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 }

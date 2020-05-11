@@ -9,8 +9,9 @@ type Response struct {
 
 //HeaderData header data
 type HeaderData struct {
-	Title string
-	Login LoginData
+	Title           string
+	ResourceVersion string
+	Login           LoginData
 }
 
 //LoginData page login info

@@ -7,16 +7,16 @@
   <title>{{.Title}}</title>
 
   <!-- js -->
-  <script src="/vendor/jquery/dist/jquery.min.js"></script>
-  <script src="/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="/vendor/chart.js/dist/Chart.js"></script>
-  <script src="/assets/js/global.js"></script>
+  <script src="/vendor/{{.ResourceVersion}}/jquery/dist/jquery.min.js"></script>
+  <script src="/vendor/{{.ResourceVersion}}/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/vendor/{{.ResourceVersion}}/chart.js/dist/Chart.js"></script>
+  <script src="/assets/{{.ResourceVersion}}/js/global.js"></script>
 
   <!-- css -->
-  <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicon-16x16.png"/>
-  <link rel="stylesheet" href="/vendor/@fortawesome/fontawesome-free/css/all.css" media="screen"/>
-  <link rel="stylesheet" href="/assets/css/sketchy.css" media="screen"/>
-  <link rel="stylesheet" href="/assets/css/site.css" media="screen"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/{{.ResourceVersion}}/img/favicon-16x16.png"/>
+  <link rel="stylesheet" href="/vendor/{{.ResourceVersion}}/@fortawesome/fontawesome-free/css/all.css" media="screen"/>
+  <link rel="stylesheet" href="/assets/{{.ResourceVersion}}/css/sketchy.css" media="screen"/>
+  <link rel="stylesheet" href="/assets/{{.ResourceVersion}}/css/site.css" media="screen"/>
 </head>
 <body>
   {{template "nav" .Login }}

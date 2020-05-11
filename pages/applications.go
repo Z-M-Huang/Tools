@@ -9,6 +9,7 @@ import (
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/dbentity"
 	"github.com/Z-M-Huang/Tools/data/webdata"
+	"github.com/Z-M-Huang/Tools/logic"
 	applicationlogic "github.com/Z-M-Huang/Tools/logic/application"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/julienschmidt/httprouter"
@@ -49,7 +50,7 @@ func RenderApplicationPage(w http.ResponseWriter, r *http.Request, ps httprouter
 			if err != nil {
 				utils.Logger.Error(err.Error())
 			} else {
-				utils.SetCookie(w, utils.UsedTokenKey, string(encoded), time.Date(2199, time.December, 31, 23, 59, 59, 0, time.UTC))
+				logic.SetCookie(w, utils.UsedTokenKey, string(encoded), time.Date(2199, time.December, 31, 23, 59, 59, 0, time.UTC))
 			}
 		}
 	} else {
