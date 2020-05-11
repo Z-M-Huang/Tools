@@ -49,7 +49,7 @@ jobs:
         script_stop: true
         script: |
           cd ~/Github/Tools
-          export $HOST
+          export HOST
           printenv > env.txt
           git pull
           
