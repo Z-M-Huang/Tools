@@ -23,6 +23,7 @@ func apiAuthHandler(requireClaim bool, next httprouter.Handle) httprouter.Handle
 		claim, err := getClaimFromHeaderAndRenew(w, r)
 		if requireClaim && (err != nil || claim.IsNil()) {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return
 		}
 		ctx := context.WithValue(r.Context(), utils.ClaimCtxKey, claim)
 		ctx = context.WithValue(ctx, utils.ResponseCtxKey, &data.Response{})
