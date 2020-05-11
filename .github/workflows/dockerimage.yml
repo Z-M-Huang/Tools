@@ -17,8 +17,6 @@ jobs:
         node-version: '12.x'
     - name: Install dependencies
       run: npm install
-    - name: Build Docker Image
-      run: docker-compose build
     - name: Push Docker Image
       uses: elgohr/Publish-Docker-Github-Action@master
       with:
@@ -27,3 +25,27 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
         dockerfile: Dockerfile
         tags: "latest"
+  deploy:
+    name: deploy
+    runs-on: ubuntu-latest
+    env:
+      CONNECTION_STRING: ${{ secrets.CONNECTION_STRING }}
+      DB_DRIVER: ${{ secrets.DB_DRIVER }}
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      HOST: ${{ secrets.HOST }}
+      JWT_KEY: ${{ secrets.JWT_KEY }}
+      REDIS_ADDR: $ {{ REDIS_ADDR }}
+    steps:
+      - name: Deploy to server
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        passphrase: ${{ secrets.SSH_PASS }}
+        port: ${{ secrets.SSH_PORT }}
+        envs: CONNECTION_STRING,DB_DRIVER,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,HOST,JWT_KEY,REDIS_ADDR
+        script: |
+          cd ~/Github/tools
+          docker stack deploy -f docker-compose.yml Tools
