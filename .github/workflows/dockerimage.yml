@@ -8,30 +8,18 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js
-      uses: actions/setup-node@v1
-      with:
-        node-version: '12.x'
     - name: Install dependencies
       run: npm install
     - name: Push Docker Image
-      uses: elgohr/Publish-Docker-Github-Action@master
-      with:
-        name: zhironghuang/tools-web
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-        dockerfile: Dockerfile
-        tags: "latest"
+      run: docker-compose push
   deploy:
     name: deploy
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
-    - name: Deploy to server
-      uses: appleboy/ssh-action@master
+    - name: Deploy
       env:
         DB_DRIVER: ${{ secrets.DB_DRIVER }}
         GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
@@ -40,16 +28,8 @@ jobs:
         JWT_KEY: ${{ secrets.JWT_KEY }}
         REDIS_ADDR: ${{ secrets.REDIS_ADDR }}
         CONNECTION_STRING: ${{ secrets.CONNECTION_STRING }}
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.SSH_USERNAME }}
-        key: ${{ secrets.SSH_KEY }}
-        passphrase: ${{ secrets.SSH_PASS }}
-        envs: CONNECTION_STRING,DB_DRIVER,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,HOST,JWT_KEY,REDIS_ADDR
-        script_stop: true
-        script: |
-          cd ~/Github/Tools
-          export DB_DRIVER GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET HOST JWT_KEY REDIS_ADDR CONNECTION_STRING
-          git pull
-          docker stack deploy -c docker-compose.yml Tools
+      run: |
+        export DB_DRIVER GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET HOST JWT_KEY REDIS_ADDR CONNECTION_STRING
+        docker stack deploy -c docker-compose.yml Tools
+    
           

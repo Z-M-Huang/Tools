@@ -13,11 +13,11 @@ services:
           - node.role == manager
       labels:
         - traefik.enable=true
-        - traefik.http.routers.toolsweb.rule=Host(`{HOST}`)
-        - traefik.http.routers.toolsweb.entrypoints=${HTTP_ENTRYPOINT}
+        - traefik.http.routers.toolsweb.rule=Host(`${HOST}`)
+        - traefik.http.routers.toolsweb.entrypoints=web
         - traefik.http.routers.toolsweb.middlewares=http-redirect@file
-        - traefik.http.routers.toolsweb-secured.rule=${HOST}
-        - traefik.http.routers.toolsweb-secured.entrypoints=${HTTPS_ENTRYPOINT}
+        - traefik.http.routers.toolsweb-secured.rule=Host(`${HOST}`)
+        - traefik.http.routers.toolsweb-secured.entrypoints=web-secured
         - traefik.http.routers.toolsweb-secured.tls.certresolver=le
         - traefik.http.routers.toolsweb-secured.middlewares=chain-no-auth@file
         - traefik.http.services.toolsweb-secured.loadbalancer.server.port=80 # it seems you always need to give traefik a port so it 'notices' the service
