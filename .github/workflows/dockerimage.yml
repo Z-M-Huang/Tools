@@ -29,7 +29,8 @@ jobs:
     name: deploy
     needs: build
     runs-on: self-hosted
-    steps:
+    steps:      
+    - uses: actions/checkout@v2
     - name: Deploy
       env:
         DB_DRIVER: ${{ secrets.DB_DRIVER }}
