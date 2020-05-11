@@ -2,7 +2,7 @@ version: "3.1"
 
 services:
   web:
-    image: zhironghuang/toolsweb
+    image: zhironghuang/tools-web
     build:
         context: .
         dockerfile: Dockerfile  
