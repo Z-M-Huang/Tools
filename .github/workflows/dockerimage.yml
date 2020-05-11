@@ -41,11 +41,11 @@ jobs:
         JWT_KEY: ${{ secrets.JWT_KEY }}
         REDIS_ADDR: $ {{ secrets.REDIS_ADDR }}
       with:
-        host: ${{ secrets.SSH_HOST }}
+        host: ${{ secrets.HOST }}
         username: ${{ secrets.SSH_USERNAME }}
         key: ${{ secrets.SSH_KEY }}
         passphrase: ${{ secrets.SSH_PASS }}
         envs: CONNECTION_STRING,DB_DRIVER,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,HOST,JWT_KEY,REDIS_ADDR
         script: |
           cd ~/Github/Tools
-          docker stack deploy -f docker-compose.yml Tools
+          docker stack deploy -c docker-compose.yml Tools
