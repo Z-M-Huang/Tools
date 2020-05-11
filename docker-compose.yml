@@ -31,7 +31,7 @@ services:
       - "REDIS_ADDR=${REDIS_ADDR}"
       - "CONNECTION_STRING=${CONNECTION_STRING}"
       - "DB_DRIVER=${DB_DRIVER}"
-      - "TZ=${TZ}"
+      - "TZ=America/New_York"
     networks:
       - proxy
         

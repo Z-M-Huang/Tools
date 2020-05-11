@@ -46,7 +46,9 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         passphrase: ${{ secrets.SSH_PASS }}
         envs: CONNECTION_STRING,DB_DRIVER,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,HOST,JWT_KEY,REDIS_ADDR
+        script_stop: true
         script: |
+          echo "$HOST"
           cd ~/Github/Tools
           git pull
           docker stack deploy -c docker-compose.yml Tools
