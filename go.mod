@@ -6,7 +6,6 @@ require (
 	cloud.google.com/go v0.57.0 // indirect
 	github.com/Z-M-Huang/hilosimulator v0.0.0-20200510183812-072168b1d6fe
 	github.com/Z-M-Huang/kelly-criterion v0.0.0-20200509173924-78264e8a8100
-	github.com/Z-M-Huang/provablyfair v0.0.0-20200510172708-6930c7b3d63d // indirect
 	github.com/denisenkom/go-mssqldb v0.0.0-20200428022330-06a60b6afbbc // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
@@ -26,7 +25,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/stretchr/testify v1.5.1 // indirect
 	go.uber.org/zap v1.15.0
-	golang.org/x/crypto v0.0.0-20200429183012-4b2356b1ed79
+	golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37
 	golang.org/x/net v0.0.0-20200506145744-7e3656a0809f // indirect
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/sys v0.0.0-20200509044756-6aff5f38e54f // indirect
