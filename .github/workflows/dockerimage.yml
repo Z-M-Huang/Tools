@@ -49,5 +49,6 @@ jobs:
         script_stop: true
         script: |
           cd ~/Github/Tools
+          printenv > env.txt
           git pull
-          docker stack deploy -c docker-compose.yml Tools
+          
