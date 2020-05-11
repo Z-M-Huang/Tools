@@ -1,12 +1,19 @@
-var appCache = window.applicationCache;
-
-if (appCache != undefined && appCache != null) {
-  appCache.update(); // Attempt to update the user's cache.
-
-  if (appCache.status == window.applicationCache.UPDATEREADY) {
-    appCache.swapCache();  // The fetch was successful, swap in the new cache.
-  }
+var cacheVersion = 'v1';
+if ('caches' in window) {
+  caches.open('v1').then(function(cache) {
+    return cache.addAll([
+      '/vendor/jquery/dist/jquery.min.js',
+      '/vendor/bootstrap/dist/js/bootstrap.bundle.min.js',
+      '/vendor/chart.js/dist/Chart.js',
+      '/vendor/@fortawesome/fontawesome-free/css/all.css',
+      '/assets/img/favicon-16x16.png',
+      '/assets/img/google.png',
+      '/assets/img/icon.png',
+      '/assets/css/sketchy.css'
+    ]);
+  })
 }
+
 
 function logout() {
   clearCookies();
