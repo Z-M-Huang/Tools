@@ -10,7 +10,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
     - name: Use Node.js
       uses: actions/setup-node@v1
       with:
@@ -39,7 +38,7 @@ jobs:
         GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
         HOST: ${{ secrets.HOST }}
         JWT_KEY: ${{ secrets.JWT_KEY }}
-        REDIS_ADDR: $ {{ REDIS_ADDR }}
+        REDIS_ADDR: $ {{ secrets.REDIS_ADDR }}
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.SSH_USERNAME }}
@@ -48,5 +47,5 @@ jobs:
         port: ${{ secrets.SSH_PORT }}
         envs: CONNECTION_STRING,DB_DRIVER,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,HOST,JWT_KEY,REDIS_ADDR
         script: |
-          cd ~/Github/tools
+          cd ~/Github/Tools
           docker stack deploy -f docker-compose.yml Tools
