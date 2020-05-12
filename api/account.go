@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
 	"time"
@@ -99,7 +100,24 @@ func Login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		WriteUnexpectedError(w, response)
 	}
 
-	response.Data = true
+	uri, err := url.ParseRequestURI(r.Header.Get("Referer"))
+	if err != nil {
+		utils.Logger.Error(err.Error())
+	}
+	result := &apidata.LoginResponse{
+		IsSuccess: true,
+	}
+
+	redirect := uri.Query().Get("redirect")
+	if len(redirect) > 0 {
+		uri, err = url.ParseRequestURI(redirect)
+		if err == nil && uri.Host == "" {
+			result.Redirect = redirect
+		} else {
+			utils.Logger.Sugar().Warnf("Illegal redirect uri detected. %s", uri.RequestURI)
+		}
+	}
+	response.Data = result
 	logic.SetCookie(w, utils.SessionTokenKey, tokenStr, expiresAt)
 	WriteResponse(w, response)
 }

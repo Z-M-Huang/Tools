@@ -26,6 +26,13 @@ func SignupPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 func LoginPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
 	response.Header.Title = "Login - Fun Apps"
+	redirectURL, ok := r.URL.Query()["redirect"]
+	if ok && len(redirectURL) > 0 {
+		response.SetAlert(&data.AlertData{
+			IsDanger: true,
+			Message:  "Please login first.",
+		})
+	}
 	if r.Context().Value(utils.ClaimCtxKey).(*data.JWTClaim).IsNil() {
 		utils.Templates.ExecuteTemplate(w, "login.gohtml", response)
 	} else {

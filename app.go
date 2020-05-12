@@ -42,11 +42,7 @@ func pageAuthHandler(requireClaim bool, next httprouter.Handle) httprouter.Handl
 		}
 		claim, err := getClaimFromCookieAndRenew(w, r)
 		if requireClaim && (err != nil || claim.IsNil()) {
-			response.SetAlert(&data.AlertData{
-				IsDanger: true,
-				Message:  "Please login first.",
-			})
-			utils.Templates.ExecuteTemplate(w, "login.gohtml", response)
+			http.Redirect(w, r, "/login?redirect="+r.URL.Path, http.StatusTemporaryRedirect)
 			return
 		} else if claim != nil {
 			response.SetLogin(&data.LoginData{

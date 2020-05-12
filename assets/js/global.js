@@ -62,7 +62,14 @@ function bindForm(id, url, callback) {
       },
       statusCode: {
         401: () => {
-          document.location.href = "/login";
+          if (data != null && data != undefined &&
+            data.Header != null && data.Header != undefined &&
+            data.Header.Alert != null && data.Header.Alert != undefined &&
+            data.Header.Alert.Message != "") {
+            showAlertCondition(data.Header.Alert);
+          } else {
+            showAlertDanger("Please login first");
+          }
         },
         200: (data) => {
           if (data != null && data != undefined && 
@@ -77,8 +84,10 @@ function bindForm(id, url, callback) {
         },
       },
       error: (xhr, status, error) => {
-        console.log(xhr.status + ":" + xhr.statusText);
-        showAlertDanger("Failed to receive success response, please try again later.");
+        if (xhr.status != 401) {
+          console.log(xhr.status + ":" + xhr.statusText);
+          showAlertDanger("Failed to receive success response, please try again later.");
+        }
       },
     });
   });
@@ -103,7 +112,14 @@ function postJSONData(url, data, callback) {
     },
     statusCode: {
       401: () => {
-        document.location.href = "/login";
+        if (data != null && data != undefined &&
+          data.Header != null && data.Header != undefined &&
+          data.Header.Alert != null && data.Header.Alert != undefined &&
+          data.Header.Alert.Message != "") {
+          showAlertCondition(data.Header.Alert);
+        } else {
+          showAlertDanger("Please login first");
+        }
       },
       200: (data) => {
         if (data != null && data != undefined &&
@@ -118,8 +134,10 @@ function postJSONData(url, data, callback) {
       },
     },
     error: (xhr, status, error) => {
-      console.log(xhr.status + ":" + xhr.statusText);
-      showAlertDanger("Failed to receive success response, please try again later.");
+      if (xhr.status != 401) {
+        console.log(xhr.status + ":" + xhr.statusText);
+        showAlertDanger("Failed to receive success response, please try again later.");
+      }
     },
   });
 }
@@ -141,7 +159,14 @@ function postLink(url, callback) {
     },
     statusCode: {
       401: () => {
-        showAlertDanger("Please login first");
+        if (data != null && data != undefined &&
+          data.Header != null && data.Header != undefined &&
+          data.Header.Alert != null && data.Header.Alert != undefined &&
+          data.Header.Alert.Message != "") {
+          showAlertCondition(data.Header.Alert);
+        } else {
+          showAlertDanger("Please login first");
+        }
       },
       200: (data) => {
         if (data != null && data != undefined &&
@@ -156,8 +181,10 @@ function postLink(url, callback) {
       },
     },
     error: (xhr, status, error) => {
-      console.log(xhr.status + ":" + xhr.statusText);
-      showAlertDanger("Failed to receive success response, please try again later.");
+      if (xhr.status != 401) {
+        console.log(xhr.status + ":" + xhr.statusText);
+        showAlertDanger("Failed to receive success response, please try again later.");
+      }
     },
   });
 }
@@ -166,7 +193,7 @@ function postLink(url, callback) {
  *                    Dynamic Modal Section
  *******************************************************/
 function getModalHTML(id, title, content, primaryButtonOnClick, primaryButtonText) {
-  modal = '<div class="modal fade" id="' + id + '"><div class="modal-dialog" role="document"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">' + title + '</h5><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button></div><div class="modal-body">' + content + '</div><div class="modal-footer">';
+  modal = '<div class="modal fade" id="' + id + '"><div class="modal-dialog" role="document"><div class="modal-content"><div class="modal-header"><h5 class="modal-title mr-2">' + title + '</h5><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button></div><div class="modal-body">' + content + '</div><div class="modal-footer">';
   if (!(primaryButtonOnClick == null || primaryButtonOnClick == undefined)) {
     modal += '<button type="button" class="btn btn-primary" onclick="' + primaryButtonOnClick + '">' + primaryButtonText + '</button>';
   }
@@ -177,14 +204,14 @@ function getModalHTML(id, title, content, primaryButtonOnClick, primaryButtonTex
 /*******************************************************
  *                    Alert Section
  *******************************************************/
-function getToastHTML(id, color, title, message, autohide, delay) {
+function getToastHTML(now, color, title, message, autohide, delay) {
   var html = '<div class="toast hover-pointer" role="alert" aria-live="assertive" aria-atomic="true" data-animation="true"';
   if (autohide) {
     html += ' data-autohide="true" data-delay="' + delay + '"';
   } else {
     html += ' data-autohide="false"';
   }
-  html += ' onclick="toastOnClickDispose(this)" id="' + id + '"><div class="toast-header"><svg width="25", height="25" class="rounded-25 mr-2"><rect width="100%" height="100%" style="fill:' + color + '" /></svg><strong class="mr-auto">' + title + '</strong><small class="text-muted">just now</small></div><div class="toast-body">' + message + '</div></div>';
+  html += ' onclick="toastOnClickDispose(this)" id="' + now + '"><div class="toast-header"><svg width="25", height="25" class="rounded-25 mr-2"><rect width="100%" height="100%" style="fill:' + color + '" /></svg><strong class="mr-auto">' + title + '</strong><small class="text-muted">' + new Date(now).toLocaleString('en-US') + '</small></div><div class="toast-body">' + message + '</div></div>';
   return html;
 }
 
@@ -209,7 +236,11 @@ function showAlertWarning(message, autohide, delay) {
   var now = d.getTime();
   var toastHTML = getToastHTML(now, window.alertColors.warning, "Warning!", message, autohide, delay);
   $("#toasts").append(toastHTML);
-  $("#" + now).toast('show');
+  var toast = $("#" + now);
+  toast.toast('show');
+  toast.on('hidden.bs.toast', function() {
+    $(this).remove();
+  })
 }
 
 function showAlertSuccess(message, autohide, delay) {
@@ -217,7 +248,11 @@ function showAlertSuccess(message, autohide, delay) {
   var now = d.getTime();
   var toastHTML = getToastHTML(now, window.alertColors.success, "Well done!", message, autohide, delay);
   $("#toasts").append(toastHTML);
-  $("#" + now).toast('show');
+  var toast = $("#" + now);
+  toast.toast('show');
+  toast.on('hidden.bs.toast', function() {
+    $(this).remove();
+  })
 }
 
 function showAlertInfo(message, autohide, delay) {
@@ -225,7 +260,11 @@ function showAlertInfo(message, autohide, delay) {
   var now = d.getTime();
   var toastHTML = getToastHTML(now, window.alertColors.info, "Heads up!", message, autohide, delay);
   $("#toasts").append(toastHTML);
-  $("#" + now).toast('show');
+  var toast = $("#" + now);
+  toast.toast('show');
+  toast.on('hidden.bs.toast', function() {
+    $(this).remove();
+  })
 }
 
 function showAlertCondition(alert) {

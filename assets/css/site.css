@@ -75,6 +75,14 @@
   border-radius: .25rem;
 }
 
+.toast-body {
+  font-size: 1rem;
+}
+
+.toast-header {
+  font-size: 1.25rem;
+}
+
 .ellipsis-1 {
   overflow: hidden;
   text-overflow: ellipsis;
