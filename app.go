@@ -144,9 +144,6 @@ func main() {
 			r.URL.Path = ps.ByName("filepath")
 			assetsServer.ServeHTTP(w, r)
 		}))
-	router.GET("/robots.txt", gzipHandler(func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-		http.ServeFile(w, r, "assets/robots.txt")
-	}))
 
 	router.GET(fmt.Sprintf("/vendor/%s/*filepath", utils.Config.ResourceVersion),
 		gzipHandler(func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -158,16 +155,24 @@ func main() {
 
 	if utils.Config.SitemapConfig.GenerateSitemap {
 		sm := utils.BuildSitemap()
+		robotsContent := utils.GetRobotsTxt()
+		err := utils.WriteContentToFile(robotsContent, "assets/robots.txt")
+		if err != nil {
+			utils.Logger.Fatal("Failed to create robots.txt")
+		}
 
 		router.GET("/sitemap.xml", gzipHandler(func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 			w.Write(sm.XMLContent())
 			return
 		}))
+		router.GET("/robots.txt", gzipHandler(func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+			http.ServeFile(w, r, "assets/robots.txt")
+		}))
 
 		if !utils.Config.IsDebug {
 			go func() {
 				time.Sleep(2000)
-				sm.PingSearchEngines()
+				utils.PingSearchEngines()
 			}()
 		}
 	}

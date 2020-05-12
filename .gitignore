@@ -14,7 +14,8 @@
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
-__debug_bin
 node_modules
 .vscode
 *.db
+robots.txt
+__debug_bin
