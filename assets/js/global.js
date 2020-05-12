@@ -193,7 +193,7 @@ function postLink(url, callback) {
  *                    Dynamic Modal Section
  *******************************************************/
 function getModalHTML(id, title, content, primaryButtonOnClick, primaryButtonText) {
-  modal = '<div class="modal fade" id="' + id + '"><div class="modal-dialog" role="document"><div class="modal-content"><div class="modal-header"><h5 class="modal-title mr-2">' + title + '</h5><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button></div><div class="modal-body">' + content + '</div><div class="modal-footer">';
+  modal = '<div class="modal fade" id="' + id + '"><div class="modal-dialog" role="document"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">' + title + '</h5><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button></div><div class="modal-body">' + content + '</div><div class="modal-footer">';
   if (!(primaryButtonOnClick == null || primaryButtonOnClick == undefined)) {
     modal += '<button type="button" class="btn btn-primary" onclick="' + primaryButtonOnClick + '">' + primaryButtonText + '</button>';
   }

@@ -13,7 +13,7 @@ import (
 
 //SignupPage /signup
 func SignupPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	if r.Context().Value(utils.ClaimCtxKey).(*data.JWTClaim).IsNil() {
+	if r.Context().Value(utils.ClaimCtxKey).(*data.JWTClaim) == nil {
 		response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
 		response.Header.Title = "Signup - Fun Apps"
 		utils.Templates.ExecuteTemplate(w, "signup.gohtml", response)
@@ -33,7 +33,7 @@ func LoginPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 			Message:  "Please login first.",
 		})
 	}
-	if r.Context().Value(utils.ClaimCtxKey).(*data.JWTClaim).IsNil() {
+	if r.Context().Value(utils.ClaimCtxKey).(*data.JWTClaim) == nil {
 		utils.Templates.ExecuteTemplate(w, "login.gohtml", response)
 	} else {
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)

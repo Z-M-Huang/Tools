@@ -23,7 +23,7 @@ import (
 func apiAuthHandler(requireClaim bool, next httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		claim, err := getClaimFromHeaderAndRenew(w, r)
-		if requireClaim && (err != nil || claim.IsNil()) {
+		if requireClaim && (err != nil || claim == nil) {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
@@ -41,7 +41,7 @@ func pageAuthHandler(requireClaim bool, next httprouter.Handle) httprouter.Handl
 			},
 		}
 		claim, err := getClaimFromCookieAndRenew(w, r)
-		if requireClaim && (err != nil || claim.IsNil()) {
+		if requireClaim && (err != nil || claim == nil) {
 			http.Redirect(w, r, "/login?redirect="+r.URL.Path, http.StatusTemporaryRedirect)
 			return
 		} else if claim != nil {

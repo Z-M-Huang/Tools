@@ -15,7 +15,7 @@ import (
 func HomePage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
 	claim := r.Context().Value(utils.ClaimCtxKey).(*data.JWTClaim)
-	if !claim.IsNil() {
+	if !(claim == nil) {
 		user := &dbentity.User{
 			Email: claim.Id,
 		}

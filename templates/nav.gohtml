@@ -22,7 +22,7 @@
       <div class="order-3">
         <ul class="navbar-nav ml-auto">
           {{$notLoggedIn := true}}
-          {{if not (isNil .)}}
+          {{if .}}
             {{if ne .Username ""}}
               {{$notLoggedIn = false}}
             {{end}}
