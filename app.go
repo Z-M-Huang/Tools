@@ -144,6 +144,9 @@ func main() {
 			r.URL.Path = ps.ByName("filepath")
 			assetsServer.ServeHTTP(w, r)
 		}))
+	router.GET("/robots.txt", gzipHandler(func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		http.ServeFile(w, r, "assets/robots.txt")
+	}))
 
 	router.GET(fmt.Sprintf("/vendor/%s/*filepath", utils.Config.ResourceVersion),
 		gzipHandler(func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -152,6 +155,22 @@ func main() {
 			r.URL.Path = ps.ByName("filepath")
 			vendorServer.ServeHTTP(w, r)
 		}))
+
+	if utils.Config.SitemapConfig.GenerateSitemap {
+		sm := utils.BuildSitemap()
+
+		router.GET("/sitemap.xml", gzipHandler(func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+			w.Write(sm.XMLContent())
+			return
+		}))
+
+		if !utils.Config.IsDebug {
+			go func() {
+				time.Sleep(2000)
+				sm.PingSearchEngines()
+			}()
+		}
+	}
 
 	router.GET("/", gzipHandler(pageAuthHandler(false, pages.HomePage)))
 	router.GET("/signup", gzipHandler(pageAuthHandler(false, pages.SignupPage)))

@@ -5,6 +5,7 @@ type Configuration struct {
 	DatabaseConfig    *DatabaseConfiguration
 	RedisConfig       *RedisConfiguration
 	GoogleOauthConfig *GoogleOauthConfiguration
+	SitemapConfig     *SitemapConfiguration
 
 	JwtKey          []byte
 	Host            string
@@ -30,4 +31,10 @@ type GoogleOauthConfiguration struct {
 type DatabaseConfiguration struct {
 	ConnectionString string
 	Driver           string
+}
+
+//SitemapConfiguration sitemap generation config
+type SitemapConfiguration struct {
+	GenerateSitemap bool
+	IsHTTPS         bool
 }

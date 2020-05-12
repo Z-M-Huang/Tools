@@ -18,7 +18,7 @@ func init() {
 }
 
 func getAnalyticTools() {
-	tools := &webdata.AppCardList{
+	tools := &webdata.AppCategory{
 		Category: "Analytic Tools",
 	}
 

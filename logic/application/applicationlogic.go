@@ -62,7 +62,7 @@ func GetApplicationsByName(name string) *webdata.AppCard {
 }
 
 //GetApplicationWithLiked get application with liked populated
-func GetApplicationWithLiked(user *dbentity.User) []*webdata.AppCardList {
+func GetApplicationWithLiked(user *dbentity.User) []*webdata.AppCategory {
 	if user != nil && len(user.LikedApps) > 0 {
 		appList := GetNewInstancesOfAppList()
 		for _, category := range appList {
@@ -80,10 +80,10 @@ func GetApplicationWithLiked(user *dbentity.User) []*webdata.AppCardList {
 }
 
 //GetNewInstancesOfAppList get new instance
-func GetNewInstancesOfAppList() []*webdata.AppCardList {
-	var appList []*webdata.AppCardList
+func GetNewInstancesOfAppList() []*webdata.AppCategory {
+	var categories []*webdata.AppCategory
 	for _, category := range utils.AppList {
-		c := &webdata.AppCardList{
+		c := &webdata.AppCategory{
 			Category: category.Category,
 		}
 		for _, app := range category.AppCards {
@@ -92,7 +92,7 @@ func GetNewInstancesOfAppList() []*webdata.AppCardList {
 			c.AppCards = append(c.AppCards, temp)
 		}
 
-		appList = append(appList, c)
+		categories = append(categories, c)
 	}
-	return appList
+	return categories
 }

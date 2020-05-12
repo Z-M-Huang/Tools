@@ -6,12 +6,14 @@ require (
 	cloud.google.com/go v0.57.0 // indirect
 	github.com/Z-M-Huang/hilosimulator v0.0.0-20200510183812-072168b1d6fe
 	github.com/Z-M-Huang/kelly-criterion v0.0.0-20200509173924-78264e8a8100
+	github.com/clbanning/mxj v1.8.4 // indirect
 	github.com/denisenkom/go-mssqldb v0.0.0-20200428022330-06a60b6afbbc // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/go-redis/redis v6.15.7+incompatible
 	github.com/go-sql-driver/mysql v1.5.0 // indirect
 	github.com/golang/protobuf v1.4.1 // indirect
+	github.com/ikeikeikeike/go-sitemap-generator v1.0.2
 	github.com/jinzhu/copier v0.0.0-20190924061706-b57f9002281a
 	github.com/jinzhu/gorm v1.9.12
 	github.com/jinzhu/now v1.1.1 // indirect

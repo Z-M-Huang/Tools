@@ -61,7 +61,7 @@ function bindForm(id, url, callback) {
         }
       },
       statusCode: {
-        401: () => {
+        401: (data) => {
           if (data != null && data != undefined &&
             data.Header != null && data.Header != undefined &&
             data.Header.Alert != null && data.Header.Alert != undefined &&
@@ -111,7 +111,7 @@ function postJSONData(url, data, callback) {
       }
     },
     statusCode: {
-      401: () => {
+      401: (data) => {
         if (data != null && data != undefined &&
           data.Header != null && data.Header != undefined &&
           data.Header.Alert != null && data.Header.Alert != undefined &&
@@ -158,7 +158,7 @@ function postLink(url, callback) {
       }
     },
     statusCode: {
-      401: () => {
+      401: (data) => {
         if (data != null && data != undefined &&
           data.Header != null && data.Header != undefined &&
           data.Header.Alert != null && data.Header.Alert != undefined &&

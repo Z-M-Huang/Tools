@@ -1,7 +1,7 @@
 package webdata
 
-//AppCardList card list for single category
-type AppCardList struct {
+//AppCategory card list for single category
+type AppCategory struct {
 	Category string
 	AppCards []*AppCard
 }

@@ -40,7 +40,7 @@ var Logger *zap.Logger
 var Config *data.Configuration
 
 //AppList in home page
-var AppList []*webdata.AppCardList
+var AppList []*webdata.AppCategory
 
 const (
 	//ClaimCtxKey claim context key
@@ -105,6 +105,28 @@ func initConfig() {
 		redisDBNum = 0
 	}
 
+	genSitemap := false
+	genSitemapStr := strings.TrimSpace(os.Getenv("ENABLE_SITEMAP"))
+	if genSitemapStr == "" {
+		Logger.Warn("ENABLE_SITEMAP is empty, set to default: false")
+	} else {
+		genSitemap, err = strconv.ParseBool(genSitemapStr)
+		if err != nil {
+			Logger.Error("Failed to parse ENABLE_SITEMAP to boolean, set to default: false")
+		}
+	}
+
+	sitemapHTTPS := false
+	sitemapHTTPSStr := strings.TrimSpace(os.Getenv("SITEMAP_HTTPS"))
+	if sitemapHTTPSStr == "" {
+		Logger.Warn("SITEMAP_HTTPS is empty, set to default: false")
+	} else {
+		sitemapHTTPS, err = strconv.ParseBool(sitemapHTTPSStr)
+		if err != nil {
+			Logger.Error("Failed to parse SITEMAP_HTTPS to boolean, set to default: false")
+		}
+	}
+
 	Config = &data.Configuration{
 		DatabaseConfig: &data.DatabaseConfiguration{
 			ConnectionString: strings.TrimSpace(os.Getenv("CONNECTION_STRING")),
@@ -120,9 +142,13 @@ func initConfig() {
 			ClientSecret: strings.TrimSpace(os.Getenv("GOOGLE_CLIENT_SECRET")),
 		},
 		JwtKey:          []byte(strings.TrimSpace(os.Getenv("JWT_KEY"))),
-		Host:            strings.TrimSpace(os.Getenv("HOST")),
+		Host:            strings.TrimSuffix(strings.TrimSpace(os.Getenv("HOST")), "/"),
 		ResourceVersion: strings.TrimSpace(os.Getenv("RESOURCE_VERSION")),
 		IsDebug:         os.Getenv("DEBUG") != "",
+		SitemapConfig: &data.SitemapConfiguration{
+			GenerateSitemap: genSitemap,
+			IsHTTPS:         sitemapHTTPS,
+		},
 	}
 
 	if Config.RedisConfig.Addr == "" {
