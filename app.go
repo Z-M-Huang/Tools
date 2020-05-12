@@ -36,7 +36,7 @@ func apiAuthHandler(requireClaim bool, next httprouter.Handle) httprouter.Handle
 func pageAuthHandler(requireClaim bool, next httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		response := &data.Response{
-			Header: data.HeaderData{
+			Header: &data.HeaderData{
 				ResourceVersion: utils.Config.ResourceVersion,
 			},
 		}
@@ -47,7 +47,7 @@ func pageAuthHandler(requireClaim bool, next httprouter.Handle) httprouter.Handl
 			utils.Templates.ExecuteTemplate(w, "login.gohtml", response)
 			return
 		} else if claim != nil {
-			response.Header.Login = data.LoginData{
+			response.Header.Login = &data.LoginData{
 				Username: claim.Subject,
 				ImageURL: claim.ImageURL,
 			}

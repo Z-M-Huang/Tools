@@ -2,7 +2,7 @@ package data
 
 //Response page and api response
 type Response struct {
-	Header HeaderData
+	Header *HeaderData `json:",omitempty"`
 	Alert  AlertData
 	Data   interface{}
 }
@@ -11,7 +11,7 @@ type Response struct {
 type HeaderData struct {
 	Title           string
 	ResourceVersion string
-	Login           LoginData
+	Login           *LoginData `json:",omitempty"`
 }
 
 //LoginData page login info

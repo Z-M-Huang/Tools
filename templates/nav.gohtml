@@ -21,7 +21,13 @@
       </ul>
       <div class="order-3">
         <ul class="navbar-nav ml-auto">
-          {{if ne .Username ""}}
+          {{$notLoggedIn := true}}
+          {{if not (isNil .)}}
+            {{if ne .Username ""}}
+              {{$notLoggedIn = false}}
+            {{end}}
+          {{end}}
+          {{if not $notLoggedIn }}
           <li class="user-login-icon navbar-nav">
             <img src="{{.ImageURL}}" />
           </li>

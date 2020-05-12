@@ -1,9 +1,9 @@
 {{template "header" .Header}}
-<script src="./assets/js/account.js"></script>
+<script src="./assets/{{.Header.ResourceVersion}}/js/account.js"></script>
 <div class="signin">
   {{template "alert_message" .Alert}}
   <div class="row d-flex justify-content-center mb-md-5">
-    <img src="./assets/img/icon.png" width="200" height="200" />
+    <img src="./assets/{{.Header.ResourceVersion}}/img/icon.png" width="200" height="200" />
   </div>
   <div class="row d-flex justify-content-center">
     <p>Don't have an account yet? <a href="/signup">Click here to create one</a></p>
@@ -31,7 +31,7 @@
 
     <div class="row social-login">
       <a href="./google_login">
-        <img src="./assets/img/google.png" width="50" height="50" />
+        <img src="./assets/{{.Header.ResourceVersion}}/img/google.png" width="50" height="50" />
       </a>
     </div>
   </div>
@@ -39,7 +39,9 @@
 
 <script>
   bindForm("signInForm", "/api/login", (d) => {
-    document.location.href = "/"
+    if (d != null && d != undefined && d == true) {
+      document.location.href = "/"
+    }
   })
 </script>
 

@@ -65,7 +65,9 @@ function bindForm(id, url, callback) {
           document.location.href = "/login";
         },
         200: (data) => {
-          if (data.Alert.Message != "") {
+          if (data != null && data != undefined 
+              && data.Alert != null && data.Alert != undefined &&
+              data.Alert.Message != "") {
             showAlertCondition(data.Alert);
           } 
           if (callback != null && callback != undefined) {
@@ -103,7 +105,9 @@ function postJSONData(url, data, callback) {
         document.location.href = "/login";
       },
       200: (data) => {
-        if (data.Alert.Message != "") {
+        if (data != null && data != undefined 
+          && data.Alert != null && data.Alert != undefined &&
+          data.Alert.Message != "") {
           showAlertCondition(data.Alert);
         } 
         if (callback != null && callback != undefined) {
@@ -138,7 +142,9 @@ function postLink(url, callback) {
         showAlertDanger("Please login first");
       },
       200: (data) => {
-        if (data.Alert.Message != "") {
+        if (data != null && data != undefined 
+          && data.Alert != null && data.Alert != undefined &&
+          data.Alert.Message != "") {
           showAlertCondition(data.Alert);
         } 
         if (callback != null && callback != undefined) {

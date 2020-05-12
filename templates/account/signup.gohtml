@@ -1,9 +1,9 @@
 {{template "header" .Header}}
-<script src="./assets/js/account.js"></script>
+<script src="./assets/{{.Header.ResourceVersion}}/js/account.js"></script>
 <div class="createAccount">
   {{template "alert_message" .Alert}}
   <div class="row d-flex justify-content-center mb-md-5">
-    <img src="./assets/img/icon.png" width="200" height="200" />
+    <img src="./assets/{{.Header.ResourceVersion}}/img/icon.png" width="200" height="200" />
   </div>
   <div>
     <form method="POST" id="createAccountForm">

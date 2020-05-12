@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strconv"
 	"strings"
 	"sync"
@@ -96,7 +97,9 @@ func getAlltemplates(inputPath string) []string {
 func getTemplateFuncs() {
 	Templates.Funcs(template.FuncMap{"add": func(i, j int) int { return i + j }})
 	Templates.Funcs(template.FuncMap{"mod": func(i, j int) int { return i % j }})
-	Templates.Funcs(template.FuncMap{"isNil": func(i interface{}) bool { return i == nil }})
+	Templates.Funcs(template.FuncMap{"isNil": func(i interface{}) bool {
+		return reflect.ValueOf(i).IsNil()
+	}})
 }
 
 func initConfig() {

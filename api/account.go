@@ -91,6 +91,7 @@ func Login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		WriteUnexpectedError(w, response)
 	}
 
+	response.Data = true
 	logic.SetCookie(w, utils.SessionTokenKey, tokenStr, expiresAt)
 	WriteResponse(w, response)
 }
