@@ -56,8 +56,8 @@ jobs:
         JWT_KEY: ${{ secrets.JWT_KEY }}
         REDIS_ADDR: ${{ secrets.REDIS_ADDR }}
         CONNECTION_STRING: ${{ secrets.CONNECTION_STRING }}
-        ENABLE_SITEMAP: ${{ ENABLE_SITEMAP }}
-        SITEMAP_HTTPS: ${{ SITEMAP_HTTPS }}
+        ENABLE_SITEMAP: ${{ secrets.ENABLE_SITEMAP }}
+        SITEMAP_HTTPS: ${{ secrets.SITEMAP_HTTPS }}
       run: |
         export DB_DRIVER GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET HOST JWT_KEY REDIS_ADDR CONNECTION_STRING ENABLE_SITEMAP SITEMAP_HTTPS
         docker stack deploy -c docker-compose.yml --with-registry-auth Tools
