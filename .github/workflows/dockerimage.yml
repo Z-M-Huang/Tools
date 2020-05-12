@@ -36,7 +36,7 @@ jobs:
         name: zhironghuang/tools-web
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-        tags: "latest,$${{ GITHUB_RUN_ID }}"
+        tags: "latest,$${{ github.run_id }}"
   deploy:
     name: deploy
     needs: build
