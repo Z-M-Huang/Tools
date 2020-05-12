@@ -101,7 +101,7 @@ func getTemplateFuncs() {
 func initConfig() {
 	redisDBNum, err := strconv.ParseInt(strings.TrimSpace(os.Getenv("REDIS_DB")), 10, 32)
 	if err != nil {
-		Logger.Sugar().Errorf("failed to parse redis db number, set to default 0 %s", err.Error())
+		Logger.Sugar().Warnf("failed to parse redis db number, set to default 0 %s", err.Error())
 		redisDBNum = 0
 	}
 
