@@ -18,14 +18,25 @@ jobs:
         node-version: '12.x'
     - name: Install dependencies
       run: npm install
+    - name: Set up Docker Buildx
+      id: buildx
+      uses: crazy-max/ghaction-docker-buildx@v1
+      with:
+        buildx-version: latest
+        qemu-version: latest
+    - name: Build using buildx
+      run: | 
+        docker buildx build \
+          --platform linux/amd64,linux/arm/v7 \
+          --output "type=image,push=false" \
+          --file ./test/Dockerfile ./test
     - name: Push Docker Image
       uses: elgohr/Publish-Docker-Github-Action@master
       with:
         name: zhironghuang/tools-web
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-        dockerfile: Dockerfile
-        tags: "latest"
+        tags: "latest,$${{ GITHUB_RUN_ID }}"
   deploy:
     name: deploy
     needs: build

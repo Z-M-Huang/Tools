@@ -7,10 +7,7 @@ services:
         context: .
         dockerfile: Dockerfile  
     deploy:
-      replicas: 1
-      placement:
-        constraints:
-          - node.role == manager
+      mode: global
       labels:
         - traefik.enable=true
         - traefik.http.routers.toolsweb.rule=Host(`${HOST}`)
