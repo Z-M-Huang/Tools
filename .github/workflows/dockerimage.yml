@@ -37,7 +37,9 @@ jobs:
           -t zhironghuang/tools-web:latest \
           -t zhironghuang/tools-web:${{ github.run_id }} .
     - name: Docker Logout
-      run: docker logout
+      run: |
+        docker logout
+        rm ~/.docker/config.json
 
   deploy:
     name: deploy
