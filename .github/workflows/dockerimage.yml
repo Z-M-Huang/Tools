@@ -29,7 +29,8 @@ jobs:
         docker buildx build \
           --platform linux/amd64,linux/arm/v7 \
           --output "type=image,push=false" \
-          --file ./test/Dockerfile ./test
+          -t zhironghuang/tools-web:latest \
+          -t zhironghuang/tools-web:$${{ github.run_id }} .
     - name: Push Docker Image
       uses: elgohr/Publish-Docker-Github-Action@master
       with:
