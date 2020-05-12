@@ -24,20 +24,21 @@ jobs:
       with:
         buildx-version: latest
         qemu-version: latest
+    - name: Docker Login
+      run: |
+        echo "${{ secrets.DOCKER_PASSWORD }}" > ~/cred.txt
+        cat ~/cred.txt | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
+    - Name: Clean Docker cred
+      run: rm ~/cred.txt
     - name: Build using buildx
       run: | 
         docker buildx build \
-          --platform linux/amd64,linux/arm/v7 \
-          --output "type=image,push=false" \
+          --platform linux/amd64,linux/arm/v7 --push \
           -t zhironghuang/tools-web:latest \
-          -t zhironghuang/tools-web:$${{ github.run_id }} .
-    - name: Push Docker Image
-      uses: elgohr/Publish-Docker-Github-Action@master
-      with:
-        name: zhironghuang/tools-web
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-        tags: "latest,$${{ github.run_id }}"
+          -t zhironghuang/tools-web:${{ github.run_id }} .
+    - name: Docker Logout
+      run: docker logout
+
   deploy:
     name: deploy
     needs: build
@@ -55,6 +56,6 @@ jobs:
         CONNECTION_STRING: ${{ secrets.CONNECTION_STRING }}
       run: |
         export DB_DRIVER GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET HOST JWT_KEY REDIS_ADDR CONNECTION_STRING
-        docker stack deploy -c docker-compose.yml Tools
+        docker stack deploy -c docker-compose.yml --with-registry-auth Tools
     
           
