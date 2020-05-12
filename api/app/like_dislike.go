@@ -37,14 +37,18 @@ func Like(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	err := userlogic.Find(utils.DB, user)
 	if err == gorm.ErrRecordNotFound {
 		utils.Logger.Sugar().Errorf("oh boy... There is a user doesn't found in database but have a token. Email: %s", claim.Id)
-		response.Alert.IsDanger = true
-		response.Alert.Message = "User not found"
+		response.SetAlert(&data.AlertData{
+			IsDanger: true,
+			Message:  "User not found",
+		})
 		api.WriteResponse(w, response)
 		return
 	} else if err != nil {
 		utils.Logger.Error(err.Error())
-		response.Alert.IsDanger = true
-		response.Alert.Message = "User not found"
+		response.SetAlert(&data.AlertData{
+			IsDanger: true,
+			Message:  "User not found",
+		})
 		api.WriteResponse(w, response)
 		return
 	}
@@ -76,8 +80,10 @@ func Like(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 			return
 		}
 	}
-	response.Alert.IsSuccess = true
-	response.Alert.Message = "Application saved! Thank you for support"
+	response.SetAlert(&data.AlertData{
+		IsSuccess: true,
+		Message:   "Application saved! Thank you for support.",
+	})
 	response.Data = appCard.AmountLiked
 	api.WriteResponse(w, response)
 }
@@ -104,14 +110,18 @@ func Dislike(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	err := userlogic.Find(utils.DB, user)
 	if err == gorm.ErrRecordNotFound {
 		utils.Logger.Sugar().Errorf("oh boy... There is a user doesn't found in database but have a token. Email: %s", claim.Id)
-		response.Alert.IsDanger = true
-		response.Alert.Message = "User not found"
+		response.SetAlert(&data.AlertData{
+			IsDanger: true,
+			Message:  "User not found",
+		})
 		api.WriteResponse(w, response)
 		return
 	} else if err != nil {
 		utils.Logger.Error(err.Error())
-		response.Alert.IsDanger = true
-		response.Alert.Message = "User not found"
+		response.SetAlert(&data.AlertData{
+			IsDanger: true,
+			Message:  "User not found",
+		})
 		api.WriteResponse(w, response)
 		return
 	}
@@ -144,8 +154,10 @@ func Dislike(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 			return
 		}
 	}
-	response.Alert.IsInfo = true
-	response.Alert.Message = "If there are anything you want us to improve about this app. Please let us know on the github bug tracker."
+	response.SetAlert(&data.AlertData{
+		IsInfo:  true,
+		Message: "If there are anything you want us to improve about this app. Please let us know on the github bug tracker.",
+	})
 	response.Data = appCard.AmountLiked
 	api.WriteResponse(w, response)
 }

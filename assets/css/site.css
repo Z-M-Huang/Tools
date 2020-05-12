@@ -71,12 +71,8 @@
   height: 40px;
 }
 
-.mt-15 {
-  margin-top: 15px;
-}
-
-.mb-15 {
-  margin-bottom: 15px;
+.rounded-25 {
+  border-radius: .25rem;
 }
 
 .ellipsis-1 {

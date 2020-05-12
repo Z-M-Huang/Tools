@@ -42,15 +42,17 @@ func pageAuthHandler(requireClaim bool, next httprouter.Handle) httprouter.Handl
 		}
 		claim, err := getClaimFromCookieAndRenew(w, r)
 		if requireClaim && (err != nil || claim.IsNil()) {
-			response.Alert.IsDanger = true
-			response.Alert.Message = "Please login first"
+			response.SetAlert(&data.AlertData{
+				IsDanger: true,
+				Message:  "Please login first.",
+			})
 			utils.Templates.ExecuteTemplate(w, "login.gohtml", response)
 			return
 		} else if claim != nil {
-			response.Header.Login = &data.LoginData{
+			response.SetLogin(&data.LoginData{
 				Username: claim.Subject,
 				ImageURL: claim.ImageURL,
-			}
+			})
 		}
 		ctx := context.WithValue(r.Context(), utils.ClaimCtxKey, claim)
 		ctx = context.WithValue(ctx, utils.ResponseCtxKey, response)

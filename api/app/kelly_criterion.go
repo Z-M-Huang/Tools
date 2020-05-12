@@ -22,34 +22,40 @@ func KellyCriterionSimulate(w http.ResponseWriter, r *http.Request, ps httproute
 	request := &application.KellyCriterionRequest{}
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		utils.Logger.Error(err.Error())
-		response.Alert.IsDanger = true
-		response.Alert.Message = "Invalid simulation request."
+		response.SetAlert(&data.AlertData{
+			IsDanger: true,
+			Message:  "Invalid simulation request.",
+		})
 		api.WriteResponse(w, response)
 		return
 	}
 
 	err = json.Unmarshal(body, &request)
 	if err != nil {
-		utils.Logger.Error(err.Error())
-		response.Alert.IsDanger = true
-		response.Alert.Message = "Invalid simulation request."
+		response.SetAlert(&data.AlertData{
+			IsDanger: true,
+			Message:  "Invalid simulation request.",
+		})
 		api.WriteResponse(w, response)
 		return
 	}
 
 	maxPayout, err := strconv.ParseFloat(request.MaxWinChancePayout, 64)
 	if err != nil {
-		response.Alert.IsDanger = true
-		response.Alert.Message = "Invalid simulation request."
+		response.SetAlert(&data.AlertData{
+			IsWarning: true,
+			Message:   "Max Payout needs to be a number.",
+		})
 		api.WriteResponse(w, response)
 		return
 	}
 
 	maxChance, err := strconv.ParseFloat(request.MaxWinChance, 64)
 	if err != nil {
-		response.Alert.IsDanger = true
-		response.Alert.Message = "Invalid simulation request."
+		response.SetAlert(&data.AlertData{
+			IsWarning: true,
+			Message:   "Max Chance needs to be a number.",
+		})
 		api.WriteResponse(w, response)
 		return
 	}

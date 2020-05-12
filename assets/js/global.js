@@ -65,10 +65,11 @@ function bindForm(id, url, callback) {
           document.location.href = "/login";
         },
         200: (data) => {
-          if (data != null && data != undefined 
-              && data.Alert != null && data.Alert != undefined &&
-              data.Alert.Message != "") {
-            showAlertCondition(data.Alert);
+          if (data != null && data != undefined && 
+              data.Header != null && data.Header != undefined &&
+              data.Header.Alert != null && data.Header.Alert != undefined &&
+              data.Header.Alert.Message != "") {
+            showAlertCondition(data.Header.Alert);
           } 
           if (callback != null && callback != undefined) {
             callback(data.Data);
@@ -105,10 +106,11 @@ function postJSONData(url, data, callback) {
         document.location.href = "/login";
       },
       200: (data) => {
-        if (data != null && data != undefined 
-          && data.Alert != null && data.Alert != undefined &&
-          data.Alert.Message != "") {
-          showAlertCondition(data.Alert);
+        if (data != null && data != undefined &&
+          data.Header != null && data.Header != undefined &&
+          data.Header.Alert != null && data.Header.Alert != undefined &&
+          data.Header.Alert.Message != "") {
+          showAlertCondition(data.Header.Alert);
         } 
         if (callback != null && callback != undefined) {
           callback(data.Data);
@@ -142,10 +144,11 @@ function postLink(url, callback) {
         showAlertDanger("Please login first");
       },
       200: (data) => {
-        if (data != null && data != undefined 
-          && data.Alert != null && data.Alert != undefined &&
-          data.Alert.Message != "") {
-          showAlertCondition(data.Alert);
+        if (data != null && data != undefined &&
+          data.Header != null && data.Header != undefined &&
+          data.Header.Alert != null && data.Header.Alert != undefined &&
+          data.Header.Alert.Message != "") {
+          showAlertCondition(data.Header.Alert);
         } 
         if (callback != null && callback != undefined) {
           callback(data.Data);
@@ -174,46 +177,69 @@ function getModalHTML(id, title, content, primaryButtonOnClick, primaryButtonTex
 /*******************************************************
  *                    Alert Section
  *******************************************************/
-function showAlertDanger(message) {
-  $(".alert").hide();
-  $("#alertDangerMessage").text(message);
-  $("#alertDanger").slideToggle();
+function getToastHTML(id, color, title, message, autohide, delay) {
+  var html = '<div class="toast hover-pointer" role="alert" aria-live="assertive" aria-atomic="true" data-animation="true"';
+  if (autohide) {
+    html += ' data-autohide="true" data-delay="' + delay + '"';
+  } else {
+    html += ' data-autohide="false"';
+  }
+  html += ' onclick="toastOnClickDispose(this)" id="' + id + '"><div class="toast-header"><svg width="25", height="25" class="rounded-25 mr-2"><rect width="100%" height="100%" style="fill:' + color + '" /></svg><strong class="mr-auto">' + title + '</strong><small class="text-muted">just now</small></div><div class="toast-body">' + message + '</div></div>';
+  return html;
 }
 
-function showAlertWarning(message) {
-  $(".alert").hide();
-  $("#alertWarningMessage").text(message);
-  $("#alertWarning").slideToggle();
+function toastOnClickDispose(ele) {
+  $(ele).toast('hide')
 }
 
-function showAlertSuccess(message) {
-  $(".alert").hide();
-  $("#alertSuccessMessage").text(message);
-  $("#alertSuccess").slideToggle();
+function showAlertDanger(message, autohide, delay) {
+  var d = new Date();
+  var now = d.getTime();
+  var toastHTML = getToastHTML(now, window.alertColors.danger, "Error!", message, autohide, delay);
+  $("#toasts").append(toastHTML);
+  var toast = $("#" + now);
+  toast.toast('show');
+  toast.on('hidden.bs.toast', function() {
+    $(this).remove();
+  })
 }
 
-function showAlertInfo(message) {
-  $(".alert").hide();
-  $("#alertInfoMessage").text(message);
-  $("#alertInfo").slideToggle();
+function showAlertWarning(message, autohide, delay) {
+  var d = new Date();
+  var now = d.getTime();
+  var toastHTML = getToastHTML(now, window.alertColors.warning, "Warning!", message, autohide, delay);
+  $("#toasts").append(toastHTML);
+  $("#" + now).toast('show');
 }
 
-function hideAllAlerts() {  
-  $(".alert").hide();
+function showAlertSuccess(message, autohide, delay) {
+  var d = new Date();
+  var now = d.getTime();
+  var toastHTML = getToastHTML(now, window.alertColors.success, "Well done!", message, autohide, delay);
+  $("#toasts").append(toastHTML);
+  $("#" + now).toast('show');
+}
+
+function showAlertInfo(message, autohide, delay) {
+  var d = new Date();
+  var now = d.getTime();
+  var toastHTML = getToastHTML(now, window.alertColors.info, "Heads up!", message, autohide, delay);
+  $("#toasts").append(toastHTML);
+  $("#" + now).toast('show');
 }
 
 function showAlertCondition(alert) {
   if (alert != "" && alert != undefined && alert != null) {
     if (alert.IsDanger) {
-      showAlertDanger(alert.Message);
+      showAlertDanger(alert.Message, false, 0);
     } else if (alert.IsWarning) {
-      showAlertWarning(alert.Message);
+      showAlertWarning(alert.Message, true, 3500);
     } else if (alert.IsSuccess) {
-      showAlertSuccess(alert.Message);
+      showAlertSuccess(alert.Message, true, 3500);
     } else if (alert.IsInfo) {
-      showAlertInfo(alert.Message);
+      showAlertInfo(alert.Message, true, 3500);
     } else if (alert.Message != "") {
-      console.log("Unknown alert", alert);
+      console.log("Unknown alert", alert, false, 0);
     }
   }
 }
@@ -238,7 +264,7 @@ function parseFormToJSON(id) {
 }
 
 /*******************************************************
- *                    Chart colors
+ *                    Colors
  *******************************************************/
 window.chartColors = {
   black: "rgb(0,0,0)",
@@ -258,3 +284,10 @@ window.chartColors = {
   yellow: "rgb(255,255,0)",
   white: "rgb(255,255,255)"
 };
+
+window.alertColors = {
+  danger: "#dc3545",
+  warning: "#ffc107",
+  success: "#28a745",
+  info: "#17a2b8"
+}

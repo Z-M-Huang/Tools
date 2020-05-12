@@ -7,7 +7,6 @@
   to gain profit.</p>
 <p class="text-danger">Gambling is a game, and please don't let gambling ruin your life.</p>
 <br />
-{{template "alert_message" .Alert}}
 <div class="card">
   <div class="card-body">
     <form id="hiLoSimulatorForm" class="row">
@@ -245,7 +244,6 @@
     if (d == null || d == undefined) {
       return
     }
-    hideAllAlerts();
     var table = $("table tbody");
     table.html("");
     $.each(d, (i, val) => {
@@ -299,9 +297,9 @@
     };
     postJSONData("/api/hilo-simulator/verify", data, (d) => {
       if (d != null && d != undefined && d) {
-        alert("The roll is verified and indeed valid roll result.");
+        showAlertInfo("The roll is verified and indeed valid roll result.", true, 2000);
       } else {
-        alert("The roll is not verified and have some problem. Please contact administrator to investigate.");
+        showAlertWarning("The roll is not verified and have some problem. Please contact administrator to investigate.", true, 2000);
       }
     })
   }

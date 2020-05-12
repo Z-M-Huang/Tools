@@ -28,8 +28,10 @@ func WriteResponse(w http.ResponseWriter, response *data.Response) {
 
 //WriteUnexpectedError Write unexpected api response
 func WriteUnexpectedError(w http.ResponseWriter, response *data.Response) {
-	response.Alert.IsDanger = true
-	response.Alert.Message = "Um... Your data got eaten by the cyber space... Would you like to try again?"
+	response.SetAlert(&data.AlertData{
+		IsDanger: true,
+		Message:  "Um... Your data got eaten by the cyber space... Would you like to try again?",
+	})
 	WriteResponse(w, response)
 }
 

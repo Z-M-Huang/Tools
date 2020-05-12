@@ -1,12 +1,11 @@
 {{template "header" .Header}}
 <script src="./assets/{{.Header.ResourceVersion}}/js/account.js"></script>
-<ul class="nav nav-tabs mb-15">
+<ul class="nav nav-tabs mb-3">
   <li class="nav-item">
     <a class="nav-link active" data-toggle="tab" href="#Security">Security</a>
   </li>
 </ul>
 <div id="tabContent" class="tab-content">
-  {{template "alert_message" .Alert}}
   {{ if not (isNil .Data) }}
   <div class="tab-pane fade active show" id="Security">
     <form method="POST" id="updatePassword">

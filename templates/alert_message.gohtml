@@ -1,26 +1,11 @@
 {{define "alert_message"}}
-  <div class="alert alert-dismissible alert-danger mb-15 mt-15" id="alertDanger" style="display: none;">
-    <button type="button" class="close" onclick="$(this).parent().slideToggle()">&times;</button>
-    <h4 class="alert-heading">Error!</h4>
-    <p class="mb-0" id="alertDangerMessage">{{.Message}}</p>
-  </div>
-  <div class="alert alert-dismissible alert-warning mb-15 mt-15" id="alertWarning" style="display: none;">
-    <button type="button" class="close" onclick="$(this).parent().slideToggle()">&times;</button>
-    <h4 class="alert-heading">Warning!</h4>
-    <p class="mb-0" id="alertWarningMessage">{{.Message}}</p>
-  </div>
-  <div class="alert alert-dismissible alert-success mb-15 mt-15" id="alertSuccess" style="display: none;">
-    <button type="button" class="close" onclick="$(this).parent().slideToggle()">&times;</button>
-    <h4 class="alert-heading">Well done!</h4>
-    <p class="mb-0" id="alertSuccessMessage">{{.Message}}</p>
-  </div>
-  <div class="alert alert-dismissible alert-info mb-15 mt-15" id="alertInfo" style="display: none;">
-    <button type="button" class="close" onclick="$(this).parent().slideToggle()">&times;</button>
-    <h4 class="alert-heading">Heads up!</h4>
-    <p class="mb-0" id="alertInfoMessage">{{.Message}}</p>
-  </div>
+<div class="position-sticky w-100 d-flex flex-column p-4" aria-live="polite" aria-atomic="true">
+  <!-- Position it -->
+  <div class="position-fixed mr-3 mt-3" style="top: 0; right: 0;" id="toasts">
 
-  <script>
-    showAlertCondition({{.}});
-  </script>
+  </div>
+</div>
+<script>
+  showAlertCondition({{.}});
+</script>
 {{end}}

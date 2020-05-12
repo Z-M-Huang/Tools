@@ -43,8 +43,11 @@ func AccountPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 	err := userlogic.Find(utils.DB, user)
 	if err != nil {
-		response.Alert.IsDanger = true
-		response.Alert.Message = err.Error()
+		utils.Logger.Error(err.Error())
+		response.SetAlert(&data.AlertData{
+			IsDanger: true,
+			Message:  "Um... Your data got eaten by the cyber space... Would you like to try again?",
+		})
 	} else {
 		response.Data = webdata.AccountPageData{
 			HasPassword: user.Password != "",

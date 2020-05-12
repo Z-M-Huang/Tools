@@ -21,8 +21,10 @@ func HILOSimulate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.Alert.IsDanger = true
-		response.Alert.Message = "Invalid simulation request."
+		response.SetAlert(&data.AlertData{
+			IsDanger: true,
+			Message:  "Invalid simulation request.",
+		})
 		api.WriteResponse(w, response)
 		return
 	}
@@ -30,8 +32,10 @@ func HILOSimulate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	err = json.Unmarshal(body, &request)
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.Alert.IsDanger = true
-		response.Alert.Message = "Invalid simulation request."
+		response.SetAlert(&data.AlertData{
+			IsDanger: true,
+			Message:  "Invalid simulation request.",
+		})
 		api.WriteResponse(w, response)
 		return
 	}
@@ -44,8 +48,10 @@ func HILOSimulate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	//Total Stack
 	simConfig.TotalStack, err = api.ParseFloat(request.TotalStack, 64, true)
 	if err != nil {
-		response.Alert.IsWarning = true
-		response.Alert.Message = "Total Stack: " + err.Error()
+		response.SetAlert(&data.AlertData{
+			IsWarning: true,
+			Message:   "Total Stack: " + err.Error(),
+		})
 		api.WriteResponse(w, response)
 		return
 	}
@@ -53,8 +59,10 @@ func HILOSimulate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	//Win Chance
 	simConfig.WinChance, err = api.ParseFloat(request.WinChance, 64, true)
 	if err != nil {
-		response.Alert.IsWarning = true
-		response.Alert.Message = "Win Chance: " + err.Error()
+		response.SetAlert(&data.AlertData{
+			IsWarning: true,
+			Message:   "Win Chance: " + err.Error(),
+		})
 		api.WriteResponse(w, response)
 		return
 	}
@@ -62,8 +70,10 @@ func HILOSimulate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	//Odds
 	simConfig.Odds, err = api.ParseFloat(request.Odds, 64, true)
 	if err != nil {
-		response.Alert.IsWarning = true
-		response.Alert.Message = "Odds: " + err.Error()
+		response.SetAlert(&data.AlertData{
+			IsWarning: true,
+			Message:   "Odds: " + err.Error(),
+		})
 		api.WriteResponse(w, response)
 		return
 	}
@@ -71,8 +81,10 @@ func HILOSimulate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	//Base Bet
 	simConfig.BaseBet, err = api.ParseFloat(request.BaseBet, 64, true)
 	if err != nil {
-		response.Alert.IsWarning = true
-		response.Alert.Message = "Base Bet: " + err.Error()
+		response.SetAlert(&data.AlertData{
+			IsWarning: true,
+			Message:   "Base Bet: " + err.Error(),
+		})
 		api.WriteResponse(w, response)
 		return
 	}
@@ -80,15 +92,19 @@ func HILOSimulate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	//Rolls Amount
 	simConfig.RollAmount, err = api.ParseUint(request.RollAmount, 10, 64, true)
 	if err != nil {
-		response.Alert.IsWarning = true
-		response.Alert.Message = "Roll Amount: " + err.Error()
+		response.SetAlert(&data.AlertData{
+			IsWarning: true,
+			Message:   "Roll Amount: " + err.Error(),
+		})
 		api.WriteResponse(w, response)
 		return
 	}
 
 	if simConfig.RollAmount > 50000 {
-		response.Alert.IsDanger = true
-		response.Alert.Message = "Requested Roll Amount is too large. Please do batches and keep the server health. Thank you"
+		response.SetAlert(&data.AlertData{
+			IsDanger: true,
+			Message:  "Requested Roll Amount is too large. Please do batches and keep the server health. Thank you",
+		})
 		api.WriteResponse(w, response)
 		return
 	}
@@ -96,8 +112,10 @@ func HILOSimulate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	//OnWin Return to Base Bet
 	simConfig.OnWin.ReturnToBaseBet, err = api.ParseBool(request.OnWinReturnToBaseBet, false)
 	if err != nil {
-		response.Alert.IsWarning = true
-		response.Alert.Message = "On Win Return to Base Bet: " + err.Error()
+		response.SetAlert(&data.AlertData{
+			IsWarning: true,
+			Message:   "On Win Return to Base Bet: " + err.Error(),
+		})
 		api.WriteResponse(w, response)
 		return
 	}
@@ -107,8 +125,10 @@ func HILOSimulate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 		//OnWin Increate By
 		simConfig.OnWin.IncreaseBetBy, err = api.ParseFloat(request.OnWinIncreaseBy, 64, true)
 		if err != nil {
-			response.Alert.IsWarning = true
-			response.Alert.Message = "On Win Increase Bet By: " + err.Error()
+			response.SetAlert(&data.AlertData{
+				IsWarning: true,
+				Message:   "On Win Increase Bet By: " + err.Error(),
+			})
 			api.WriteResponse(w, response)
 			return
 		}
@@ -118,8 +138,10 @@ func HILOSimulate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	//OnWin Change Odds
 	simConfig.OnWin.ChangeOdds, err = api.ParseBool(request.OnWinChangeOdds, false)
 	if err != nil {
-		response.Alert.IsWarning = true
-		response.Alert.Message = "On Win Change Odds: " + err.Error()
+		response.SetAlert(&data.AlertData{
+			IsWarning: true,
+			Message:   "On Win Change Odds: " + err.Error(),
+		})
 		api.WriteResponse(w, response)
 		return
 	}
@@ -128,8 +150,10 @@ func HILOSimulate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 		//OnWin Change Odds To
 		simConfig.OnWin.ChangeOddsTo, err = api.ParseFloat(request.OnWinChangeOddsTo, 64, true)
 		if err != nil {
-			response.Alert.IsWarning = true
-			response.Alert.Message = "On Win Change Odds to: " + err.Error()
+			response.SetAlert(&data.AlertData{
+				IsWarning: true,
+				Message:   "On Win Change Odds to: " + err.Error(),
+			})
 			api.WriteResponse(w, response)
 			return
 		}
@@ -137,8 +161,10 @@ func HILOSimulate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 		//OnWin New Win Chance
 		simConfig.OnWin.NewWinChance, err = api.ParseFloat(request.OnWinNewOddsWinChance, 64, true)
 		if err != nil {
-			response.Alert.IsWarning = true
-			response.Alert.Message = "On Win New Win Chance: " + err.Error()
+			response.SetAlert(&data.AlertData{
+				IsWarning: true,
+				Message:   "On Win New Win Chance: " + err.Error(),
+			})
 			api.WriteResponse(w, response)
 			return
 		}
@@ -147,8 +173,10 @@ func HILOSimulate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	//OnLoss Return to Base Bet
 	simConfig.OnLoss.ReturnToBaseBet, err = api.ParseBool(request.OnLossReturnToBaseBet, false)
 	if err != nil {
-		response.Alert.IsWarning = true
-		response.Alert.Message = "On Loss Return to Base Bet: " + err.Error()
+		response.SetAlert(&data.AlertData{
+			IsWarning: true,
+			Message:   "On Loss Return to Base Bet: " + err.Error(),
+		})
 		api.WriteResponse(w, response)
 		return
 	}
@@ -159,8 +187,10 @@ func HILOSimulate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 		//OnLoss Increate By
 		simConfig.OnLoss.IncreaseBetBy, err = api.ParseFloat(request.OnLossIncreaseBy, 64, true)
 		if err != nil {
-			response.Alert.IsWarning = true
-			response.Alert.Message = "On Loss Increase Bet By: " + err.Error()
+			response.SetAlert(&data.AlertData{
+				IsWarning: true,
+				Message:   "On Loss Increase Bet By: " + err.Error(),
+			})
 			api.WriteResponse(w, response)
 			return
 		}
@@ -170,8 +200,10 @@ func HILOSimulate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	//OnLoss Change Odds
 	simConfig.OnLoss.ChangeOdds, err = api.ParseBool(request.OnLossChangeOdds, false)
 	if err != nil {
-		response.Alert.IsWarning = true
-		response.Alert.Message = "On Loss Change Odds: " + err.Error()
+		response.SetAlert(&data.AlertData{
+			IsWarning: true,
+			Message:   "On Loss Change Odds: " + err.Error(),
+		})
 		api.WriteResponse(w, response)
 		return
 	}
@@ -180,8 +212,10 @@ func HILOSimulate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 		//OnLoss Change Odds To
 		simConfig.OnLoss.ChangeOddsTo, err = api.ParseFloat(request.OnLossChangeOddsTo, 64, true)
 		if err != nil {
-			response.Alert.IsWarning = true
-			response.Alert.Message = "On Loss Change Odds to: " + err.Error()
+			response.SetAlert(&data.AlertData{
+				IsWarning: true,
+				Message:   "On Loss Change Odds to: " + err.Error(),
+			})
 			api.WriteResponse(w, response)
 			return
 		}
@@ -189,8 +223,10 @@ func HILOSimulate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 		//OnLoss New Win Chance
 		simConfig.OnLoss.NewWinChance, err = api.ParseFloat(request.OnLossNewOddsWinChance, 64, true)
 		if err != nil {
-			response.Alert.IsWarning = true
-			response.Alert.Message = "On Loss New Win Chance: " + err.Error()
+			response.SetAlert(&data.AlertData{
+				IsWarning: true,
+				Message:   "On Loss New Win Chance: " + err.Error(),
+			})
 			api.WriteResponse(w, response)
 			return
 		}
@@ -198,16 +234,20 @@ func HILOSimulate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 
 	simConfig.RandomClientSeed, err = api.ParseBool(request.RandomClientSeed, false)
 	if err != nil {
-		response.Alert.IsWarning = true
-		response.Alert.Message = "Random Client Seed: " + err.Error()
+		response.SetAlert(&data.AlertData{
+			IsWarning: true,
+			Message:   "Random Client Seed: " + err.Error(),
+		})
 		api.WriteResponse(w, response)
 		return
 	}
 
 	simConfig.AlternateHiLo, err = api.ParseBool(request.AlternateHiLo, false)
 	if err != nil {
-		response.Alert.IsWarning = true
-		response.Alert.Message = "Alternate Bet Hi/Low: " + err.Error()
+		response.SetAlert(&data.AlertData{
+			IsWarning: true,
+			Message:   "Alternate Bet Hi/Low: " + err.Error(),
+		})
 		api.WriteResponse(w, response)
 		return
 	}
@@ -215,8 +255,10 @@ func HILOSimulate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	result, err := hilosimulator.Simulate(simConfig)
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.Alert.IsDanger = true
-		response.Alert.Message = err.Error()
+		response.SetAlert(&data.AlertData{
+			IsDanger: true,
+			Message:  err.Error(),
+		})
 		api.WriteResponse(w, response)
 		return
 	}
@@ -233,8 +275,10 @@ func HILOVerify(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.Alert.IsDanger = true
-		response.Alert.Message = "Invalid simulation request."
+		response.SetAlert(&data.AlertData{
+			IsDanger: true,
+			Message:  "Invalid simulation request.",
+		})
 		api.WriteResponse(w, response)
 		return
 	}
@@ -242,8 +286,10 @@ func HILOVerify(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	err = json.Unmarshal(body, &request)
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.Alert.IsDanger = true
-		response.Alert.Message = "Invalid simulation request."
+		response.SetAlert(&data.AlertData{
+			IsDanger: true,
+			Message:  "Invalid simulation request.",
+		})
 		api.WriteResponse(w, response)
 		return
 	}
@@ -251,8 +297,10 @@ func HILOVerify(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	valid, err := hilosimulator.Verify(request.ClientSeed, request.ServerSeed, request.Nonce, request.Roll)
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.Alert.IsDanger = true
-		response.Alert.Message = err.Error()
+		response.SetAlert(&data.AlertData{
+			IsDanger: true,
+			Message:  err.Error(),
+		})
 		api.WriteResponse(w, response)
 		return
 	}

@@ -45,8 +45,10 @@ func Login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.Alert.IsDanger = true
-		response.Alert.Message = "Invalid login request."
+		response.SetAlert(&data.AlertData{
+			IsDanger: true,
+			Message:  "Invalid login request.",
+		})
 		WriteResponse(w, response)
 		return
 	}
@@ -54,8 +56,10 @@ func Login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	err = json.Unmarshal(body, &request)
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.Alert.IsDanger = true
-		response.Alert.Message = "Invalid login request."
+		response.SetAlert(&data.AlertData{
+			IsDanger: true,
+			Message:  "Invalid login request.",
+		})
 		WriteResponse(w, response)
 		return
 	}
@@ -67,8 +71,10 @@ func Login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 	err = userlogic.Find(utils.DB, existingUser)
 	if err == gorm.ErrRecordNotFound {
-		response.Alert.IsDanger = true
-		response.Alert.Message = "We couldn't find any account for this email address... Maybe you need to create one"
+		response.SetAlert(&data.AlertData{
+			IsDanger: true,
+			Message:  "We couldn't find any account for this email address... Maybe you need to create one.",
+		})
 		WriteResponse(w, response)
 		return
 	} else if err != nil {
@@ -79,8 +85,10 @@ func Login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	if !utils.ComparePasswords(existingUser.Password, []byte(request.Password)) {
 		utils.Logger.Sugar().Errorf("Invalid login attempt received for: %s", request.Email)
-		response.Alert.IsWarning = true
-		response.Alert.Message = `Incorrect password. Do you forget your password? If you forget your password, please <a href="#">Click here</a> to reset your password. Uh... We don't have that feature yet, sorry...`
+		response.SetAlert(&data.AlertData{
+			IsWarning: true,
+			Message:   `Incorrect password. Do you forget your password? If you forget your password, please <a href="#">Click here</a> to reset your password. Uh... We don't have that feature yet, sorry...`,
+		})
 		WriteResponse(w, response)
 		return
 	}
@@ -169,16 +177,20 @@ func SignUp(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.Alert.IsDanger = true
-		response.Alert.Message = "Invalid sign up request."
+		response.SetAlert(&data.AlertData{
+			IsDanger: true,
+			Message:  "Invalid login request.",
+		})
 		WriteResponse(w, response)
 		return
 	}
 	err = json.Unmarshal(body, &request)
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.Alert.IsDanger = true
-		response.Alert.Message = "Invalid sign up request."
+		response.SetAlert(&data.AlertData{
+			IsDanger: true,
+			Message:  "Invalid login request.",
+		})
 		WriteResponse(w, response)
 		return
 	}
@@ -186,22 +198,28 @@ func SignUp(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	request.Email = strings.TrimSpace(strings.ToLower(request.Email))
 
 	if !emailRe.Match([]byte(request.Email)) {
-		response.Alert.IsDanger = true
-		response.Alert.Message = "Invalid email address."
+		response.SetAlert(&data.AlertData{
+			IsDanger: true,
+			Message:  "Invalid email address.",
+		})
 		WriteResponse(w, response)
 		return
 	}
 
 	if request.ConfirmPassword != request.Password {
-		response.Alert.IsWarning = true
-		response.Alert.Message = "Password doesn't match"
+		response.SetAlert(&data.AlertData{
+			IsDanger: true,
+			Message:  "Password doesn't match",
+		})
 		WriteResponse(w, response)
 		return
 	}
 
 	if len(request.Password) < minPasswordLength {
-		response.Alert.IsWarning = true
-		response.Alert.Message = fmt.Sprintf("Password has minimum length of %d characters.", minPasswordLength)
+		response.SetAlert(&data.AlertData{
+			IsWarning: true,
+			Message:   fmt.Sprintf("Password has minimum length of %d characters.", minPasswordLength),
+		})
 		WriteResponse(w, response)
 		return
 	}
@@ -211,8 +229,10 @@ func SignUp(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 	err = userlogic.Find(utils.DB, existingUser)
 	if err == nil {
-		response.Alert.IsWarning = true
-		response.Alert.Message = "Email address already exists, please try to remember the password, since password recovery function is not yet built. If you cant remember your password, good luck... The password is hashed, and even as an admin, I have no clue what's your password could be... See ya."
+		response.SetAlert(&data.AlertData{
+			IsWarning: true,
+			Message:   "Email address already exists, please try to remember the password, since password recovery function is not yet built. If you cant remember your password, good luck... The password is hashed, and even as an admin, I have no clue what's your password could be... See ya.",
+		})
 		WriteResponse(w, response)
 		return
 	} else if err != nil && err != gorm.ErrRecordNotFound {
@@ -226,8 +246,10 @@ func SignUp(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 	err = userlogic.Find(utils.DB, existingUser)
 	if err == nil {
-		response.Alert.IsWarning = true
-		response.Alert.Message = "Username already taken. Can't you think of something else? Try harder"
+		response.SetAlert(&data.AlertData{
+			IsWarning: true,
+			Message:   "Username already taken. Can't you think of something else? Try harder",
+		})
 		WriteResponse(w, response)
 		return
 	} else if err != nil && err != gorm.ErrRecordNotFound {
@@ -267,16 +289,20 @@ func UpdatePassword(w http.ResponseWriter, r *http.Request, ps httprouter.Params
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.Alert.IsDanger = true
-		response.Alert.Message = "Invalid sign up request."
+		response.SetAlert(&data.AlertData{
+			IsDanger: true,
+			Message:  "Invalid sign up request.",
+		})
 		WriteResponse(w, response)
 		return
 	}
 	err = json.Unmarshal(body, &request)
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.Alert.IsDanger = true
-		response.Alert.Message = "Invalid sign up request."
+		response.SetAlert(&data.AlertData{
+			IsDanger: true,
+			Message:  "Invalid sign up request.",
+		})
 		WriteResponse(w, response)
 		return
 	}
@@ -284,13 +310,17 @@ func UpdatePassword(w http.ResponseWriter, r *http.Request, ps httprouter.Params
 	claim := r.Context().Value(utils.ClaimCtxKey).(*data.JWTClaim)
 
 	if request.Password != request.ConfirmPassword {
-		response.Alert.IsWarning = true
-		response.Alert.Message = "Password doesn't match."
+		response.SetAlert(&data.AlertData{
+			IsWarning: true,
+			Message:   "Password doesn't match.",
+		})
 		WriteResponse(w, response)
 		return
 	} else if len(request.Password) < minPasswordLength {
-		response.Alert.IsWarning = true
-		response.Alert.Message = fmt.Sprintf("Password has minimum length of %d.", minPasswordLength)
+		response.SetAlert(&data.AlertData{
+			IsWarning: true,
+			Message:   fmt.Sprintf("Password has minimum length of %d.", minPasswordLength),
+		})
 		WriteResponse(w, response)
 		return
 	}
@@ -310,13 +340,17 @@ func UpdatePassword(w http.ResponseWriter, r *http.Request, ps httprouter.Params
 	}
 
 	if dbUser.Password != "" && !utils.ComparePasswords(dbUser.Password, []byte(request.CurrentPassword)) {
-		response.Alert.IsWarning = true
-		response.Alert.Message = "Current password is different compared to what's in database... Try harder..."
+		response.SetAlert(&data.AlertData{
+			IsWarning: true,
+			Message:   "Current password is different compared to what's in database... Try harder...",
+		})
 		WriteResponse(w, response)
 		return
 	} else if dbUser.Password != "" && utils.ComparePasswords(dbUser.Password, []byte(request.Password)) {
-		response.Alert.IsWarning = true
-		response.Alert.Message = "New password is exactly the same as the old password..."
+		response.SetAlert(&data.AlertData{
+			IsWarning: true,
+			Message:   "New password is exactly the same as the old password...",
+		})
 		WriteResponse(w, response)
 		return
 	}
@@ -329,8 +363,10 @@ func UpdatePassword(w http.ResponseWriter, r *http.Request, ps httprouter.Params
 		WriteUnexpectedError(w, response)
 		return
 	}
-	response.Alert.IsSuccess = true
-	response.Alert.Message = "Password is updated."
+	response.SetAlert(&data.AlertData{
+		IsSuccess: true,
+		Message:   "Password is updated.",
+	})
 	WriteResponse(w, response)
 }
 
