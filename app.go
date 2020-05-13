@@ -195,6 +195,7 @@ func main() {
 	router.POST("/api/kelly-criterion/simulate", gzipHandler(apiAuthHandler(false, appApis.KellyCriterionSimulate)))
 	router.POST("/api/hilo-simulator/simulate", gzipHandler(apiAuthHandler(false, appApis.HILOSimulate)))
 	router.POST("/api/hilo-simulator/verify", gzipHandler(apiAuthHandler(false, appApis.HILOVerify)))
+	router.POST("/api/dns-lookup/lookup", gzipHandler(apiAuthHandler(false, appApis.DNSLookup)))
 	router.POST("/app/:name/like", gzipHandler(apiAuthHandler(true, appApis.Like)))
 	router.POST("/app/:name/dislike", gzipHandler(apiAuthHandler(true, appApis.Dislike)))
 

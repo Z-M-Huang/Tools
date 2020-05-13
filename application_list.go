@@ -14,6 +14,7 @@ import (
 
 func init() {
 	getAnalyticTools()
+	getLookupTools()
 	loadAppCardsUsage()
 }
 
@@ -30,6 +31,19 @@ func getAnalyticTools() {
 		"/app/hilo-simulator", "HiLo Simulator", "Simulate online hi/low betting website result(Provably fair only).")
 
 	tools.AppCards = append(tools.AppCards, betSimulator)
+
+	sortAppCardSlice(tools.AppCards)
+	utils.AppList = append(utils.AppList, tools)
+}
+
+func getLookupTools() {
+	tools := &webdata.AppCategory{
+		Category: "Lookup",
+	}
+
+	dnsLookup := newAppCart("dns-lookup", "dns_lookup.gohtml", "", "fas fa-receipt",
+		"/app/dns-lookup", "DNS Lookup", "Lookup given domain's DNS record (A, CNAME, PTR, NS, MX, TXT, and etc.")
+	tools.AppCards = append(tools.AppCards, dnsLookup)
 
 	sortAppCardSlice(tools.AppCards)
 	utils.AppList = append(utils.AppList, tools)

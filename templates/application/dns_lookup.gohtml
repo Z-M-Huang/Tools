@@ -1,0 +1,100 @@
+{{template "header" .Header}}
+<h1>DNS Lookup</h1>
+
+<p class="text-primary">This tool can help look up DNS records of a given domain</p>
+
+<div class="card row">
+  <div class="card-body">
+    <form id="dnsLookupForm">
+      <div class="form-group row d-flex justify-content-center">
+        <label for="domainName" class="col-sm-5 col-form-label text-right" style="display: 1.5rem;">Domain Name</label>
+        <div class="col-sm-7">
+          <input type="text" class="form-control col-sm-6" id="domainName" name="domainName"
+            aria-describedby="domainNameHelp" placeholder="google.com">
+        </div>
+      </div>
+      <div class="row d-flex justify-content-center">
+        <button type="submit" class="btn btn-primary btn-lg">Look up</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<h3 class="row mt-5 mb-3" id="resultHeader">Result:</h3>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Record</th>
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
+</table>
+
+<script>
+  bindForm("dnsLookupForm", "/api/dns-lookup/lookup", (d) => {
+      console.log(d);
+    if (d != null && d != undefined) {
+      console.log(d);
+      var table = $("table tbody");
+      table.html("");
+      $.each(d.IPAddress, (i, val) => {
+        var markup = "<tr>";
+        markup += "<td>" + d.DomainName + "</td>";
+        markup += "<td>IP Address</td>";
+        markup += "<td>" + val + "</td>";
+        markup += "</tr>";
+        table.append(markup);
+
+        $.each(d.PTR[val], (j, v) => {
+          var markup = "<tr>";
+          markup += "<td></td>";
+          markup += "<td>PTR</td>";
+          markup += "<td>" + v + "</td>";
+          markup += "</tr>";
+          table.append(markup);
+        })
+      })
+
+      $.each(d.CNAME, (i, val) => {
+        var markup = "<tr>";
+        markup += "<td>" + d.DomainName + "</td>";
+        markup += "<td>CNAME</td>";
+        markup += "<td>" + val + "</td>";
+        markup += "</tr>";
+        table.append(markup);
+      })
+
+      
+      $.each(d.NS, (i, val) => {
+        var markup = "<tr>";
+        markup += "<td>" + d.DomainName + "</td>";
+        markup += "<td>NS</td>";
+        markup += "<td>" + val + "</td>";
+        markup += "</tr>";
+        table.append(markup);
+      })
+
+      $.each(d.MX, (i, val) => {
+        var markup = "<tr>";
+        markup += "<td>" + d.DomainName + "</td>";
+        markup += "<td>MX</td>";
+        markup += "<td>" + val + "</td>";
+        markup += "</tr>";
+        table.append(markup);
+      })
+
+      $.each(d.TXT, (i, val) => {
+        var markup = "<tr>";
+        markup += "<td>" + d.DomainName + "</td>";
+        markup += "<td>TXT</td>";
+        markup += "<td>" + val + "</td>";
+        markup += "</tr>";
+        table.append(markup);
+      })
+    }
+  })
+</script>
+{{template "footer"}}
