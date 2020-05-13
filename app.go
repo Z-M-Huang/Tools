@@ -20,10 +20,10 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func apiAuthHandler(requireClaim bool, next httprouter.Handle) httprouter.Handle {
+func apiAuthHandler(requireToken bool, next httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		claim, err := getClaimFromHeaderAndRenew(w, r)
-		if requireClaim && (err != nil || claim == nil) {
+		if requireToken && (err != nil || claim == nil) {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
@@ -37,6 +37,10 @@ func pageHandler(requireToken bool, next httprouter.Handle) httprouter.Handle {
 	return gzipHandler(pageAuthHandler(requireToken, pageStyleHandler(next)))
 }
 
+func apiHandler(requireToken bool, next httprouter.Handle) httprouter.Handle {
+	return gzipHandler(apiAuthHandler(requireToken, next))
+}
+
 func pageStyleHandler(next httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
@@ -47,7 +51,7 @@ func pageStyleHandler(next httprouter.Handle) httprouter.Handle {
 		} else {
 			logic.SetCookie(w, utils.PageStyleCookieKey, "default", time.Now().AddDate(100, 0, 0))
 		}
-		response.Header.PageStyle = pages.GetPageStyle(style)
+		response.SetNavStyleName(logic.GetPageStyle(style))
 		next(w, r, ps)
 	}
 }
@@ -212,12 +216,12 @@ func main() {
 	router.GET("/app/:name", pageHandler(false, pages.RenderApplicationPage))
 
 	//app api
-	router.POST("/api/kelly-criterion/simulate", gzipHandler(apiAuthHandler(false, appApis.KellyCriterionSimulate)))
-	router.POST("/api/hilo-simulator/simulate", gzipHandler(apiAuthHandler(false, appApis.HILOSimulate)))
-	router.POST("/api/hilo-simulator/verify", gzipHandler(apiAuthHandler(false, appApis.HILOVerify)))
-	router.POST("/api/dns-lookup/lookup", gzipHandler(apiAuthHandler(false, appApis.DNSLookup)))
-	router.POST("/app/:name/like", gzipHandler(apiAuthHandler(true, appApis.Like)))
-	router.POST("/app/:name/dislike", gzipHandler(apiAuthHandler(true, appApis.Dislike)))
+	router.POST("/api/kelly-criterion/simulate", apiHandler(false, appApis.KellyCriterionSimulate))
+	router.POST("/api/hilo-simulator/simulate", apiHandler(false, appApis.HILOSimulate))
+	router.POST("/api/hilo-simulator/verify", apiHandler(false, appApis.HILOVerify))
+	router.POST("/api/dns-lookup/lookup", apiHandler(false, appApis.DNSLookup))
+	router.POST("/app/:name/like", apiHandler(true, appApis.Like))
+	router.POST("/app/:name/dislike", apiHandler(true, appApis.Dislike))
 
 	utils.Logger.Fatal(http.ListenAndServe(":80", router).Error())
 }

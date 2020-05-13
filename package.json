@@ -4,7 +4,6 @@
   "description": "Tools for fun",
   "main": "index.js",
   "dependencies": {
-    "@fortawesome/fontawesome-free": "^5.13.0",
     "chart.js": "^2.9.3"
   },
   "devDependencies": {},

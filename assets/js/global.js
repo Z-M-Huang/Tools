@@ -286,6 +286,17 @@ function showAlertCondition(alert) {
 /*******************************************************
  *                    Parsing functions
  *******************************************************/
+function styleChangeOnClick(styleName) {
+  var d = new Date();
+  //100 years should be more than enough right?
+  d.setTime(d.getTime() + 3153600000000);
+  document.cookie = "page_style=" + styleName + "; expires=" + d.toUTCString() + ";path=/";
+  location.reload();
+}
+
+/*******************************************************
+ *                    Parsing functions
+ *******************************************************/
 function parseFormToJSON(id) {
   var o = {};
   var a = $(id).serializeArray();

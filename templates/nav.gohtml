@@ -21,19 +21,48 @@
       </ul>
       <div class="order-3">
         <ul class="navbar-nav ml-auto">
+          <li class="nav-item dropdown  mr-3">
+            <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="true"><i class="fas fa-sliders-h mr-1"></i>Theme - {{.StyleName}}</a>
+            <div class="dropdown-menu" x-placement="bottom-start" style="position: absolute; transform: translate3d(0px, 40px, 0px); top: 0px; left: 0px; will-change: transform;">
+              <a class="dropdown-item" href="#" onclick="styleChangeOnClick('cerulean')"><i class="fas fa-screwdriver mr-1"></i>Cerulean</a>
+              <a class="dropdown-item" href="#" onclick="styleChangeOnClick('cosmo')"><i class="fas fa-screwdriver mr-1"></i>Cosmo</a>
+              <a class="dropdown-item" href="#" onclick="styleChangeOnClick('cyborg')"><i class="fas fa-screwdriver mr-1"></i>Cyborg</a>
+              <a class="dropdown-item" href="#" onclick="styleChangeOnClick('darkly')"><i class="fas fa-screwdriver mr-1"></i>Darkly</a>
+              <a class="dropdown-item" href="#" onclick="styleChangeOnClick('default')"><i class="fas fa-screwdriver mr-1"></i>Default</a>
+              <a class="dropdown-item" href="#" onclick="styleChangeOnClick('flatly')"><i class="fas fa-screwdriver mr-1"></i>Flatly</a>
+              <a class="dropdown-item" href="#" onclick="styleChangeOnClick('journal')"><i class="fas fa-screwdriver mr-1"></i>Journal</a>
+              <a class="dropdown-item" href="#" onclick="styleChangeOnClick('litera')"><i class="fas fa-screwdriver mr-1"></i>Litera</a>
+              <a class="dropdown-item" href="#" onclick="styleChangeOnClick('Lumen')"><i class="fas fa-screwdriver mr-1"></i>lumen</a>
+              <a class="dropdown-item" href="#" onclick="styleChangeOnClick('lux')"><i class="fas fa-screwdriver mr-1"></i>Lux</a>
+              <a class="dropdown-item" href="#" onclick="styleChangeOnClick('materia')"><i class="fas fa-screwdriver mr-1"></i>Materia</a>
+              <a class="dropdown-item" href="#" onclick="styleChangeOnClick('minty')"><i class="fas fa-screwdriver mr-1"></i>Minty</a>
+              <a class="dropdown-item" href="#" onclick="styleChangeOnClick('pulse')"><i class="fas fa-screwdriver mr-1"></i>Pulse</a>
+              <a class="dropdown-item" href="#" onclick="styleChangeOnClick('sandstone')"><i class="fas fa-screwdriver mr-1"></i>Sandstone</a>
+              <a class="dropdown-item" href="#" onclick="styleChangeOnClick('simplex')"><i class="fas fa-screwdriver mr-1"></i>Simplex</a>
+              <a class="dropdown-item" href="#" onclick="styleChangeOnClick('sketchy')"><i class="fas fa-screwdriver mr-1"></i>Sketchy</a>
+              <a class="dropdown-item" href="#" onclick="styleChangeOnClick('slate')"><i class="fas fa-screwdriver mr-1"></i>Slate</a>
+              <a class="dropdown-item" href="#" onclick="styleChangeOnClick('solar')"><i class="fas fa-screwdriver mr-1"></i>Solar</a>
+              <a class="dropdown-item" href="#" onclick="styleChangeOnClick('spacelab')"><i class="fas fa-screwdriver mr-1"></i>Spacelab</a>
+              <a class="dropdown-item" href="#" onclick="styleChangeOnClick('superhero')"><i class="fas fa-screwdriver mr-1"></i>Superhero</a>
+              <a class="dropdown-item" href="#" onclick="styleChangeOnClick('united')"><i class="fas fa-screwdriver mr-1"></i>United</a>
+              <a class="dropdown-item" href="#" onclick="styleChangeOnClick('yeti')"><i class="fas fa-screwdriver mr-1"></i>Yeti</a>
+            </div>
+          </li>
           {{$notLoggedIn := true}}
           {{if .}}
-            {{if ne .Username ""}}
-              {{$notLoggedIn = false}}
+            {{if .Login}}            
+              {{if ne .Login.Username ""}}
+                {{$notLoggedIn = false}}
+              {{end}}
             {{end}}
           {{end}}
           {{if not $notLoggedIn }}
           <li class="user-login-icon navbar-nav">
-            <img src="{{.ImageURL}}" />
+            <img src="{{.Login.ImageURL}}" />
           </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" id="userNavDropdown" data-toggle="dropdown" aria-haspopup="true"
-              aria-expanded="false" href="">Hello, {{.Username}}</a>
+              aria-expanded="false" href="">Hello, {{.Login.Username}}</a>
             <div class="dropdown-menu" aria-labelledby="userNavDropdown">
               <a class="dropdown-item" href="/account">Settings</a>
               <a class="dropdown-item" onclick="logout()">Logout</a>
