@@ -98,6 +98,9 @@ func getAlltemplates(inputPath string) []string {
 func getTemplateFuncs() {
 	Templates.Funcs(template.FuncMap{"add": func(i, j int) int { return i + j }})
 	Templates.Funcs(template.FuncMap{"mod": func(i, j int) int { return i % j }})
+	Templates.Funcs(template.FuncMap{"nospace": func(i string) string {
+		return strings.ReplaceAll(i, " ", "")
+	}})
 }
 
 func initConfig() {
