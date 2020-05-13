@@ -10,8 +10,9 @@ type Response struct {
 type HeaderData struct {
 	Title           string
 	ResourceVersion string
-	Login           *LoginData `json:",omitempty"`
-	Alert           *AlertData
+	PageStyle       *PageStyleData `json:",omitempty"`
+	Login           *LoginData     `json:",omitempty"`
+	Alert           *AlertData     `json:",omitempty"`
 }
 
 //LoginData page login info
@@ -29,24 +30,24 @@ type AlertData struct {
 	Message   string
 }
 
+//PageStyleData bootswatch styles
+type PageStyleData struct {
+	Link      string
+	Integrity string
+}
+
 //SetAlert set alert
 func (r *Response) SetAlert(alert *AlertData) {
 	if r.Header == nil {
-		r.Header = &HeaderData{
-			Alert: alert,
-		}
-	} else {
-		r.Header.Alert = alert
+		r.Header = &HeaderData{}
 	}
+	r.Header.Alert = alert
 }
 
 //SetLogin set login
 func (r *Response) SetLogin(login *LoginData) {
 	if r.Header == nil {
-		r.Header = &HeaderData{
-			Login: login,
-		}
-	} else {
-		r.Header.Login = login
+		r.Header = &HeaderData{}
 	}
+	r.Header.Login = login
 }

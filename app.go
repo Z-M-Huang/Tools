@@ -33,15 +33,35 @@ func apiAuthHandler(requireClaim bool, next httprouter.Handle) httprouter.Handle
 	}
 }
 
-func pageAuthHandler(requireClaim bool, next httprouter.Handle) httprouter.Handle {
+func pageHandler(requireToken bool, next httprouter.Handle) httprouter.Handle {
+	return gzipHandler(pageAuthHandler(requireToken, pageStyleHandler(next)))
+}
+
+func pageStyleHandler(next httprouter.Handle) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
+		style := ""
+		cookie, err := r.Cookie(utils.PageStyleCookieKey)
+		if err == nil {
+			style = cookie.Value
+		} else {
+			logic.SetCookie(w, utils.PageStyleCookieKey, "default", time.Now().AddDate(100, 0, 0))
+		}
+		response.Header.PageStyle = pages.GetPageStyle(style)
+		next(w, r, ps)
+	}
+}
+
+func pageAuthHandler(requireToken bool, next httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		response := &data.Response{
 			Header: &data.HeaderData{
 				ResourceVersion: utils.Config.ResourceVersion,
 			},
 		}
+
 		claim, err := getClaimFromCookieAndRenew(w, r)
-		if requireClaim && (err != nil || claim == nil) {
+		if requireToken && (err != nil || claim == nil) {
 			http.Redirect(w, r, "/login?redirect="+r.URL.Path, http.StatusTemporaryRedirect)
 			return
 		} else if claim != nil {
@@ -177,10 +197,10 @@ func main() {
 		}
 	}
 
-	router.GET("/", gzipHandler(pageAuthHandler(false, pages.HomePage)))
-	router.GET("/signup", gzipHandler(pageAuthHandler(false, pages.SignupPage)))
-	router.GET("/login", gzipHandler(pageAuthHandler(false, pages.LoginPage)))
-	router.GET("/account", gzipHandler(pageAuthHandler(true, pages.AccountPage)))
+	router.GET("/", pageHandler(false, pages.HomePage))
+	router.GET("/signup", pageHandler(false, pages.SignupPage))
+	router.GET("/login", pageHandler(false, pages.LoginPage))
+	router.GET("/account", pageHandler(true, pages.AccountPage))
 
 	router.GET("/google_login", api.GoogleLogin)
 	router.GET("/google_oauth", api.GoogleCallback)
@@ -189,7 +209,7 @@ func main() {
 	router.POST("/api/account/update/password", apiAuthHandler(true, api.UpdatePassword))
 
 	//app
-	router.GET("/app/:name", gzipHandler(pageAuthHandler(false, pages.RenderApplicationPage)))
+	router.GET("/app/:name", pageHandler(false, pages.RenderApplicationPage))
 
 	//app api
 	router.POST("/api/kelly-criterion/simulate", gzipHandler(apiAuthHandler(false, appApis.KellyCriterionSimulate)))
