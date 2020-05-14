@@ -3,10 +3,7 @@ package app
 import (
 	"encoding/base32"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 	"net/url"
 	"strings"
 
@@ -14,15 +11,15 @@ import (
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/apidata/application"
 	"github.com/Z-M-Huang/Tools/utils"
-	"github.com/julienschmidt/httprouter"
+	"github.com/gin-gonic/gin"
 )
 
 //EncodeDecode /api/string/encodedecode
-func EncodeDecode(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
+func EncodeDecode(c *gin.Context) {
+	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
 	request := &application.StringEncodeDecodeRequest{}
 	var result []string
-	body, err := ioutil.ReadAll(r.Body)
+	err := c.ShouldBind(&request)
 	if err != nil {
 		utils.Logger.Error(err.Error())
 		response.SetAlert(&data.AlertData{
@@ -30,18 +27,7 @@ func EncodeDecode(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 			Message:  "Invalid lookup request.",
 		})
 		response.Data = []string{response.Header.Alert.Message}
-		api.WriteResponse(w, response)
-		return
-	}
-
-	err = json.Unmarshal(body, &request)
-	if err != nil {
-		utils.Logger.Error(err.Error())
-		response.SetAlert(&data.AlertData{
-			IsDanger: true,
-			Message:  "Invalid lookup request.",
-		})
-		api.WriteResponse(w, response)
+		api.WriteResponse(c, 200, response)
 		return
 	}
 
@@ -55,7 +41,7 @@ func EncodeDecode(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 			Message:   "Invalid action code.",
 		})
 		response.Data = []string{response.Header.Alert.Message}
-		api.WriteResponse(w, response)
+		api.WriteResponse(c, 200, response)
 		return
 	}
 	switch request.Type {
@@ -73,7 +59,7 @@ func EncodeDecode(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 						Message:   fmt.Sprintf("Cannot decode string requested %s", err.Error()),
 					})
 					response.Data = []string{response.Header.Alert.Message}
-					api.WriteResponse(w, response)
+					api.WriteResponse(c, 200, response)
 					return
 				}
 				result = append(result, string(unescaped))
@@ -93,7 +79,7 @@ func EncodeDecode(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 						Message:   fmt.Sprintf("Cannot decode string requested %s", err.Error()),
 					})
 					response.Data = []string{response.Header.Alert.Message}
-					api.WriteResponse(w, response)
+					api.WriteResponse(c, 200, response)
 					return
 				}
 				result = append(result, string(unescaped))
@@ -113,7 +99,7 @@ func EncodeDecode(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 						Message:  fmt.Sprintf("Cannot decode string requested %s", err.Error()),
 					})
 					response.Data = []string{response.Header.Alert.Message}
-					api.WriteResponse(w, response)
+					api.WriteResponse(c, 200, response)
 					return
 				}
 				result = append(result, unescaped)
@@ -125,10 +111,10 @@ func EncodeDecode(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 			Message:   "Invalid type request.",
 		})
 		response.Data = []string{response.Header.Alert.Message}
-		api.WriteResponse(w, response)
+		api.WriteResponse(c, 200, response)
 		return
 	}
 
 	response.Data = result
-	api.WriteResponse(w, response)
+	api.WriteResponse(c, 200, response)
 }

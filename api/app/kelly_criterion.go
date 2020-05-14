@@ -1,10 +1,7 @@
 package app
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"math"
-	"net/http"
 	"strconv"
 
 	"github.com/Z-M-Huang/Tools/api"
@@ -12,31 +9,21 @@ import (
 	"github.com/Z-M-Huang/Tools/data/apidata/application"
 	"github.com/Z-M-Huang/Tools/utils"
 	kellycriterion "github.com/Z-M-Huang/kelly-criterion"
-	"github.com/julienschmidt/httprouter"
+	"github.com/gin-gonic/gin"
 )
 
 //KellyCriterionSimulate /api/kelly-criterion/simulate
-func KellyCriterionSimulate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
+func KellyCriterionSimulate(c *gin.Context) {
+	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
 	var simulationResult []*application.KellyCriterionSimulationResponse
 	request := &application.KellyCriterionRequest{}
-	body, err := ioutil.ReadAll(r.Body)
+	err := c.ShouldBind(&request)
 	if err != nil {
 		response.SetAlert(&data.AlertData{
 			IsDanger: true,
 			Message:  "Invalid simulation request.",
 		})
-		api.WriteResponse(w, response)
-		return
-	}
-
-	err = json.Unmarshal(body, &request)
-	if err != nil {
-		response.SetAlert(&data.AlertData{
-			IsDanger: true,
-			Message:  "Invalid simulation request.",
-		})
-		api.WriteResponse(w, response)
+		api.WriteResponse(c, 200, response)
 		return
 	}
 
@@ -46,7 +33,7 @@ func KellyCriterionSimulate(w http.ResponseWriter, r *http.Request, ps httproute
 			IsWarning: true,
 			Message:   "Max Payout needs to be a number.",
 		})
-		api.WriteResponse(w, response)
+		api.WriteResponse(c, 200, response)
 		return
 	}
 
@@ -56,7 +43,7 @@ func KellyCriterionSimulate(w http.ResponseWriter, r *http.Request, ps httproute
 			IsWarning: true,
 			Message:   "Max Chance needs to be a number.",
 		})
-		api.WriteResponse(w, response)
+		api.WriteResponse(c, 200, response)
 		return
 	}
 
@@ -71,5 +58,5 @@ func KellyCriterionSimulate(w http.ResponseWriter, r *http.Request, ps httproute
 		})
 	}
 	response.Data = simulationResult
-	api.WriteResponse(w, response)
+	api.WriteResponse(c, 200, response)
 }

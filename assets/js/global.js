@@ -24,12 +24,12 @@ function likeOnClick(obj, name) {
   var ele = $(obj);
   if (ele.hasClass("fas")) {
     //Unlike
-    postLink("/app/" + name + "/dislike", (d) => {
+    postLink("/api/app/" + name + "/dislike", (d) => {
       ele.parent().html("<i class=\"far fa-thumbs-up mr-1 hover-pointer hover-150\" onclick=\"likeOnClick(this, '" + name +  "')\"></i>" + d)
     })
   } else {
     //like
-    postLink("/app/" + name + "/like", (d) => {
+    postLink("/api/app/" + name + "/like", (d) => {
       ele.parent().html("<i class=\"fas fa-thumbs-up mr-1 hover-pointer hover-150\" onclick=\"likeOnClick(this, '" + name +  "')\"></i>" + d)
     })
   }

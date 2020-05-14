@@ -1,11 +1,8 @@
 package app
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net"
-	"net/http"
 	"net/url"
 	"strings"
 
@@ -13,33 +10,21 @@ import (
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/apidata/application"
 	"github.com/Z-M-Huang/Tools/utils"
-	"github.com/julienschmidt/httprouter"
+	"github.com/gin-gonic/gin"
 )
 
 //DNSLookup look up dns
-func DNSLookup(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
+func DNSLookup(c *gin.Context) {
+	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
 	request := &application.DNSLookupRequest{}
 
-	body, err := ioutil.ReadAll(r.Body)
+	err := c.ShouldBind(&request)
 	if err != nil {
-		utils.Logger.Error(err.Error())
 		response.SetAlert(&data.AlertData{
 			IsDanger: true,
 			Message:  "Invalid lookup request.",
 		})
-		api.WriteResponse(w, response)
-		return
-	}
-
-	err = json.Unmarshal(body, &request)
-	if err != nil {
-		utils.Logger.Error(err.Error())
-		response.SetAlert(&data.AlertData{
-			IsDanger: true,
-			Message:  "Invalid lookup request.",
-		})
-		api.WriteResponse(w, response)
+		api.WriteResponse(c, 200, response)
 		return
 	}
 
@@ -54,7 +39,7 @@ func DNSLookup(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 			IsDanger: true,
 			Message:  "Invalid domain name",
 		})
-		api.WriteResponse(w, response)
+		api.WriteResponse(c, 200, response)
 		return
 	}
 
@@ -63,7 +48,7 @@ func DNSLookup(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 			IsDanger: true,
 			Message:  "Please enter a valid domain name",
 		})
-		api.WriteResponse(w, response)
+		api.WriteResponse(c, 200, response)
 		return
 	}
 
@@ -150,5 +135,5 @@ func DNSLookup(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 
 	response.Data = result
-	api.WriteResponse(w, response)
+	api.WriteResponse(c, 200, response)
 }

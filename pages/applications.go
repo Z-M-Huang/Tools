@@ -12,29 +12,29 @@ import (
 	"github.com/Z-M-Huang/Tools/logic"
 	applicationlogic "github.com/Z-M-Huang/Tools/logic/application"
 	"github.com/Z-M-Huang/Tools/utils"
-	"github.com/julienschmidt/httprouter"
+	"github.com/gin-gonic/gin"
 )
 
 //RenderApplicationPage renders /app/:name
-func RenderApplicationPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
+func RenderApplicationPage(c *gin.Context) {
+	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
 
-	name := ps.ByName("name")
+	name := c.Param("name")
 
 	if name == "" {
-		http.Error(w, "Not Found", http.StatusNotFound)
+		c.String(http.StatusNotFound, "404 Not Found")
 		return
 	}
 
 	appCard := applicationlogic.GetApplicationsByName(name)
 	if appCard == nil {
-		http.Error(w, "Not Found", http.StatusNotFound)
+		c.String(http.StatusNotFound, "404 Not Found")
 		return
 	}
 	response.Header.Title = appCard.Title + " - Fun Apps"
 	response.Header.Description = appCard.Description
 
-	usedApps, err := applicationlogic.GetApplicationUsed(r)
+	usedApps, err := applicationlogic.GetApplicationUsed(c.Request)
 	if err == nil {
 		exists := false
 		for _, str := range usedApps {
@@ -51,14 +51,14 @@ func RenderApplicationPage(w http.ResponseWriter, r *http.Request, ps httprouter
 			if err != nil {
 				utils.Logger.Error(err.Error())
 			} else {
-				logic.SetCookie(w, utils.UsedTokenKey, string(encoded), time.Date(2199, time.December, 31, 23, 59, 59, 0, time.UTC))
+				logic.SetCookie(c, utils.UsedTokenKey, string(encoded), time.Date(2199, time.December, 31, 23, 59, 59, 0, time.UTC))
 			}
 		}
 	} else {
 		utils.Logger.Error(err.Error())
 	}
 
-	utils.Templates.ExecuteTemplate(w, appCard.TemplateName, response)
+	utils.Templates.ExecuteTemplate(c.Writer, appCard.TemplateName, response)
 }
 
 func addApplicationUsage(app *webdata.AppCard) {

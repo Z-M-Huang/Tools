@@ -1,20 +1,18 @@
 package pages
 
 import (
-	"net/http"
-
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/dbentity"
 	applicationlogic "github.com/Z-M-Huang/Tools/logic/application"
 	userlogic "github.com/Z-M-Huang/Tools/logic/user"
 	"github.com/Z-M-Huang/Tools/utils"
-	"github.com/julienschmidt/httprouter"
+	"github.com/gin-gonic/gin"
 )
 
 //HomePage home page /
-func HomePage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
-	claim := r.Context().Value(utils.ClaimCtxKey).(*data.JWTClaim)
+func HomePage(c *gin.Context) {
+	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
+	claim := c.Keys[utils.ClaimCtxKey].(*data.JWTClaim)
 	if !(claim == nil) {
 		user := &dbentity.User{
 			Email: claim.Id,
@@ -35,5 +33,5 @@ func HomePage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	response.Header.Title = "Fun Apps"
 	response.Header.Description = "Fun apps, fun personal small projects, and just for fun."
-	utils.Templates.ExecuteTemplate(w, "homepage.gohtml", response)
+	utils.Templates.ExecuteTemplate(c.Writer, "homepage.gohtml", response)
 }
