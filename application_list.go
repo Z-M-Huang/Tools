@@ -14,6 +14,7 @@ import (
 
 func init() {
 	getAnalyticTools()
+	getConverterTools()
 	getLookupTools()
 	loadAppCardsUsage()
 }
@@ -31,6 +32,19 @@ func getAnalyticTools() {
 		"/app/hilo-simulator", "HiLo Simulator", "Simulate online hi/low betting website result(Provably fair only).")
 
 	tools.AppCards = append(tools.AppCards, betSimulator)
+
+	sortAppCardSlice(tools.AppCards)
+	utils.AppList = append(utils.AppList, tools)
+}
+
+func getConverterTools() {
+	tools := &webdata.AppCategory{
+		Category: "Converter",
+	}
+
+	encoderDecoder := newAppCart("string-encoder-decoder", "string_encoder_decoder.gohtml", "", "fas fa-receipt",
+		"/app/string-encoder-decoder", "Encoder Decoder", "Convert string encoding based on request.")
+	tools.AppCards = append(tools.AppCards, encoderDecoder)
 
 	sortAppCardSlice(tools.AppCards)
 	utils.AppList = append(utils.AppList, tools)

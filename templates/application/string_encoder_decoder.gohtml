@@ -1,0 +1,64 @@
+{{template "header" .Header}}
+<h1>String Encoder/Decoder</h1>
+
+<p>Encode/Decode string to various encodings.</p>
+<p class="text-success">Feel free to click the result content and it will be clipped automatically</p>
+
+<form id="encodeDecodeForm">
+  <div class="row">
+    <div class="card border-primary col-sm-5 mb-3">
+      <div class="card-body">
+        <h4 class="card-title">String to Encode/Decode</h4>
+        <textarea class="form-control" id="requestString" name="requestString" rows="20"></textarea>
+      </div>
+    </div>
+    <span class="col-sm-2 my-auto">
+      <div class="form-group mb-3">
+        <label for="encoding">Type</label>
+        <select class="form-control" id="type" name="type">
+          <option value="Base32">Base32</option>
+          <option value="Base64">Base64</option>
+          <option value="URL" selected>URL</option>
+        </select>
+      </div>
+      <input type="text" name="action" id="action" style="display: none;"/>
+      <button type="submit" class="btn btn-primary btn-lg btn-block mb-3" id="encodeBtn">Encode<i class="fas fa-arrow-circle-right ml-3"></i></button>
+      <button type="submit" class="btn btn-primary btn-lg btn-block mb-3" id="decodeBtn">Decode<i class="fas fa-arrow-circle-right ml-3"></i></button>
+    </span>
+    <div class="card border-primary mb-3 col-sm-5">
+      <div class="card-body">
+        <h4 class="card-title">Encode/Decode Result</h4>
+        <textarea class="form-control" id="encodeDecodeResult" rows="20" onclick="copyValueOnClick(this)" readonly></textarea>
+      </div>
+    </div>
+  </div>
+</form>
+
+<script>
+  bindForm("encodeDecodeForm", "/api/string/encodedecode", (d) => {
+    if (d != null && d != undefined) {
+      var txtArea = $("#encodeDecodeResult");
+      txtArea.val("");
+      var result = "";
+      $.each(d, (i, val) => {
+        result = result + val;
+        if (i != (d.length - 1)){
+          result = result + "\r\n";
+        }
+      })
+      txtArea.val(result);
+    }
+  })
+
+  $("#encodeBtn").on('click', (e) => {
+    $("#action").val("encode");
+  })
+
+  
+  $("#decodeBtn").on('click', (e) => {
+    $("#action").val("decode");
+  })
+
+</script>
+
+{{template "footer"}}

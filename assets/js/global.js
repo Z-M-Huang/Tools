@@ -284,7 +284,7 @@ function showAlertCondition(alert) {
 }
 
 /*******************************************************
- *                    Parsing functions
+ *                    onClick functions
  *******************************************************/
 function styleChangeOnClick(styleName) {
   var d = new Date();
@@ -292,6 +292,19 @@ function styleChangeOnClick(styleName) {
   d.setTime(d.getTime() + 3153600000000);
   document.cookie = "page_style=" + styleName + "; expires=" + d.toUTCString() + ";path=/";
   location.reload();
+}
+
+function copyValueOnClick(ele) {
+  navigator.permissions.query({name: "clipboard-write"}).then(result => {
+    if (result.state == "granted" || result.state == "prompt") {
+      navigator.clipboard.writeText($(ele).val()).then(function() {
+        showAlertSuccess("Text Copied!.", true, 3000);
+      }, function() {
+        showAlertWarning("Failed to copy text.", true, 3000);
+      })
+    }
+  });
+  navigator.clipboard.readText().then()
 }
 
 /*******************************************************

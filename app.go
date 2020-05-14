@@ -220,6 +220,7 @@ func main() {
 	router.POST("/api/hilo-simulator/simulate", apiHandler(false, appApis.HILOSimulate))
 	router.POST("/api/hilo-simulator/verify", apiHandler(false, appApis.HILOVerify))
 	router.POST("/api/dns-lookup/lookup", apiHandler(false, appApis.DNSLookup))
+	router.POST("/api/string/encodedecode", apiHandler(false, appApis.EncodeDecode))
 	router.POST("/app/:name/like", apiHandler(true, appApis.Like))
 	router.POST("/app/:name/dislike", apiHandler(true, appApis.Dislike))
 
