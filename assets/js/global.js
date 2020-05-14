@@ -304,7 +304,6 @@ function copyValueOnClick(ele) {
       })
     }
   });
-  navigator.clipboard.readText().then()
 }
 
 /*******************************************************
