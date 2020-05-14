@@ -34,5 +34,6 @@ func HomePage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 
 	response.Header.Title = "Fun Apps"
+	response.Header.Description = "Fun apps, fun personal small projects, and just for fun."
 	utils.Templates.ExecuteTemplate(w, "homepage.gohtml", response)
 }

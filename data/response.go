@@ -9,6 +9,7 @@ type Response struct {
 //HeaderData header data
 type HeaderData struct {
 	Title           string
+	Description     string
 	ResourceVersion string
 	PageStyle       *PageStyleData `json:",omitempty"`
 	Nav             *NavData       `json:",omitempty"`

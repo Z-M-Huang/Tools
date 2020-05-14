@@ -16,6 +16,7 @@ func SignupPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	if r.Context().Value(utils.ClaimCtxKey).(*data.JWTClaim) == nil {
 		response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
 		response.Header.Title = "Signup - Fun Apps"
+		response.Header.Description = "Signup - create an account"
 		utils.Templates.ExecuteTemplate(w, "signup.gohtml", response)
 	} else {
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
@@ -26,6 +27,7 @@ func SignupPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 func LoginPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
 	response.Header.Title = "Login - Fun Apps"
+	response.Header.Description = "Login"
 	redirectURL, ok := r.URL.Query()["redirect"]
 	if ok && len(redirectURL) > 0 {
 		response.SetAlert(&data.AlertData{
@@ -44,6 +46,7 @@ func LoginPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 func AccountPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
 	response.Header.Title = "Account - Fun Apps"
+	response.Header.Description = "Manage account"
 	claim := r.Context().Value(utils.ClaimCtxKey).(*data.JWTClaim)
 	user := &dbentity.User{
 		Email: claim.Id,

@@ -32,6 +32,7 @@ func RenderApplicationPage(w http.ResponseWriter, r *http.Request, ps httprouter
 		return
 	}
 	response.Header.Title = appCard.Title + " - Fun Apps"
+	response.Header.Description = appCard.Description
 
 	usedApps, err := applicationlogic.GetApplicationUsed(r)
 	if err == nil {
