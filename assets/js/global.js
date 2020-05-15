@@ -1,6 +1,9 @@
 function logout() {
-  clearCookie("session_token");
-  document.location.href = "/";
+  postLink("/api/logout", (d) => {
+    if (d != null && d != undefined && d) {
+      location.reload();
+    }
+  })
 }
 
 function clearCookie(name) {

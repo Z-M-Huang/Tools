@@ -29,7 +29,7 @@ func Save(tx *gorm.DB, u *dbentity.User) error {
 
 //GenerateJWTToken generates JWT token
 func GenerateJWTToken(audience, emailAddress, username, imageURL string) (string, time.Time, error) {
-	expiresAt := time.Now().Add(24 * time.Hour)
+	expiresAt := time.Now().Add(30 * 24 * time.Hour)
 	claim := &data.JWTClaim{
 		ImageURL: imageURL,
 		StandardClaims: jwt.StandardClaims{

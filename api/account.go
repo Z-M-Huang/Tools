@@ -108,7 +108,15 @@ func Login(c *gin.Context) {
 		}
 	}
 	response.Data = result
-	logic.SetCookie(c, utils.SessionTokenKey, tokenStr, expiresAt, false)
+	logic.SetCookie(c, utils.SessionTokenKey, tokenStr, expiresAt, true)
+	WriteResponse(c, 200, response)
+}
+
+//Logout logout
+func Logout(c *gin.Context) {
+	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
+	logic.SetCookie(c, utils.SessionTokenKey, "", time.Now().AddDate(-10, 1, 1), true)
+	response.Data = true
 	WriteResponse(c, 200, response)
 }
 
@@ -207,7 +215,7 @@ func SignUp(c *gin.Context) {
 		WriteUnexpectedError(c, response)
 	}
 
-	logic.SetCookie(c, utils.SessionTokenKey, tokenStr, expiresAt, false)
+	logic.SetCookie(c, utils.SessionTokenKey, tokenStr, expiresAt, true)
 	response.Data = true
 	WriteResponse(c, 200, response)
 	return

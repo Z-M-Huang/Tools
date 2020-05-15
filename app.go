@@ -112,6 +112,7 @@ func main() {
 	router.GET("/google_login", api.GoogleLogin)
 	router.GET("/google_oauth", api.GoogleCallback)
 	apiNoAuth.POST("/login", api.Login)
+	apiNoAuth.POST("/logout", api.Logout)
 	apiNoAuth.POST("/signup", api.SignUp)
 	apiAuthRequired.POST("/account/update/password", api.UpdatePassword)
 
