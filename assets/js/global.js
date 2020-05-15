@@ -15,11 +15,6 @@ function getCookieValue(name) {
   var parts = value.split("; " + name + "=");
   if (parts.length == 2) return parts.pop().split(";").shift();
 }
-
-function onClickRedirect(url) {
-  window.location.href = url
-}
-
 /*******************************************************
  *                    Like/Dislike Section
  *******************************************************/
@@ -298,17 +293,26 @@ function styleChangeOnClick(styleName) {
 }
 
 function copyValueOnClick(ele) {
-  navigator.permissions.query({name: "clipboard-write"}).then(result => {
-    if (result.state == "granted" || result.state == "prompt") {
-      navigator.clipboard.writeText($(ele).val()).then(function() {
-        showAlertSuccess("Text Copied!.", true, 3000);
-      }, function() {
-        showAlertWarning("Failed to copy text.", true, 3000);
-      })
-    }
-  });
+  var e = $(ele);
+  if (e.val().length > 0) {
+    navigator.permissions.query({ name: "clipboard-write" }).then((result) => {
+      if (result.state == "granted" || result.state == "prompt") {
+        navigator.clipboard.writeText(e.val()).then(
+          function () {
+            showAlertSuccess("Text Copied!.", true, 3000);
+          },
+          function () {
+            showAlertWarning("Failed to copy text.", true, 3000);
+          }
+        );
+      }
+    });
+  }
 }
 
+function onClickRedirect(url) {
+  window.location.href = url
+}
 /*******************************************************
  *                    Parsing functions
  *******************************************************/
