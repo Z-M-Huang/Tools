@@ -11,6 +11,7 @@ type Configuration struct {
 	Host            string
 	ResourceVersion string
 
+	IsHTTPS bool
 	IsDebug bool
 }
 
@@ -36,5 +37,4 @@ type DatabaseConfiguration struct {
 //SitemapConfiguration sitemap generation config
 type SitemapConfiguration struct {
 	GenerateSitemap bool
-	IsHTTPS         bool
 }

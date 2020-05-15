@@ -1,27 +1,23 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/Z-M-Huang/Tools/api"
 	appApis "github.com/Z-M-Huang/Tools/api/app"
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/logic"
-	userlogic "github.com/Z-M-Huang/Tools/logic/user"
 	"github.com/Z-M-Huang/Tools/pages"
 	"github.com/Z-M-Huang/Tools/utils"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 )
 
 func apiAuthHandler(requireToken bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		claim, err := getClaimFromHeaderAndRenew(c)
+		claim, err := logic.GetClaimFromHeaderAndRenew(c)
 		if requireToken && (err != nil || claim == nil) {
 			c.String(http.StatusUnauthorized, "Unauthorized")
 			return
@@ -40,7 +36,7 @@ func pageStyleHandler() gin.HandlerFunc {
 		if err == nil && val != "" {
 			style = val
 		} else {
-			logic.SetCookie(c, utils.PageStyleCookieKey, "default", time.Now().AddDate(100, 0, 0))
+			logic.SetCookie(c, utils.PageStyleCookieKey, "default", time.Now().AddDate(100, 0, 0), true)
 		}
 		response.SetNavStyleName(logic.GetPageStyle(style))
 		c.Next()
@@ -55,7 +51,7 @@ func pageAuthHandler(requireToken bool) gin.HandlerFunc {
 			},
 		}
 
-		claim, err := getClaimFromCookieAndRenew(c)
+		claim, err := logic.GetClaimFromCookieAndRenew(c)
 		if requireToken && (err != nil || claim == nil) {
 			c.Redirect(http.StatusTemporaryRedirect, "/login?redirect="+c.Request.URL.Path)
 			c.Abort()
@@ -72,72 +68,13 @@ func pageAuthHandler(requireToken bool) gin.HandlerFunc {
 	}
 }
 
-func getClaimFromCookieAndRenew(c *gin.Context) (*data.JWTClaim, error) {
-	val, err := c.Cookie(utils.SessionTokenKey)
-	if err != nil || val == "" {
-		return nil, nil
-	}
-	claim, err := isTokenValid(val)
-	if err != nil {
-		return nil, err
-	}
-	if time.Now().UTC().Sub(time.Unix(claim.ExpiresAt, 0)).Hours() < 24 {
-		tokenStr, expiresAt, err := userlogic.GenerateJWTToken(claim.Audience, claim.Id, claim.Subject, claim.ImageURL)
-		if err != nil {
-			utils.Logger.Sugar().Errorf("failed to generate jwt token %s", err.Error())
-		} else {
-			logic.SetCookie(c, utils.SessionTokenKey, tokenStr, expiresAt)
-		}
-	}
-	return claim, nil
-}
-
-func getClaimFromHeaderAndRenew(c *gin.Context) (*data.JWTClaim, error) {
-	token := c.GetHeader("Authorization")
-	if token == "" || !strings.Contains(token, "Bearer ") {
-		return nil, errors.New("Unauthorized")
-	}
-
-	token = strings.ReplaceAll(token, "Bearer ", "")
-	claim, err := isTokenValid(token)
-	if err != nil {
-		return nil, errors.New("Unauthorized")
-	}
-	if time.Now().UTC().Sub(time.Unix(claim.ExpiresAt, 0)).Hours() < 24 {
-		tokenStr, expiresAt, err := userlogic.GenerateJWTToken(claim.Audience, claim.Id, claim.Subject, claim.ImageURL)
-		if err != nil {
-			utils.Logger.Sugar().Errorf("failed to generate jwt token %s", err.Error())
-		} else {
-			logic.SetCookie(c, utils.SessionTokenKey, tokenStr, expiresAt)
-		}
-	}
-	return claim, nil
-}
-
-func isTokenValid(token string) (*data.JWTClaim, error) {
-	claims := &data.JWTClaim{}
-	tkn, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
-		return utils.Config.JwtKey, nil
-	})
-
-	if err != nil {
-		utils.Logger.Error(err.Error())
-		return nil, fmt.Errorf("Unauthenticated")
-	}
-
-	if !tkn.Valid || !claims.VerifyIssuer(utils.Config.Host, true) {
-		return nil, fmt.Errorf("Invalid Token")
-	}
-
-	return claims, nil
-}
-
 func main() {
 	router := gin.Default()
 
 	router.Use(gzip.Gzip(gzip.DefaultCompression))
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
+	router.SetHTMLTemplate(utils.Templates)
 
 	router.Static(fmt.Sprintf("/assets/%s", utils.Config.ResourceVersion), "assets/")
 	router.Static(fmt.Sprintf("/vendor/%s", utils.Config.ResourceVersion), "node_modules/")

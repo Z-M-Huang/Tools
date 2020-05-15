@@ -33,5 +33,5 @@ func HomePage(c *gin.Context) {
 
 	response.Header.Title = "Fun Apps"
 	response.Header.Description = "Fun apps, fun personal small projects, and just for fun."
-	utils.Templates.ExecuteTemplate(c.Writer, "homepage.gohtml", response)
+	c.HTML(200, "homepage.gohtml", response)
 }

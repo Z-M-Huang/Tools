@@ -35,6 +35,9 @@ func init() {
 		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"},
 		Endpoint:     google.Endpoint,
 	}
+	if !utils.Config.IsHTTPS {
+		googleOauthConfig.RedirectURL = fmt.Sprintf("http://%s/google_oauth", utils.Config.Host)
+	}
 }
 
 //Login request
@@ -105,7 +108,7 @@ func Login(c *gin.Context) {
 		}
 	}
 	response.Data = result
-	logic.SetCookie(c, utils.SessionTokenKey, tokenStr, expiresAt)
+	logic.SetCookie(c, utils.SessionTokenKey, tokenStr, expiresAt, false)
 	WriteResponse(c, 200, response)
 }
 
@@ -204,7 +207,7 @@ func SignUp(c *gin.Context) {
 		WriteUnexpectedError(c, response)
 	}
 
-	logic.SetCookie(c, utils.SessionTokenKey, tokenStr, expiresAt)
+	logic.SetCookie(c, utils.SessionTokenKey, tokenStr, expiresAt, false)
 	response.Data = true
 	WriteResponse(c, 200, response)
 	return
@@ -330,7 +333,7 @@ func GoogleCallback(c *gin.Context) {
 	if err != nil {
 		utils.Logger.Sugar().Errorf("failed to generate jwt token %s", err.Error())
 	} else {
-		logic.SetCookie(c, utils.SessionTokenKey, tokenStr, expiresAt)
+		logic.SetCookie(c, utils.SessionTokenKey, tokenStr, expiresAt, false)
 	}
 	c.Redirect(http.StatusTemporaryRedirect, "/")
 }

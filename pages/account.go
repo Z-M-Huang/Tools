@@ -17,7 +17,7 @@ func SignupPage(c *gin.Context) {
 		response := c.Keys[utils.ResponseCtxKey].(*data.Response)
 		response.Header.Title = "Signup - Fun Apps"
 		response.Header.Description = "Signup - create an account"
-		utils.Templates.ExecuteTemplate(c.Writer, "signup.gohtml", response)
+		c.HTML(200, "signup.gohtml", response)
 	} else {
 		c.Redirect(http.StatusTemporaryRedirect, "/")
 	}
@@ -36,7 +36,7 @@ func LoginPage(c *gin.Context) {
 		})
 	}
 	if c.Keys[utils.ClaimCtxKey].(*data.JWTClaim) == nil {
-		utils.Templates.ExecuteTemplate(c.Writer, "login.gohtml", response)
+		c.HTML(200, "login.gohtml", response)
 	} else {
 		c.Redirect(http.StatusTemporaryRedirect, "/")
 	}
@@ -63,5 +63,5 @@ func AccountPage(c *gin.Context) {
 			HasPassword: user.Password != "",
 		}
 	}
-	utils.Templates.ExecuteTemplate(c.Writer, "account.gohtml", response)
+	c.HTML(200, "account.gohtml", response)
 }

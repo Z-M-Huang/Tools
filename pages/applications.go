@@ -51,14 +51,14 @@ func RenderApplicationPage(c *gin.Context) {
 			if err != nil {
 				utils.Logger.Error(err.Error())
 			} else {
-				logic.SetCookie(c, utils.UsedTokenKey, string(encoded), time.Date(2199, time.December, 31, 23, 59, 59, 0, time.UTC))
+				logic.SetCookie(c, utils.UsedTokenKey, string(encoded), time.Date(2199, time.December, 31, 23, 59, 59, 0, time.UTC), true)
 			}
 		}
 	} else {
 		utils.Logger.Error(err.Error())
 	}
 
-	utils.Templates.ExecuteTemplate(c.Writer, appCard.TemplateName, response)
+	c.HTML(200, appCard.TemplateName, response)
 }
 
 func addApplicationUsage(app *webdata.AppCard) {

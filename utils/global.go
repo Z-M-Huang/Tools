@@ -121,12 +121,12 @@ func initConfig() {
 		}
 	}
 
-	sitemapHTTPS := false
-	sitemapHTTPSStr := strings.TrimSpace(os.Getenv("SITEMAP_HTTPS"))
-	if sitemapHTTPSStr == "" {
-		Logger.Warn("SITEMAP_HTTPS is empty, set to default: false")
+	isHTTPS := false
+	isHTTPSStr := strings.TrimSpace(os.Getenv("HTTPS"))
+	if isHTTPSStr == "" {
+		Logger.Warn("HTTPS is empty, set to default: false")
 	} else {
-		sitemapHTTPS, err = strconv.ParseBool(sitemapHTTPSStr)
+		isHTTPS, err = strconv.ParseBool(isHTTPSStr)
 		if err != nil {
 			Logger.Error("Failed to parse SITEMAP_HTTPS to boolean, set to default: false")
 		}
@@ -150,9 +150,9 @@ func initConfig() {
 		Host:            strings.TrimSuffix(strings.TrimSpace(os.Getenv("HOST")), "/"),
 		ResourceVersion: strings.TrimSpace(os.Getenv("RESOURCE_VERSION")),
 		IsDebug:         os.Getenv("DEBUG") != "",
+		IsHTTPS:         isHTTPS,
 		SitemapConfig: &data.SitemapConfiguration{
 			GenerateSitemap: genSitemap,
-			IsHTTPS:         sitemapHTTPS,
 		},
 	}
 
