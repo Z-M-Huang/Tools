@@ -55,10 +55,25 @@ func RenderApplicationPage(c *gin.Context) {
 			}
 		}
 	} else {
+		logic.SetCookie(c, utils.UsedTokenKey, "", time.Date(2199, time.December, 31, 23, 59, 59, 0, time.UTC), true)
 		utils.Logger.Error(err.Error())
 	}
 
+	response.Data = loadAppSpecificData(c, appCard.Name)
+
 	c.HTML(200, appCard.TemplateName, response)
+}
+
+func loadAppSpecificData(c *gin.Context, appName string) interface{} {
+	switch appName {
+	case "request-bin":
+		id := c.Param("id")
+		if id == "" {
+			return nil
+		}
+		return applicationlogic.GetRequestBinHistory(c, id)
+	}
+	return nil
 }
 
 func addApplicationUsage(app *webdata.AppCard) {

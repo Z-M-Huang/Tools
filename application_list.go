@@ -16,6 +16,7 @@ func init() {
 	getAnalyticTools()
 	getFormatTools()
 	getLookupTools()
+	getWebUtils()
 	loadAppCardsUsage()
 }
 
@@ -57,6 +58,19 @@ func getLookupTools() {
 
 	dnsLookup := newAppCart("dns-lookup", "dns_lookup.gohtml", "", "fas fa-receipt",
 		"/app/dns-lookup", "DNS Lookup", "Lookup given domain's DNS record (A, CNAME, PTR, NS, MX, TXT, and etc.")
+	tools.AppCards = append(tools.AppCards, dnsLookup)
+
+	sortAppCardSlice(tools.AppCards)
+	utils.AppList = append(utils.AppList, tools)
+}
+
+func getWebUtils() {
+	tools := &webdata.AppCategory{
+		Category: "Web Utils",
+	}
+
+	dnsLookup := newAppCart("request-bin", "request_bin.gohtml", "", "fas fa-receipt",
+		"/app/request-bin", "Request Bin", "Receive and visualize HTTP requests")
 	tools.AppCards = append(tools.AppCards, dnsLookup)
 
 	sortAppCardSlice(tools.AppCards)

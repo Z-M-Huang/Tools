@@ -25,67 +25,14 @@ func HILOSimulate(c *gin.Context) {
 		return
 	}
 
-	simConfig := &hilosimulator.Configuration{
-		OnWin:  &hilosimulator.ConditionalChangeConfiguration{},
-		OnLoss: &hilosimulator.ConditionalChangeConfiguration{},
-	}
-
-	//Total Stack
-	simConfig.TotalStack, err = api.ParseFloat(request.TotalStack, 64, true)
-	if err != nil {
+	if request.RollAmount < 0 {
 		response.SetAlert(&data.AlertData{
 			IsWarning: true,
-			Message:   "Total Stack: " + err.Error(),
+			Message:   "Roll Amount: Cannot be negative number",
 		})
 		api.WriteResponse(c, 200, response)
 		return
-	}
-
-	//Win Chance
-	simConfig.WinChance, err = api.ParseFloat(request.WinChance, 64, true)
-	if err != nil {
-		response.SetAlert(&data.AlertData{
-			IsWarning: true,
-			Message:   "Win Chance: " + err.Error(),
-		})
-		api.WriteResponse(c, 200, response)
-		return
-	}
-
-	//Odds
-	simConfig.Odds, err = api.ParseFloat(request.Odds, 64, true)
-	if err != nil {
-		response.SetAlert(&data.AlertData{
-			IsWarning: true,
-			Message:   "Odds: " + err.Error(),
-		})
-		api.WriteResponse(c, 200, response)
-		return
-	}
-
-	//Base Bet
-	simConfig.BaseBet, err = api.ParseFloat(request.BaseBet, 64, true)
-	if err != nil {
-		response.SetAlert(&data.AlertData{
-			IsWarning: true,
-			Message:   "Base Bet: " + err.Error(),
-		})
-		api.WriteResponse(c, 200, response)
-		return
-	}
-
-	//Rolls Amount
-	simConfig.RollAmount, err = api.ParseUint(request.RollAmount, 10, 64, true)
-	if err != nil {
-		response.SetAlert(&data.AlertData{
-			IsWarning: true,
-			Message:   "Roll Amount: " + err.Error(),
-		})
-		api.WriteResponse(c, 200, response)
-		return
-	}
-
-	if simConfig.RollAmount > 50000 {
+	} else if request.RollAmount > 50000 {
 		response.SetAlert(&data.AlertData{
 			IsDanger: true,
 			Message:  "Requested Roll Amount is too large. Please do batches and keep the server health. Thank you",
@@ -94,148 +41,29 @@ func HILOSimulate(c *gin.Context) {
 		return
 	}
 
-	//OnWin Return to Base Bet
-	simConfig.OnWin.ReturnToBaseBet, err = api.ParseBool(request.OnWinReturnToBaseBet, false)
-	if err != nil {
-		response.SetAlert(&data.AlertData{
-			IsWarning: true,
-			Message:   "On Win Return to Base Bet: " + err.Error(),
-		})
-		api.WriteResponse(c, 200, response)
-		return
-	}
-	simConfig.OnWin.IncreaseBet = !simConfig.OnWin.ReturnToBaseBet
-
-	if simConfig.OnWin.IncreaseBet {
-		//OnWin Increate By
-		simConfig.OnWin.IncreaseBetBy, err = api.ParseFloat(request.OnWinIncreaseBy, 64, true)
-		if err != nil {
-			response.SetAlert(&data.AlertData{
-				IsWarning: true,
-				Message:   "On Win Increase Bet By: " + err.Error(),
-			})
-			api.WriteResponse(c, 200, response)
-			return
-		}
-		simConfig.OnWin.IncreaseBetBy = simConfig.OnWin.IncreaseBetBy / 100
-	}
-
-	//OnWin Change Odds
-	simConfig.OnWin.ChangeOdds, err = api.ParseBool(request.OnWinChangeOdds, false)
-	if err != nil {
-		response.SetAlert(&data.AlertData{
-			IsWarning: true,
-			Message:   "On Win Change Odds: " + err.Error(),
-		})
-		api.WriteResponse(c, 200, response)
-		return
-	}
-
-	if simConfig.OnWin.ChangeOdds {
-		//OnWin Change Odds To
-		simConfig.OnWin.ChangeOddsTo, err = api.ParseFloat(request.OnWinChangeOddsTo, 64, true)
-		if err != nil {
-			response.SetAlert(&data.AlertData{
-				IsWarning: true,
-				Message:   "On Win Change Odds to: " + err.Error(),
-			})
-			api.WriteResponse(c, 200, response)
-			return
-		}
-
-		//OnWin New Win Chance
-		simConfig.OnWin.NewWinChance, err = api.ParseFloat(request.OnWinNewOddsWinChance, 64, true)
-		if err != nil {
-			response.SetAlert(&data.AlertData{
-				IsWarning: true,
-				Message:   "On Win New Win Chance: " + err.Error(),
-			})
-			api.WriteResponse(c, 200, response)
-			return
-		}
-	}
-
-	//OnLoss Return to Base Bet
-	simConfig.OnLoss.ReturnToBaseBet, err = api.ParseBool(request.OnLossReturnToBaseBet, false)
-	if err != nil {
-		response.SetAlert(&data.AlertData{
-			IsWarning: true,
-			Message:   "On Loss Return to Base Bet: " + err.Error(),
-		})
-		api.WriteResponse(c, 200, response)
-		return
+	simConfig := &hilosimulator.Configuration{
+		TotalStack: request.TotalStack,
+		WinChance:  request.WinChance,
+		Odds:       request.Odds,
+		BaseBet:    request.BaseBet,
+		RollAmount: uint64(request.RollAmount),
+		OnWin: &hilosimulator.ConditionalChangeConfiguration{
+			ReturnToBaseBet: request.OnWinReturnToBaseBet,
+			IncreaseBet:     !request.OnWinReturnToBaseBet,
+			IncreaseBetBy:   request.OnWinIncreaseBy / 100,
+			ChangeOdds:      request.OnWinChangeOdds,
+			NewWinChance:    request.OnWinNewOddsWinChance / 100,
+		},
+		OnLoss: &hilosimulator.ConditionalChangeConfiguration{
+			ReturnToBaseBet: request.OnLossReturnToBaseBet,
+			IncreaseBet:     !request.OnLossReturnToBaseBet,
+			IncreaseBetBy:   request.OnLossIncreaseBy / 100,
+			ChangeOdds:      request.OnLossChangeOdds,
+			NewWinChance:    request.OnLossNewOddsWinChance / 100,
+		},
 	}
 
 	simConfig.OnLoss.IncreaseBet = !simConfig.OnLoss.ReturnToBaseBet
-
-	if simConfig.OnLoss.IncreaseBet {
-		//OnLoss Increate By
-		simConfig.OnLoss.IncreaseBetBy, err = api.ParseFloat(request.OnLossIncreaseBy, 64, true)
-		if err != nil {
-			response.SetAlert(&data.AlertData{
-				IsWarning: true,
-				Message:   "On Loss Increase Bet By: " + err.Error(),
-			})
-			api.WriteResponse(c, 200, response)
-			return
-		}
-		simConfig.OnLoss.IncreaseBetBy = simConfig.OnLoss.IncreaseBetBy / 100
-	}
-
-	//OnLoss Change Odds
-	simConfig.OnLoss.ChangeOdds, err = api.ParseBool(request.OnLossChangeOdds, false)
-	if err != nil {
-		response.SetAlert(&data.AlertData{
-			IsWarning: true,
-			Message:   "On Loss Change Odds: " + err.Error(),
-		})
-		api.WriteResponse(c, 200, response)
-		return
-	}
-
-	if simConfig.OnLoss.ChangeOdds {
-		//OnLoss Change Odds To
-		simConfig.OnLoss.ChangeOddsTo, err = api.ParseFloat(request.OnLossChangeOddsTo, 64, true)
-		if err != nil {
-			response.SetAlert(&data.AlertData{
-				IsWarning: true,
-				Message:   "On Loss Change Odds to: " + err.Error(),
-			})
-			api.WriteResponse(c, 200, response)
-			return
-		}
-
-		//OnLoss New Win Chance
-		simConfig.OnLoss.NewWinChance, err = api.ParseFloat(request.OnLossNewOddsWinChance, 64, true)
-		if err != nil {
-			response.SetAlert(&data.AlertData{
-				IsWarning: true,
-				Message:   "On Loss New Win Chance: " + err.Error(),
-			})
-			api.WriteResponse(c, 200, response)
-			return
-		}
-	}
-
-	simConfig.RandomClientSeed, err = api.ParseBool(request.RandomClientSeed, false)
-	if err != nil {
-		response.SetAlert(&data.AlertData{
-			IsWarning: true,
-			Message:   "Random Client Seed: " + err.Error(),
-		})
-		api.WriteResponse(c, 200, response)
-		return
-	}
-
-	simConfig.AlternateHiLo, err = api.ParseBool(request.AlternateHiLo, false)
-	if err != nil {
-		response.SetAlert(&data.AlertData{
-			IsWarning: true,
-			Message:   "Alternate Bet Hi/Low: " + err.Error(),
-		})
-		api.WriteResponse(c, 200, response)
-		return
-	}
 
 	result, err := hilosimulator.Simulate(simConfig)
 	if err != nil {

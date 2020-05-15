@@ -2,7 +2,6 @@ package app
 
 import (
 	"math"
-	"strconv"
 
 	"github.com/Z-M-Huang/Tools/api"
 	"github.com/Z-M-Huang/Tools/data"
@@ -27,29 +26,9 @@ func KellyCriterionSimulate(c *gin.Context) {
 		return
 	}
 
-	maxPayout, err := strconv.ParseFloat(request.MaxWinChancePayout, 64)
-	if err != nil {
-		response.SetAlert(&data.AlertData{
-			IsWarning: true,
-			Message:   "Max Payout needs to be a number.",
-		})
-		api.WriteResponse(c, 200, response)
-		return
-	}
-
-	maxChance, err := strconv.ParseFloat(request.MaxWinChance, 64)
-	if err != nil {
-		response.SetAlert(&data.AlertData{
-			IsWarning: true,
-			Message:   "Max Chance needs to be a number.",
-		})
-		api.WriteResponse(c, 200, response)
-		return
-	}
-
-	total := maxChance * maxPayout / 100
+	total := request.MaxWinChance * request.MaxWinChancePayout / 100
 	for i := 0; i < 1000; i++ {
-		payout := float64(maxPayout) + (float64(i) * 0.01)
+		payout := float64(request.MaxWinChancePayout) + (float64(i) * 0.01)
 		chance := float64(total / payout)
 		simulationResult = append(simulationResult, &application.KellyCriterionSimulationResponse{
 			Payout: math.Round(payout*100) / 100,

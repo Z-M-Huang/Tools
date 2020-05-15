@@ -32,7 +32,7 @@ func GetClaimFromCookieAndRenew(c *gin.Context) (*data.JWTClaim, error) {
 	if err != nil {
 		return nil, err
 	}
-	if time.Now().UTC().Sub(time.Unix(claim.ExpiresAt, 0)).Hours() < 24 {
+	if time.Unix(claim.ExpiresAt, 0).Sub(time.Now().UTC()).Hours() < 24 {
 		tokenStr, expiresAt, err := userlogic.GenerateJWTToken(claim.Audience, claim.Id, claim.Subject, claim.ImageURL)
 		if err != nil {
 			utils.Logger.Sugar().Errorf("failed to generate jwt token %s", err.Error())
@@ -55,7 +55,7 @@ func GetClaimFromHeaderAndRenew(c *gin.Context) (*data.JWTClaim, error) {
 	if err != nil {
 		return nil, errors.New("Unauthorized")
 	}
-	if time.Now().UTC().Sub(time.Unix(claim.ExpiresAt, 0)).Hours() < 24 {
+	if time.Unix(claim.ExpiresAt, 0).Sub(time.Now().UTC()).Hours() < 24 {
 		tokenStr, expiresAt, err := userlogic.GenerateJWTToken(claim.Audience, claim.Id, claim.Subject, claim.ImageURL)
 		if err != nil {
 			utils.Logger.Sugar().Errorf("failed to generate jwt token %s", err.Error())

@@ -2,8 +2,8 @@ package application
 
 //KellyCriterionRequest /api/kelly-criterion/simulate request
 type KellyCriterionRequest struct {
-	MaxWinChancePayout string `json:"maxWinChancePayout"`
-	MaxWinChance       string `json:"maxWinChance"`
+	MaxWinChancePayout float64 `json:"maxWinChancePayout" xml:"maxWinChancePayout" form:"maxWinChancePayout" binding:"required"`
+	MaxWinChance       float64 `json:"maxWinChance" xml:"maxWinChance" form:"maxWinChance" binding:"required"`
 }
 
 //KellyCriterionSimulationResponse /api/kelly-criterion/simulate response. Response will be a slice

@@ -39,15 +39,13 @@ function likeOnClick(obj, name) {
  *******************************************************/
 function bindForm(id, url, callback) {
   id = "#" + id;
-  $(id).on("submit", (e) => {
+  var form = $(id);
+  form.on("submit", (e) => {
     e.preventDefault();
-    var data = parseFormToJSON(id);
     $.ajax({
       type: "POST",
       url: url,
-      data: JSON.stringify(data),
-      dataType: "json",
-      contentType: "application/json",
+      data: form.serialize(),
       beforeSend: (xhr) => {
         var sessionToken = getCookieValue("session_token");
         if (
@@ -312,24 +310,6 @@ function copyValueOnClick(ele) {
 
 function onClickRedirect(url) {
   window.location.href = url
-}
-/*******************************************************
- *                    Parsing functions
- *******************************************************/
-function parseFormToJSON(id) {
-  var o = {};
-  var a = $(id).serializeArray();
-  $.each(a, function () {
-    if (o[this.name]) {
-      if (!o[this.name].push) {
-        o[this.name] = [o[this.name]];
-      }
-      o[this.name].push(this.value || "");
-    } else {
-      o[this.name] = this.value || "";
-    }
-  });
-  return o;
 }
 
 /*******************************************************

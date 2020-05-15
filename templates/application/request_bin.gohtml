@@ -1,0 +1,42 @@
+{{template "header" .Header}}
+<h1>Request Bin</h1>
+
+<p>Receive and visualize HTTP requests</p>
+<p class="text-success">Feel free to click the result content and it will be clipped automatically</p>
+
+
+{{ if .Data }}
+<div class="row d-flex justify-content-center">
+  <div class="col-sm-10 form-group row">
+      <h1 for="requestURL" class="col-sm-4 col-form-label text-right">Request URL</h1>
+      <div class="col-sm-8">
+        <input type="text" readonly="" class="form-control form-control-lg" id="requestURL" value="{{.Data.URL}}">
+      </div>
+  </div>
+</div>
+{{else}}
+<form id="createBinForm">
+  <div class="row d-flex mb-2">
+    <div class="col-sm-6 offset-md-3">
+      <button type="submit" class="btn btn-primary btn-lg btn-block">Create New Bin</button>
+    </div>
+  </div>
+  <div class="row justify-content-center">
+    <div class="custom-control custom-switch">
+      <input type="checkbox" class="custom-control-input" id="isPrivate" name="isPrivate" value="true">
+      <label class="custom-control-label" for="isPrivate">Private bin</label>
+    </div>
+  </div>
+</form>
+<script>
+  bindForm("createBinForm", "/api/request-bin/create", (d) => {
+    if (d != null && d != undefined) {
+      if (d.VerificationKey.length != "") {
+        document.cookie = "request_bin_verification_key=" + d.VerificationKey;
+      }
+      document.location.href = d.URL;
+    }
+  })
+</script>
+{{end}}
+{{template "footer"}}

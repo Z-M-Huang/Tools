@@ -119,6 +119,7 @@ func main() {
 
 	//app
 	pageNoAuth.GET("/app/:name", pages.RenderApplicationPage)
+	pageNoAuth.GET("/app/:name/:id", pages.RenderApplicationPage)
 
 	//app api
 	apiNoAuth.POST("/kelly-criterion/simulate", appApis.KellyCriterionSimulate)
@@ -126,6 +127,7 @@ func main() {
 	apiNoAuth.POST("/hilo-simulator/verify", appApis.HILOVerify)
 	apiNoAuth.POST("/dns-lookup/lookup", appApis.DNSLookup)
 	apiNoAuth.POST("/string/encodedecode", appApis.EncodeDecode)
+	apiNoAuth.POST("/request-bin/create", appApis.CreateRequestBin)
 	apiAuthRequired.POST("/app/:name/like", appApis.Like)
 	apiAuthRequired.POST("/app/:name/dislike", appApis.Dislike)
 
