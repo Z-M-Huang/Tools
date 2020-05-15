@@ -14,7 +14,7 @@ require (
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-redis/redis v6.15.7+incompatible
 	github.com/go-sql-driver/mysql v1.5.0 // indirect
-	github.com/golang/protobuf v1.4.1 // indirect
+	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/ikeikeikeike/go-sitemap-generator v1.0.2
 	github.com/imdario/mergo v0.3.9 // indirect
 	github.com/jinzhu/copier v0.0.0-20190924061706-b57f9002281a
@@ -33,7 +33,7 @@ require (
 	golang.org/x/net v0.0.0-20200513185701-a91f0712d120 // indirect
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/sys v0.0.0-20200513112337-417ce2331b5c // indirect
-	golang.org/x/tools v0.0.0-20200513201620-d5fe73897c97 // indirect
+	golang.org/x/tools v0.0.0-20200515010526-7d3b6ebf133d // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
