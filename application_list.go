@@ -14,7 +14,7 @@ import (
 
 func init() {
 	getAnalyticTools()
-	getConverterTools()
+	getFormatTools()
 	getLookupTools()
 	loadAppCardsUsage()
 }
@@ -37,9 +37,9 @@ func getAnalyticTools() {
 	utils.AppList = append(utils.AppList, tools)
 }
 
-func getConverterTools() {
+func getFormatTools() {
 	tools := &webdata.AppCategory{
-		Category: "Converter",
+		Category: "Formatter",
 	}
 
 	encoderDecoder := newAppCart("string-encoder-decoder", "string_encoder_decoder.gohtml", "", "fas fa-receipt",

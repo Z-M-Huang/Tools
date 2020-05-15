@@ -78,6 +78,7 @@ func main() {
 
 	router.Static(fmt.Sprintf("/assets/%s", utils.Config.ResourceVersion), "assets/")
 	router.Static(fmt.Sprintf("/vendor/%s", utils.Config.ResourceVersion), "node_modules/")
+	router.StaticFile("/favicon.ico", "assets/img/favicon.ico")
 
 	if utils.Config.EnableSitemap {
 		sm := utils.BuildSitemap()
