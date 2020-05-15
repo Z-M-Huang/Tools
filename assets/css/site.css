@@ -44,10 +44,6 @@
     margin: auto;
     background-color: white;
   }  
-
-  .modal-dialog {
-    max-width: 600px;
-  }
 }
 
 @media (max-width: 991px) {

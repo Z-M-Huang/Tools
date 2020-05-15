@@ -1,7 +1,10 @@
 package app
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"math"
+	"net/http"
 	"strconv"
 
 	"github.com/Z-M-Huang/Tools/api"
@@ -9,21 +12,31 @@ import (
 	"github.com/Z-M-Huang/Tools/data/apidata/application"
 	"github.com/Z-M-Huang/Tools/utils"
 	kellycriterion "github.com/Z-M-Huang/kelly-criterion"
-	"github.com/gin-gonic/gin"
+	"github.com/julienschmidt/httprouter"
 )
 
 //KellyCriterionSimulate /api/kelly-criterion/simulate
-func KellyCriterionSimulate(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
+func KellyCriterionSimulate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
 	var simulationResult []*application.KellyCriterionSimulationResponse
 	request := &application.KellyCriterionRequest{}
-	err := c.ShouldBind(&request)
+	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		response.SetAlert(&data.AlertData{
 			IsDanger: true,
 			Message:  "Invalid simulation request.",
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(w, response)
+		return
+	}
+
+	err = json.Unmarshal(body, &request)
+	if err != nil {
+		response.SetAlert(&data.AlertData{
+			IsDanger: true,
+			Message:  "Invalid simulation request.",
+		})
+		api.WriteResponse(w, response)
 		return
 	}
 
@@ -33,7 +46,7 @@ func KellyCriterionSimulate(c *gin.Context) {
 			IsWarning: true,
 			Message:   "Max Payout needs to be a number.",
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(w, response)
 		return
 	}
 
@@ -43,7 +56,7 @@ func KellyCriterionSimulate(c *gin.Context) {
 			IsWarning: true,
 			Message:   "Max Chance needs to be a number.",
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(w, response)
 		return
 	}
 
@@ -58,5 +71,5 @@ func KellyCriterionSimulate(c *gin.Context) {
 		})
 	}
 	response.Data = simulationResult
-	api.WriteResponse(c, 200, response)
+	api.WriteResponse(w, response)
 }

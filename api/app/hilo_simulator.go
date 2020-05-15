@@ -1,27 +1,42 @@
 package app
 
 import (
+	"encoding/json"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/Z-M-Huang/Tools/api"
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/apidata/application"
 	"github.com/Z-M-Huang/Tools/utils"
 	hilosimulator "github.com/Z-M-Huang/hilosimulator"
-	"github.com/gin-gonic/gin"
+	"github.com/julienschmidt/httprouter"
 )
 
 //HILOSimulate /api/hilo-simulator/simulate
-func HILOSimulate(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
+func HILOSimulate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
 	request := &application.HiLoSimulateRequest{}
 
-	err := c.ShouldBind(&request)
+	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		utils.Logger.Error(err.Error())
 		response.SetAlert(&data.AlertData{
 			IsDanger: true,
 			Message:  "Invalid simulation request.",
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(w, response)
+		return
+	}
+
+	err = json.Unmarshal(body, &request)
+	if err != nil {
+		utils.Logger.Error(err.Error())
+		response.SetAlert(&data.AlertData{
+			IsDanger: true,
+			Message:  "Invalid simulation request.",
+		})
+		api.WriteResponse(w, response)
 		return
 	}
 
@@ -37,7 +52,7 @@ func HILOSimulate(c *gin.Context) {
 			IsWarning: true,
 			Message:   "Total Stack: " + err.Error(),
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(w, response)
 		return
 	}
 
@@ -48,7 +63,7 @@ func HILOSimulate(c *gin.Context) {
 			IsWarning: true,
 			Message:   "Win Chance: " + err.Error(),
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(w, response)
 		return
 	}
 
@@ -59,7 +74,7 @@ func HILOSimulate(c *gin.Context) {
 			IsWarning: true,
 			Message:   "Odds: " + err.Error(),
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(w, response)
 		return
 	}
 
@@ -70,7 +85,7 @@ func HILOSimulate(c *gin.Context) {
 			IsWarning: true,
 			Message:   "Base Bet: " + err.Error(),
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(w, response)
 		return
 	}
 
@@ -81,7 +96,7 @@ func HILOSimulate(c *gin.Context) {
 			IsWarning: true,
 			Message:   "Roll Amount: " + err.Error(),
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(w, response)
 		return
 	}
 
@@ -90,7 +105,7 @@ func HILOSimulate(c *gin.Context) {
 			IsDanger: true,
 			Message:  "Requested Roll Amount is too large. Please do batches and keep the server health. Thank you",
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(w, response)
 		return
 	}
 
@@ -101,7 +116,7 @@ func HILOSimulate(c *gin.Context) {
 			IsWarning: true,
 			Message:   "On Win Return to Base Bet: " + err.Error(),
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(w, response)
 		return
 	}
 	simConfig.OnWin.IncreaseBet = !simConfig.OnWin.ReturnToBaseBet
@@ -114,7 +129,7 @@ func HILOSimulate(c *gin.Context) {
 				IsWarning: true,
 				Message:   "On Win Increase Bet By: " + err.Error(),
 			})
-			api.WriteResponse(c, 200, response)
+			api.WriteResponse(w, response)
 			return
 		}
 		simConfig.OnWin.IncreaseBetBy = simConfig.OnWin.IncreaseBetBy / 100
@@ -127,7 +142,7 @@ func HILOSimulate(c *gin.Context) {
 			IsWarning: true,
 			Message:   "On Win Change Odds: " + err.Error(),
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(w, response)
 		return
 	}
 
@@ -139,7 +154,7 @@ func HILOSimulate(c *gin.Context) {
 				IsWarning: true,
 				Message:   "On Win Change Odds to: " + err.Error(),
 			})
-			api.WriteResponse(c, 200, response)
+			api.WriteResponse(w, response)
 			return
 		}
 
@@ -150,7 +165,7 @@ func HILOSimulate(c *gin.Context) {
 				IsWarning: true,
 				Message:   "On Win New Win Chance: " + err.Error(),
 			})
-			api.WriteResponse(c, 200, response)
+			api.WriteResponse(w, response)
 			return
 		}
 	}
@@ -162,7 +177,7 @@ func HILOSimulate(c *gin.Context) {
 			IsWarning: true,
 			Message:   "On Loss Return to Base Bet: " + err.Error(),
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(w, response)
 		return
 	}
 
@@ -176,7 +191,7 @@ func HILOSimulate(c *gin.Context) {
 				IsWarning: true,
 				Message:   "On Loss Increase Bet By: " + err.Error(),
 			})
-			api.WriteResponse(c, 200, response)
+			api.WriteResponse(w, response)
 			return
 		}
 		simConfig.OnLoss.IncreaseBetBy = simConfig.OnLoss.IncreaseBetBy / 100
@@ -189,7 +204,7 @@ func HILOSimulate(c *gin.Context) {
 			IsWarning: true,
 			Message:   "On Loss Change Odds: " + err.Error(),
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(w, response)
 		return
 	}
 
@@ -201,7 +216,7 @@ func HILOSimulate(c *gin.Context) {
 				IsWarning: true,
 				Message:   "On Loss Change Odds to: " + err.Error(),
 			})
-			api.WriteResponse(c, 200, response)
+			api.WriteResponse(w, response)
 			return
 		}
 
@@ -212,7 +227,7 @@ func HILOSimulate(c *gin.Context) {
 				IsWarning: true,
 				Message:   "On Loss New Win Chance: " + err.Error(),
 			})
-			api.WriteResponse(c, 200, response)
+			api.WriteResponse(w, response)
 			return
 		}
 	}
@@ -223,7 +238,7 @@ func HILOSimulate(c *gin.Context) {
 			IsWarning: true,
 			Message:   "Random Client Seed: " + err.Error(),
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(w, response)
 		return
 	}
 
@@ -233,7 +248,7 @@ func HILOSimulate(c *gin.Context) {
 			IsWarning: true,
 			Message:   "Alternate Bet Hi/Low: " + err.Error(),
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(w, response)
 		return
 	}
 
@@ -244,27 +259,38 @@ func HILOSimulate(c *gin.Context) {
 			IsDanger: true,
 			Message:  err.Error(),
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(w, response)
 		return
 	}
 
 	response.Data = result
-	api.WriteResponse(c, 200, response)
+	api.WriteResponse(w, response)
 }
 
 //HILOVerify /api/hilo-simulator/verify
-func HILOVerify(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
+func HILOVerify(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
 	request := &application.HiLoVerifyRequest{}
 
-	err := c.ShouldBind(&request)
+	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		utils.Logger.Error(err.Error())
 		response.SetAlert(&data.AlertData{
 			IsDanger: true,
 			Message:  "Invalid simulation request.",
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(w, response)
+		return
+	}
+
+	err = json.Unmarshal(body, &request)
+	if err != nil {
+		utils.Logger.Error(err.Error())
+		response.SetAlert(&data.AlertData{
+			IsDanger: true,
+			Message:  "Invalid simulation request.",
+		})
+		api.WriteResponse(w, response)
 		return
 	}
 
@@ -275,9 +301,9 @@ func HILOVerify(c *gin.Context) {
 			IsDanger: true,
 			Message:  err.Error(),
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(w, response)
 		return
 	}
 	response.Data = valid
-	api.WriteResponse(c, 200, response)
+	api.WriteResponse(w, response)
 }

@@ -2,7 +2,7 @@ package application
 
 //DNSLookupRequest dns lookup request
 type DNSLookupRequest struct {
-	DomainName string `json:"domainName" xml:"domainName" form:"domainName" binding:"required"`
+	DomainName string `json:"domainName"`
 }
 
 //DNSLookupResponse dns lookup response

@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/Z-M-Huang/Tools/api"
 	"github.com/Z-M-Huang/Tools/data"
@@ -10,34 +11,24 @@ import (
 	applicationlogic "github.com/Z-M-Huang/Tools/logic/application"
 	userlogic "github.com/Z-M-Huang/Tools/logic/user"
 	"github.com/Z-M-Huang/Tools/utils"
-	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	"github.com/julienschmidt/httprouter"
 )
 
 //Like /app/:name/like
-func Like(c *gin.Context) {
+func Like(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	//Only logged in user can access this
-	claim := c.Keys[utils.ClaimCtxKey].(*data.JWTClaim)
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
+	claim := r.Context().Value(utils.ClaimCtxKey).(*data.JWTClaim)
+	response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
 
-	name := c.Param("name")
+	name := ps.ByName("name")
 	if name == "" {
-		response.SetAlert(&data.AlertData{
-			IsDanger: true,
-			Message:  "User not found",
-		})
-		api.WriteResponse(c, 200, response)
-		return
+		http.Error(w, "Not Found", http.StatusNotFound)
 	}
 
 	appCard := applicationlogic.GetApplicationsByName(name)
 	if appCard == nil {
-		response.SetAlert(&data.AlertData{
-			IsDanger: true,
-			Message:  "User not found",
-		})
-		api.WriteResponse(c, 200, response)
-		return
+		http.Error(w, "Not Found", http.StatusNotFound)
 	}
 
 	user := &dbentity.User{
@@ -50,7 +41,7 @@ func Like(c *gin.Context) {
 			IsDanger: true,
 			Message:  "User not found",
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(w, response)
 		return
 	} else if err != nil {
 		utils.Logger.Error(err.Error())
@@ -58,7 +49,7 @@ func Like(c *gin.Context) {
 			IsDanger: true,
 			Message:  "User not found",
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(w, response)
 		return
 	}
 
@@ -84,7 +75,7 @@ func Like(c *gin.Context) {
 			return nil
 		})
 		if err != nil {
-			api.WriteUnexpectedError(c, response)
+			api.WriteUnexpectedError(w, response)
 			utils.Logger.Error(err.Error())
 			return
 		}
@@ -94,33 +85,23 @@ func Like(c *gin.Context) {
 		Message:   "Application saved! Thank you for support.",
 	})
 	response.Data = appCard.AmountLiked
-	api.WriteResponse(c, 200, response)
+	api.WriteResponse(w, response)
 }
 
 //Dislike /app/:name/dislike
-func Dislike(c *gin.Context) {
+func Dislike(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	//Only logged in user can access this
-	claim := c.Keys[utils.ClaimCtxKey].(*data.JWTClaim)
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
+	claim := r.Context().Value(utils.ClaimCtxKey).(*data.JWTClaim)
+	response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
 
-	name := c.Param("name")
+	name := ps.ByName("name")
 	if name == "" {
-		response.SetAlert(&data.AlertData{
-			IsDanger: true,
-			Message:  "User not found",
-		})
-		api.WriteResponse(c, 200, response)
-		return
+		http.Error(w, "Not Found", http.StatusNotFound)
 	}
 
 	appCard := applicationlogic.GetApplicationsByName(name)
 	if appCard == nil {
-		response.SetAlert(&data.AlertData{
-			IsDanger: true,
-			Message:  "User not found",
-		})
-		api.WriteResponse(c, 200, response)
-		return
+		http.Error(w, "Not Found", http.StatusNotFound)
 	}
 
 	user := &dbentity.User{
@@ -133,7 +114,7 @@ func Dislike(c *gin.Context) {
 			IsDanger: true,
 			Message:  "User not found",
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(w, response)
 		return
 	} else if err != nil {
 		utils.Logger.Error(err.Error())
@@ -141,7 +122,7 @@ func Dislike(c *gin.Context) {
 			IsDanger: true,
 			Message:  "User not found",
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(w, response)
 		return
 	}
 
@@ -168,7 +149,7 @@ func Dislike(c *gin.Context) {
 			return nil
 		})
 		if err != nil {
-			api.WriteUnexpectedError(c, response)
+			api.WriteUnexpectedError(w, response)
 			utils.Logger.Error(err.Error())
 			return
 		}
@@ -178,7 +159,7 @@ func Dislike(c *gin.Context) {
 		Message: "If there are anything you want us to improve about this app. Please let us know on the github bug tracker.",
 	})
 	response.Data = appCard.AmountLiked
-	api.WriteResponse(c, 200, response)
+	api.WriteResponse(w, response)
 }
 
 func addApplicationLike(tx *gorm.DB, app *webdata.AppCard) error {

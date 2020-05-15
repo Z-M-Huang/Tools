@@ -8,46 +8,46 @@ import (
 	"github.com/Z-M-Huang/Tools/data/webdata"
 	userlogic "github.com/Z-M-Huang/Tools/logic/user"
 	"github.com/Z-M-Huang/Tools/utils"
-	"github.com/gin-gonic/gin"
+	"github.com/julienschmidt/httprouter"
 )
 
 //SignupPage /signup
-func SignupPage(c *gin.Context) {
-	if c.Keys[utils.ClaimCtxKey].(*data.JWTClaim) == nil {
-		response := c.Keys[utils.ResponseCtxKey].(*data.Response)
+func SignupPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	if r.Context().Value(utils.ClaimCtxKey).(*data.JWTClaim) == nil {
+		response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
 		response.Header.Title = "Signup - Fun Apps"
 		response.Header.Description = "Signup - create an account"
-		utils.Templates.ExecuteTemplate(c.Writer, "signup.gohtml", response)
+		utils.Templates.ExecuteTemplate(w, "signup.gohtml", response)
 	} else {
-		c.Redirect(http.StatusTemporaryRedirect, "/")
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 	}
 }
 
 //LoginPage /login
-func LoginPage(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
+func LoginPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
 	response.Header.Title = "Login - Fun Apps"
 	response.Header.Description = "Login"
-	redirectURL, ok := c.Request.URL.Query()["redirect"]
+	redirectURL, ok := r.URL.Query()["redirect"]
 	if ok && len(redirectURL) > 0 {
 		response.SetAlert(&data.AlertData{
 			IsDanger: true,
 			Message:  "Please login first.",
 		})
 	}
-	if c.Keys[utils.ClaimCtxKey].(*data.JWTClaim) == nil {
-		utils.Templates.ExecuteTemplate(c.Writer, "login.gohtml", response)
+	if r.Context().Value(utils.ClaimCtxKey).(*data.JWTClaim) == nil {
+		utils.Templates.ExecuteTemplate(w, "login.gohtml", response)
 	} else {
-		c.Redirect(http.StatusTemporaryRedirect, "/")
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 	}
 }
 
 //AccountPage /account requires claim
-func AccountPage(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
+func AccountPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
 	response.Header.Title = "Account - Fun Apps"
 	response.Header.Description = "Manage account"
-	claim := c.Keys[utils.ClaimCtxKey].(*data.JWTClaim)
+	claim := r.Context().Value(utils.ClaimCtxKey).(*data.JWTClaim)
 	user := &dbentity.User{
 		Email: claim.Id,
 	}
@@ -63,5 +63,5 @@ func AccountPage(c *gin.Context) {
 			HasPassword: user.Password != "",
 		}
 	}
-	utils.Templates.ExecuteTemplate(c.Writer, "account.gohtml", response)
+	utils.Templates.ExecuteTemplate(w, "account.gohtml", response)
 }

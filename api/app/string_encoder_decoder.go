@@ -3,7 +3,10 @@ package app
 import (
 	"encoding/base32"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"net/url"
 	"strings"
 
@@ -11,15 +14,15 @@ import (
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/apidata/application"
 	"github.com/Z-M-Huang/Tools/utils"
-	"github.com/gin-gonic/gin"
+	"github.com/julienschmidt/httprouter"
 )
 
 //EncodeDecode /api/string/encodedecode
-func EncodeDecode(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
+func EncodeDecode(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
 	request := &application.StringEncodeDecodeRequest{}
 	var result []string
-	err := c.ShouldBind(&request)
+	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		utils.Logger.Error(err.Error())
 		response.SetAlert(&data.AlertData{
@@ -27,7 +30,18 @@ func EncodeDecode(c *gin.Context) {
 			Message:  "Invalid lookup request.",
 		})
 		response.Data = []string{response.Header.Alert.Message}
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(w, response)
+		return
+	}
+
+	err = json.Unmarshal(body, &request)
+	if err != nil {
+		utils.Logger.Error(err.Error())
+		response.SetAlert(&data.AlertData{
+			IsDanger: true,
+			Message:  "Invalid lookup request.",
+		})
+		api.WriteResponse(w, response)
 		return
 	}
 
@@ -41,7 +55,7 @@ func EncodeDecode(c *gin.Context) {
 			Message:   "Invalid action code.",
 		})
 		response.Data = []string{response.Header.Alert.Message}
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(w, response)
 		return
 	}
 	switch request.Type {
@@ -59,7 +73,7 @@ func EncodeDecode(c *gin.Context) {
 						Message:   fmt.Sprintf("Cannot decode string requested %s", err.Error()),
 					})
 					response.Data = []string{response.Header.Alert.Message}
-					api.WriteResponse(c, 200, response)
+					api.WriteResponse(w, response)
 					return
 				}
 				result = append(result, string(unescaped))
@@ -79,7 +93,7 @@ func EncodeDecode(c *gin.Context) {
 						Message:   fmt.Sprintf("Cannot decode string requested %s", err.Error()),
 					})
 					response.Data = []string{response.Header.Alert.Message}
-					api.WriteResponse(c, 200, response)
+					api.WriteResponse(w, response)
 					return
 				}
 				result = append(result, string(unescaped))
@@ -99,7 +113,7 @@ func EncodeDecode(c *gin.Context) {
 						Message:  fmt.Sprintf("Cannot decode string requested %s", err.Error()),
 					})
 					response.Data = []string{response.Header.Alert.Message}
-					api.WriteResponse(c, 200, response)
+					api.WriteResponse(w, response)
 					return
 				}
 				result = append(result, unescaped)
@@ -111,10 +125,10 @@ func EncodeDecode(c *gin.Context) {
 			Message:   "Invalid type request.",
 		})
 		response.Data = []string{response.Header.Alert.Message}
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(w, response)
 		return
 	}
 
 	response.Data = result
-	api.WriteResponse(c, 200, response)
+	api.WriteResponse(w, response)
 }

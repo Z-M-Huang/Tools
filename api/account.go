@@ -2,6 +2,7 @@ package api
 
 import (
 	"crypto/md5"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -17,8 +18,8 @@ import (
 	"github.com/Z-M-Huang/Tools/logic"
 	userlogic "github.com/Z-M-Huang/Tools/logic/user"
 	"github.com/Z-M-Huang/Tools/utils"
-	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	"github.com/julienschmidt/httprouter"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 )
@@ -38,17 +39,29 @@ func init() {
 }
 
 //Login request
-func Login(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
+func Login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	defer r.Body.Close()
+	response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
 	request := &apidata.LoginRequest{}
-	err := c.ShouldBind(&request)
+	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		utils.Logger.Error(err.Error())
 		response.SetAlert(&data.AlertData{
 			IsDanger: true,
 			Message:  "Invalid login request.",
 		})
-		WriteResponse(c, 200, response)
+		WriteResponse(w, response)
+		return
+	}
+
+	err = json.Unmarshal(body, &request)
+	if err != nil {
+		utils.Logger.Error(err.Error())
+		response.SetAlert(&data.AlertData{
+			IsDanger: true,
+			Message:  "Invalid login request.",
+		})
+		WriteResponse(w, response)
 		return
 	}
 
@@ -63,11 +76,11 @@ func Login(c *gin.Context) {
 			IsDanger: true,
 			Message:  "We couldn't find any account for this email address... Maybe you need to create one.",
 		})
-		WriteResponse(c, 200, response)
+		WriteResponse(w, response)
 		return
 	} else if err != nil {
 		utils.Logger.Error(err.Error())
-		WriteUnexpectedError(c, response)
+		WriteUnexpectedError(w, response)
 		return
 	}
 
@@ -77,17 +90,17 @@ func Login(c *gin.Context) {
 			IsWarning: true,
 			Message:   `Incorrect password. Do you forget your password? If you forget your password, please <a href="#">Click here</a> to reset your password. Uh... We don't have that feature yet, sorry...`,
 		})
-		WriteResponse(c, 200, response)
+		WriteResponse(w, response)
 		return
 	}
 
 	tokenStr, expiresAt, err := userlogic.GenerateJWTToken("Direct Login", request.Email, existingUser.Username, getGravatarLink(request.Email, 50))
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		WriteUnexpectedError(c, response)
+		WriteUnexpectedError(w, response)
 	}
 
-	uri, err := url.ParseRequestURI(c.GetHeader("Referer"))
+	uri, err := url.ParseRequestURI(r.Header.Get("Referer"))
 	if err != nil {
 		utils.Logger.Error(err.Error())
 	}
@@ -105,24 +118,101 @@ func Login(c *gin.Context) {
 		}
 	}
 	response.Data = result
-	logic.SetCookie(c, utils.SessionTokenKey, tokenStr, expiresAt)
-	WriteResponse(c, 200, response)
+	logic.SetCookie(w, utils.SessionTokenKey, tokenStr, expiresAt)
+	WriteResponse(w, response)
+}
+
+//APILogin api login
+func APILogin(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	authHeader := strings.TrimSpace(r.Header.Get("Authorization"))
+	if authHeader == "" || !strings.Contains(authHeader, "Basic ") {
+		http.Error(w, "Invalid Authorization Header", http.StatusBadRequest)
+		return
+	}
+	authHeader = strings.Replace(authHeader, "Basic ", "", 1)
+	decodedAuthBytes, err := base64.StdEncoding.DecodeString(authHeader)
+	if err != nil {
+		http.Error(w, "Invalid Authorization Header", http.StatusBadRequest)
+		return
+	}
+
+	decodedAuth := string(decodedAuthBytes)
+	if !strings.Contains(decodedAuth, ":") {
+		http.Error(w, "Invalid Authorization Header", http.StatusBadRequest)
+		return
+	}
+
+	authSplit := strings.Split(decodedAuth, ":")
+	if len(authSplit) != 2 && emailRe.Match([]byte(authSplit[0])) && len(authSplit[1]) < minPasswordLength {
+		http.Error(w, "Invalid Authorization Header", http.StatusBadRequest)
+		return
+	}
+
+	existingUser := &dbentity.User{
+		Email: authSplit[0],
+	}
+	err = userlogic.Find(utils.DB, existingUser)
+	if err == gorm.ErrRecordNotFound {
+		utils.Logger.Sugar().Errorf("APILogin: Email %s not found", authSplit[0])
+		http.Error(w, "User not found", http.StatusUnauthorized)
+		return
+	} else if err != nil {
+		utils.Logger.Error(err.Error())
+		http.Error(w, "Internal Error", http.StatusInternalServerError)
+		return
+	}
+
+	if !utils.ComparePasswords(existingUser.Password, []byte(authSplit[1])) {
+		http.Error(w, "Invalid Authorization Header", http.StatusBadRequest)
+		return
+	}
+
+	tokenStr, expiresAt, err := userlogic.GenerateJWTToken("APILogin", authSplit[0], existingUser.Username, getGravatarLink(authSplit[0], 50))
+	if err != nil {
+		utils.Logger.Error(err.Error())
+		http.Error(w, "Internal Error", http.StatusInternalServerError)
+		return
+	}
+
+	response := &apidata.APILoginResponse{
+		TokenType:   "bearer",
+		AccessToken: tokenStr,
+		ExpiresIn:   int64(expiresAt.Sub(time.Now().UTC()).Seconds()),
+	}
+
+	jsonBody, _ := json.Marshal(response)
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonBody)
 }
 
 //SignUp request
-func SignUp(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
+func SignUp(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	defer r.Body.Close()
+	response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
 	request := &apidata.CreateAccountRequest{}
-	err := c.ShouldBind(&request)
+	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		utils.Logger.Error(err.Error())
 		response.SetAlert(&data.AlertData{
 			IsDanger: true,
 			Message:  "Invalid login request.",
 		})
-		WriteResponse(c, 200, response)
+		WriteResponse(w, response)
 		return
 	}
+	err = json.Unmarshal(body, &request)
+	if err != nil {
+		utils.Logger.Error(err.Error())
+		response.SetAlert(&data.AlertData{
+			IsDanger: true,
+			Message:  "Invalid login request.",
+		})
+		WriteResponse(w, response)
+		return
+	}
+
 	request.Email = strings.TrimSpace(strings.ToLower(request.Email))
 
 	if !emailRe.Match([]byte(request.Email)) {
@@ -130,7 +220,7 @@ func SignUp(c *gin.Context) {
 			IsDanger: true,
 			Message:  "Invalid email address.",
 		})
-		WriteResponse(c, 200, response)
+		WriteResponse(w, response)
 		return
 	}
 
@@ -139,7 +229,7 @@ func SignUp(c *gin.Context) {
 			IsDanger: true,
 			Message:  "Password doesn't match",
 		})
-		WriteResponse(c, 200, response)
+		WriteResponse(w, response)
 		return
 	}
 
@@ -148,7 +238,7 @@ func SignUp(c *gin.Context) {
 			IsWarning: true,
 			Message:   fmt.Sprintf("Password has minimum length of %d characters.", minPasswordLength),
 		})
-		WriteResponse(c, 200, response)
+		WriteResponse(w, response)
 		return
 	}
 
@@ -161,11 +251,11 @@ func SignUp(c *gin.Context) {
 			IsWarning: true,
 			Message:   "Email address already exists, please try to remember the password, since password recovery function is not yet built. If you cant remember your password, good luck... The password is hashed, and even as an admin, I have no clue what's your password could be... See ya.",
 		})
-		WriteResponse(c, 200, response)
+		WriteResponse(w, response)
 		return
 	} else if err != nil && err != gorm.ErrRecordNotFound {
 		utils.Logger.Error(err.Error())
-		WriteUnexpectedError(c, response)
+		WriteUnexpectedError(w, response)
 		return
 	}
 
@@ -178,11 +268,11 @@ func SignUp(c *gin.Context) {
 			IsWarning: true,
 			Message:   "Username already taken. Can't you think of something else? Try harder",
 		})
-		WriteResponse(c, 200, response)
+		WriteResponse(w, response)
 		return
 	} else if err != nil && err != gorm.ErrRecordNotFound {
 		utils.Logger.Error(err.Error())
-		WriteUnexpectedError(c, response)
+		WriteUnexpectedError(w, response)
 		return
 	}
 
@@ -194,52 +284,62 @@ func SignUp(c *gin.Context) {
 	err = userlogic.Save(utils.DB, user)
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		WriteUnexpectedError(c, response)
+		WriteUnexpectedError(w, response)
 		return
 	}
 
 	tokenStr, expiresAt, err := userlogic.GenerateJWTToken("Direct Login", request.Email, user.Username, getGravatarLink(request.Email, 50))
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		WriteUnexpectedError(c, response)
+		WriteUnexpectedError(w, response)
 	}
 
-	logic.SetCookie(c, utils.SessionTokenKey, tokenStr, expiresAt)
+	logic.SetCookie(w, utils.SessionTokenKey, tokenStr, expiresAt)
 	response.Data = true
-	WriteResponse(c, 200, response)
+	WriteResponse(w, response)
 	return
 }
 
 //UpdatePassword api
-func UpdatePassword(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
+func UpdatePassword(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
 	request := &apidata.UpdatePasswordRequest{}
-	err := c.ShouldBind(&request)
+	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		utils.Logger.Error(err.Error())
 		response.SetAlert(&data.AlertData{
 			IsDanger: true,
 			Message:  "Invalid sign up request.",
 		})
-		WriteResponse(c, 200, response)
+		WriteResponse(w, response)
+		return
+	}
+	err = json.Unmarshal(body, &request)
+	if err != nil {
+		utils.Logger.Error(err.Error())
+		response.SetAlert(&data.AlertData{
+			IsDanger: true,
+			Message:  "Invalid sign up request.",
+		})
+		WriteResponse(w, response)
 		return
 	}
 
-	claim := c.Keys[utils.ClaimCtxKey].(*data.JWTClaim)
+	claim := r.Context().Value(utils.ClaimCtxKey).(*data.JWTClaim)
 
 	if request.Password != request.ConfirmPassword {
 		response.SetAlert(&data.AlertData{
 			IsWarning: true,
 			Message:   "Password doesn't match.",
 		})
-		WriteResponse(c, 200, response)
+		WriteResponse(w, response)
 		return
 	} else if len(request.Password) < minPasswordLength {
 		response.SetAlert(&data.AlertData{
 			IsWarning: true,
 			Message:   fmt.Sprintf("Password has minimum length of %d.", minPasswordLength),
 		})
-		WriteResponse(c, 200, response)
+		WriteResponse(w, response)
 		return
 	}
 
@@ -249,11 +349,11 @@ func UpdatePassword(c *gin.Context) {
 	err = userlogic.Find(utils.DB, dbUser)
 	if err == gorm.ErrRecordNotFound {
 		utils.Logger.Sugar().Errorf("User not found for %s in UpdatePassword", claim.Id)
-		WriteUnexpectedError(c, response)
+		WriteUnexpectedError(w, response)
 		return
 	} else if err != nil {
 		utils.Logger.Error(err.Error())
-		WriteUnexpectedError(c, response)
+		WriteUnexpectedError(w, response)
 		return
 	}
 
@@ -262,14 +362,14 @@ func UpdatePassword(c *gin.Context) {
 			IsWarning: true,
 			Message:   "Current password is different compared to what's in database... Try harder...",
 		})
-		WriteResponse(c, 200, response)
+		WriteResponse(w, response)
 		return
 	} else if dbUser.Password != "" && utils.ComparePasswords(dbUser.Password, []byte(request.Password)) {
 		response.SetAlert(&data.AlertData{
 			IsWarning: true,
 			Message:   "New password is exactly the same as the old password...",
 		})
-		WriteResponse(c, 200, response)
+		WriteResponse(w, response)
 		return
 	}
 
@@ -278,32 +378,32 @@ func UpdatePassword(c *gin.Context) {
 
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		WriteUnexpectedError(c, response)
+		WriteUnexpectedError(w, response)
 		return
 	}
 	response.SetAlert(&data.AlertData{
 		IsSuccess: true,
 		Message:   "Password is updated.",
 	})
-	WriteResponse(c, 200, response)
+	WriteResponse(w, response)
 }
 
 //GoogleLogin google login request
-func GoogleLogin(c *gin.Context) {
+func GoogleLogin(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	state := utils.RandomString(10)
 	err := utils.RedisClient.Set(state, "1", 20*time.Minute).Err()
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		c.String(http.StatusInternalServerError, "Internal Error")
+		http.Redirect(w, r, "/error", http.StatusTemporaryRedirect)
 		return
 	}
 	url := googleOauthConfig.AuthCodeURL(state)
-	c.Redirect(http.StatusTemporaryRedirect, url)
+	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
 
 //GoogleCallback handle google callback
-func GoogleCallback(c *gin.Context) {
-	user, err := getGoogleUserInfo(c.Request.FormValue("state"), c.Request.FormValue("code"))
+func GoogleCallback(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	user, err := getGoogleUserInfo(r.FormValue("state"), r.FormValue("code"))
 	if err != nil {
 		utils.Logger.Error(err.Error())
 	}
@@ -330,9 +430,9 @@ func GoogleCallback(c *gin.Context) {
 	if err != nil {
 		utils.Logger.Sugar().Errorf("failed to generate jwt token %s", err.Error())
 	} else {
-		logic.SetCookie(c, utils.SessionTokenKey, tokenStr, expiresAt)
+		logic.SetCookie(w, utils.SessionTokenKey, tokenStr, expiresAt)
 	}
-	c.Redirect(http.StatusTemporaryRedirect, "/")
+	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 }
 
 func getGoogleUserInfo(state string, code string) (*apidata.GoogleUserInfo, error) {
