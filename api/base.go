@@ -1,38 +1,36 @@
 package api
 
 import (
-	"encoding/json"
 	"errors"
 	"net/http"
 	"strconv"
 	"strings"
 
 	"github.com/Z-M-Huang/Tools/data"
-	"github.com/Z-M-Huang/Tools/utils"
+	"github.com/gin-gonic/gin"
 )
 
 //WriteResponse Write api response
-func WriteResponse(w http.ResponseWriter, response *data.Response) {
-	jsonBody, err := json.Marshal(response)
-	if err != nil {
-		utils.Logger.Error(err.Error())
-		response.Data = nil
-		WriteUnexpectedError(w, response)
-		return
+func WriteResponse(c *gin.Context, code int, obj interface{}) {
+	switch c.NegotiateFormat(gin.MIMEJSON, gin.MIMEXML, gin.MIMEYAML, gin.MIMEPlain) {
+	case gin.MIMEJSON:
+		c.JSON(code, obj)
+	case gin.MIMEXML:
+		c.XML(code, obj)
+	case gin.MIMEYAML:
+		c.YAML(code, obj)
+	default:
+		c.String(http.StatusNotAcceptable, "Not Acceptable")
 	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(jsonBody)
 }
 
 //WriteUnexpectedError Write unexpected api response
-func WriteUnexpectedError(w http.ResponseWriter, response *data.Response) {
+func WriteUnexpectedError(c *gin.Context, response *data.Response) {
 	response.SetAlert(&data.AlertData{
 		IsDanger: true,
 		Message:  "Um... Your data got eaten by the cyber space... Would you like to try again?",
 	})
-	WriteResponse(w, response)
+	WriteResponse(c, http.StatusInternalServerError, response)
 }
 
 //ParseFloat parse float from string

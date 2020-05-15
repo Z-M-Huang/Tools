@@ -2,7 +2,6 @@ package app
 
 import (
 	"fmt"
-	"net/http"
 
 	"github.com/Z-M-Huang/Tools/api"
 	"github.com/Z-M-Huang/Tools/data"
@@ -11,24 +10,34 @@ import (
 	applicationlogic "github.com/Z-M-Huang/Tools/logic/application"
 	userlogic "github.com/Z-M-Huang/Tools/logic/user"
 	"github.com/Z-M-Huang/Tools/utils"
+	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
-	"github.com/julienschmidt/httprouter"
 )
 
 //Like /app/:name/like
-func Like(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func Like(c *gin.Context) {
 	//Only logged in user can access this
-	claim := r.Context().Value(utils.ClaimCtxKey).(*data.JWTClaim)
-	response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
+	claim := c.Keys[utils.ClaimCtxKey].(*data.JWTClaim)
+	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
 
-	name := ps.ByName("name")
+	name := c.Param("name")
 	if name == "" {
-		http.Error(w, "Not Found", http.StatusNotFound)
+		response.SetAlert(&data.AlertData{
+			IsDanger: true,
+			Message:  "User not found",
+		})
+		api.WriteResponse(c, 200, response)
+		return
 	}
 
 	appCard := applicationlogic.GetApplicationsByName(name)
 	if appCard == nil {
-		http.Error(w, "Not Found", http.StatusNotFound)
+		response.SetAlert(&data.AlertData{
+			IsDanger: true,
+			Message:  "User not found",
+		})
+		api.WriteResponse(c, 200, response)
+		return
 	}
 
 	user := &dbentity.User{
@@ -41,7 +50,7 @@ func Like(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 			IsDanger: true,
 			Message:  "User not found",
 		})
-		api.WriteResponse(w, response)
+		api.WriteResponse(c, 200, response)
 		return
 	} else if err != nil {
 		utils.Logger.Error(err.Error())
@@ -49,7 +58,7 @@ func Like(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 			IsDanger: true,
 			Message:  "User not found",
 		})
-		api.WriteResponse(w, response)
+		api.WriteResponse(c, 200, response)
 		return
 	}
 
@@ -75,7 +84,7 @@ func Like(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 			return nil
 		})
 		if err != nil {
-			api.WriteUnexpectedError(w, response)
+			api.WriteUnexpectedError(c, response)
 			utils.Logger.Error(err.Error())
 			return
 		}
@@ -85,23 +94,33 @@ func Like(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		Message:   "Application saved! Thank you for support.",
 	})
 	response.Data = appCard.AmountLiked
-	api.WriteResponse(w, response)
+	api.WriteResponse(c, 200, response)
 }
 
 //Dislike /app/:name/dislike
-func Dislike(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func Dislike(c *gin.Context) {
 	//Only logged in user can access this
-	claim := r.Context().Value(utils.ClaimCtxKey).(*data.JWTClaim)
-	response := r.Context().Value(utils.ResponseCtxKey).(*data.Response)
+	claim := c.Keys[utils.ClaimCtxKey].(*data.JWTClaim)
+	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
 
-	name := ps.ByName("name")
+	name := c.Param("name")
 	if name == "" {
-		http.Error(w, "Not Found", http.StatusNotFound)
+		response.SetAlert(&data.AlertData{
+			IsDanger: true,
+			Message:  "User not found",
+		})
+		api.WriteResponse(c, 200, response)
+		return
 	}
 
 	appCard := applicationlogic.GetApplicationsByName(name)
 	if appCard == nil {
-		http.Error(w, "Not Found", http.StatusNotFound)
+		response.SetAlert(&data.AlertData{
+			IsDanger: true,
+			Message:  "User not found",
+		})
+		api.WriteResponse(c, 200, response)
+		return
 	}
 
 	user := &dbentity.User{
@@ -114,7 +133,7 @@ func Dislike(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 			IsDanger: true,
 			Message:  "User not found",
 		})
-		api.WriteResponse(w, response)
+		api.WriteResponse(c, 200, response)
 		return
 	} else if err != nil {
 		utils.Logger.Error(err.Error())
@@ -122,7 +141,7 @@ func Dislike(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 			IsDanger: true,
 			Message:  "User not found",
 		})
-		api.WriteResponse(w, response)
+		api.WriteResponse(c, 200, response)
 		return
 	}
 
@@ -149,7 +168,7 @@ func Dislike(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 			return nil
 		})
 		if err != nil {
-			api.WriteUnexpectedError(w, response)
+			api.WriteUnexpectedError(c, response)
 			utils.Logger.Error(err.Error())
 			return
 		}
@@ -159,7 +178,7 @@ func Dislike(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		Message: "If there are anything you want us to improve about this app. Please let us know on the github bug tracker.",
 	})
 	response.Data = appCard.AmountLiked
-	api.WriteResponse(w, response)
+	api.WriteResponse(c, 200, response)
 }
 
 func addApplicationLike(tx *gorm.DB, app *webdata.AppCard) error {
