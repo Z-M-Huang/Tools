@@ -13,7 +13,7 @@ var client http.Client
 func BuildSitemap() *stm.Sitemap {
 	sm := stm.NewSitemap()
 	host := ""
-	if Config.IsHTTPS {
+	if Config.HTTPS {
 		host = "https://"
 	} else {
 		host = "http://"
@@ -52,7 +52,7 @@ func GetRobotsTxt() []string {
 		"Disallow: /api/*"}
 
 	sitemapURL := ""
-	if Config.IsHTTPS {
+	if Config.HTTPS {
 		sitemapURL = fmt.Sprintf("https://%s/sitemap.xml", Config.Host)
 	} else {
 		sitemapURL = fmt.Sprintf("http://%s/sitemap.xml", Config.Host)
@@ -64,7 +64,7 @@ func GetRobotsTxt() []string {
 //PingSearchEngines ping search engine
 func PingSearchEngines() {
 	sitemapURL := ""
-	if Config.IsHTTPS {
+	if Config.HTTPS {
 		sitemapURL = fmt.Sprintf("https://%s/sitemap.xml", Config.Host)
 	} else {
 		sitemapURL = fmt.Sprintf("http://%s/sitemap.xml", Config.Host)

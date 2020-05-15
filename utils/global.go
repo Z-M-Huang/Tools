@@ -110,12 +110,12 @@ func initConfig() {
 		redisDBNum = 0
 	}
 
-	genSitemap := false
-	genSitemapStr := strings.TrimSpace(os.Getenv("ENABLE_SITEMAP"))
-	if genSitemapStr == "" {
+	enableSitemap := false
+	enableSitemapStr := strings.TrimSpace(os.Getenv("ENABLE_SITEMAP"))
+	if enableSitemapStr == "" {
 		Logger.Warn("ENABLE_SITEMAP is empty, set to default: false")
 	} else {
-		genSitemap, err = strconv.ParseBool(genSitemapStr)
+		enableSitemap, err = strconv.ParseBool(enableSitemapStr)
 		if err != nil {
 			Logger.Error("Failed to parse ENABLE_SITEMAP to boolean, set to default: false")
 		}
@@ -150,10 +150,8 @@ func initConfig() {
 		Host:            strings.TrimSuffix(strings.TrimSpace(os.Getenv("HOST")), "/"),
 		ResourceVersion: strings.TrimSpace(os.Getenv("RESOURCE_VERSION")),
 		IsDebug:         os.Getenv("DEBUG") != "",
-		IsHTTPS:         isHTTPS,
-		SitemapConfig: &data.SitemapConfiguration{
-			GenerateSitemap: genSitemap,
-		},
+		HTTPS:           isHTTPS,
+		EnableSitemap:   enableSitemap,
 	}
 
 	if Config.RedisConfig.Addr == "" {

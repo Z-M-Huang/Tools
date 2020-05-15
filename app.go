@@ -79,7 +79,7 @@ func main() {
 	router.Static(fmt.Sprintf("/assets/%s", utils.Config.ResourceVersion), "assets/")
 	router.Static(fmt.Sprintf("/vendor/%s", utils.Config.ResourceVersion), "node_modules/")
 
-	if utils.Config.SitemapConfig.GenerateSitemap {
+	if utils.Config.EnableSitemap {
 		sm := utils.BuildSitemap()
 		robotsContent := utils.GetRobotsTxt()
 		err := utils.WriteContentToFile(robotsContent, "assets/robots.txt")

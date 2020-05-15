@@ -15,7 +15,7 @@ import (
 
 //SetCookie sets cookie
 func SetCookie(c *gin.Context, cookieName, cookieVal string, expiresAt time.Time, httpOnly bool) {
-	if utils.Config.IsHTTPS {
+	if utils.Config.HTTPS {
 		c.SetCookie(cookieName, cookieVal, int(expiresAt.Sub(time.Now()).Seconds()), "/", utils.Config.Host, true, httpOnly)
 	} else {
 		c.SetCookie(cookieName, cookieVal, int(expiresAt.Sub(time.Now()).Seconds()), "/", utils.Config.Host, false, httpOnly)

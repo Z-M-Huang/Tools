@@ -35,7 +35,7 @@ func init() {
 		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"},
 		Endpoint:     google.Endpoint,
 	}
-	if !utils.Config.IsHTTPS {
+	if !utils.Config.HTTPS {
 		googleOauthConfig.RedirectURL = fmt.Sprintf("http://%s/google_oauth", utils.Config.Host)
 	}
 }
