@@ -7,6 +7,6 @@ type CreateBinRequest struct {
 
 //CreateBinResponse response
 type CreateBinResponse struct {
-	URL             string
+	ID              string
 	VerificationKey string
 }

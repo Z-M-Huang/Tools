@@ -8,13 +8,12 @@ import (
 
 	webData "github.com/Z-M-Huang/Tools/data/webdata/application"
 	"github.com/Z-M-Huang/Tools/utils"
-	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
 )
 
 //GetRequestBinHistory get request history by id
-func GetRequestBinHistory(c *gin.Context, id string) *webData.RequestBinPageData {
-	key := getRequestKey(id)
+func GetRequestBinHistory(id string) *webData.RequestBinPageData {
+	key := GetRequestBinKey(id)
 	val, err := utils.RedisClient.Get(key).Result()
 	if err == redis.Nil {
 		return nil
@@ -32,7 +31,7 @@ func GetRequestBinHistory(c *gin.Context, id string) *webData.RequestBinPageData
 }
 
 //NewRequestBinHistory new request history
-func NewRequestBinHistory(c *gin.Context, private bool) *webData.RequestBinPageData {
+func NewRequestBinHistory(private bool) *webData.RequestBinPageData {
 	data := &webData.RequestBinPageData{
 		ID: strconv.FormatInt(time.Now().Unix(), 10),
 	}
@@ -42,7 +41,7 @@ func NewRequestBinHistory(c *gin.Context, private bool) *webData.RequestBinPageD
 		data.URL = "http://"
 	}
 
-	data.URL += utils.Config.Host + "/app/request-bin/" + data.ID
+	data.URL += utils.Config.Host + "/api/request-bin/receive/" + data.ID
 
 	if private {
 		data.VerificationKey = utils.RandomString(30)
@@ -53,8 +52,8 @@ func NewRequestBinHistory(c *gin.Context, private bool) *webData.RequestBinPageD
 		utils.Logger.Error(err.Error())
 		return nil
 	}
-	key := getRequestKey(data.ID)
-	err = utils.RedisClient.Set(key, bytes, 7*24*time.Hour).Err()
+	key := GetRequestBinKey(data.ID)
+	err = utils.RedisClient.Set(key, bytes, 24*time.Hour).Err()
 	if err != nil {
 		utils.Logger.Error(err.Error())
 		return nil
@@ -62,6 +61,7 @@ func NewRequestBinHistory(c *gin.Context, private bool) *webData.RequestBinPageD
 	return data
 }
 
-func getRequestKey(id string) string {
+//GetRequestBinKey request bin key
+func GetRequestBinKey(id string) string {
 	return fmt.Sprintf("APP_REQUEST_BIN_%s", id)
 }

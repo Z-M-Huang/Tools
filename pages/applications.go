@@ -9,6 +9,7 @@ import (
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/dbentity"
 	"github.com/Z-M-Huang/Tools/data/webdata"
+	"github.com/Z-M-Huang/Tools/data/webdata/application"
 	"github.com/Z-M-Huang/Tools/logic"
 	applicationlogic "github.com/Z-M-Huang/Tools/logic/application"
 	"github.com/Z-M-Huang/Tools/utils"
@@ -60,6 +61,9 @@ func RenderApplicationPage(c *gin.Context) {
 	}
 
 	response.Data = loadAppSpecificData(c, appCard.Name)
+	if c.IsAborted() {
+		return
+	}
 
 	c.HTML(200, appCard.TemplateName, response)
 }
@@ -67,13 +71,31 @@ func RenderApplicationPage(c *gin.Context) {
 func loadAppSpecificData(c *gin.Context, appName string) interface{} {
 	switch appName {
 	case "request-bin":
-		id := c.Param("id")
-		if id == "" {
-			return nil
-		}
-		return applicationlogic.GetRequestBinHistory(c, id)
+		return loadRequestBinData(c)
 	}
 	return nil
+}
+
+func loadRequestBinData(c *gin.Context) *application.RequestBinPageData {
+	id := c.Param("id")
+	if id == "" {
+		return nil
+	}
+	data := applicationlogic.GetRequestBinHistory(id)
+	if data != nil && data.VerificationKey != "" {
+		val, err := c.Cookie("request_bin_verification_key")
+		if err != nil || val == "" {
+			c.Redirect(http.StatusTemporaryRedirect, "/app/request-bin")
+			c.Abort()
+			return nil
+		}
+		if data.VerificationKey != val {
+			c.Redirect(http.StatusTemporaryRedirect, "/app/request-bin")
+			c.Abort()
+			return nil
+		}
+	}
+	return data
 }
 
 func addApplicationUsage(app *webdata.AppCard) {

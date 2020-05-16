@@ -36,7 +36,7 @@ func pageStyleHandler() gin.HandlerFunc {
 		if err == nil && val != "" {
 			style = val
 		} else {
-			logic.SetCookie(c, utils.PageStyleCookieKey, "default", time.Now().AddDate(100, 0, 0), true)
+			logic.SetCookie(c, utils.PageStyleCookieKey, "default", time.Now().AddDate(100, 0, 0), false)
 		}
 		response.SetNavStyleName(logic.GetPageStyle(style))
 		c.Next()
@@ -122,6 +122,7 @@ func main() {
 	pageNoAuth.GET("/app/:name/:id", pages.RenderApplicationPage)
 
 	//app api
+	router.Any("/api/request-bin/receive/:id", appApis.RequestIn)
 	apiNoAuth.POST("/kelly-criterion/simulate", appApis.KellyCriterionSimulate)
 	apiNoAuth.POST("/hilo-simulator/simulate", appApis.HILOSimulate)
 	apiNoAuth.POST("/hilo-simulator/verify", appApis.HILOVerify)

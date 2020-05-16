@@ -28,6 +28,7 @@ require (
 	github.com/onsi/gomega v1.10.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/stretchr/testify v1.5.1 // indirect
+	github.com/vmihailenco/msgpack v4.0.4+incompatible
 	go.uber.org/zap v1.15.0
 	golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37
 	golang.org/x/net v0.0.0-20200513185701-a91f0712d120 // indirect

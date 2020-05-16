@@ -38,6 +38,10 @@ func GetApplicationUsed(r *http.Request) ([]string, error) {
 		return nil, err
 	}
 
+	if usedAppCookie.Value == "" {
+		return usedApps, nil
+	}
+
 	decoded, err := base64.StdEncoding.DecodeString(usedAppCookie.Value)
 	if err != nil {
 		return nil, err
