@@ -1,7 +1,8 @@
 name: Docker Release CI
 
 on:
-  release: [published]
+  release: 
+    types: [published]
 
 jobs:
   build:
