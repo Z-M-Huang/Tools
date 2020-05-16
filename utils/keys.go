@@ -1,4 +1,4 @@
-package constval
+package utils
 
 const (
 	//ClaimCtxKey claim context key

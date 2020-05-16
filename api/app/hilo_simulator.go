@@ -4,7 +4,6 @@ import (
 	"github.com/Z-M-Huang/Tools/api"
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/apidata/application"
-	"github.com/Z-M-Huang/Tools/data/constval"
 	"github.com/Z-M-Huang/Tools/utils"
 	hilosimulator "github.com/Z-M-Huang/hilosimulator"
 	"github.com/gin-gonic/gin"
@@ -12,7 +11,7 @@ import (
 
 //HILOSimulate /api/hilo-simulator/simulate
 func HILOSimulate(c *gin.Context) {
-	response := c.Keys[constval.ResponseCtxKey].(*data.Response)
+	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
 	request := &application.HiLoSimulateRequest{}
 
 	err := c.ShouldBind(&request)
@@ -83,7 +82,7 @@ func HILOSimulate(c *gin.Context) {
 
 //HILOVerify /api/hilo-simulator/verify
 func HILOVerify(c *gin.Context) {
-	response := c.Keys[constval.ResponseCtxKey].(*data.Response)
+	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
 	request := &application.HiLoVerifyRequest{}
 
 	err := c.ShouldBind(&request)

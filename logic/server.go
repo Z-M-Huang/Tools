@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/Z-M-Huang/Tools/data"
-	"github.com/Z-M-Huang/Tools/data/constval"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -24,7 +23,7 @@ func SetCookie(c *gin.Context, cookieName, cookieVal string, expiresAt time.Time
 
 //GetClaimFromCookieAndRenew get claim and renew
 func GetClaimFromCookieAndRenew(c *gin.Context) (*data.JWTClaim, error) {
-	val, err := c.Cookie(constval.SessionCookieKey)
+	val, err := c.Cookie(utils.SessionCookieKey)
 	if err != nil || val == "" {
 		return nil, nil
 	}
@@ -37,7 +36,7 @@ func GetClaimFromCookieAndRenew(c *gin.Context) (*data.JWTClaim, error) {
 		if err != nil {
 			utils.Logger.Sugar().Errorf("failed to generate jwt token %s", err.Error())
 		} else {
-			SetCookie(c, constval.SessionCookieKey, tokenStr, expiresAt, false)
+			SetCookie(c, utils.SessionCookieKey, tokenStr, expiresAt, false)
 		}
 	}
 	return claim, nil
@@ -60,7 +59,7 @@ func GetClaimFromHeaderAndRenew(c *gin.Context) (*data.JWTClaim, error) {
 		if err != nil {
 			utils.Logger.Sugar().Errorf("failed to generate jwt token %s", err.Error())
 		} else {
-			SetCookie(c, constval.SessionCookieKey, tokenStr, expiresAt, false)
+			SetCookie(c, utils.SessionCookieKey, tokenStr, expiresAt, false)
 		}
 	}
 	return claim, nil

@@ -5,7 +5,6 @@ import (
 
 	"github.com/Z-M-Huang/Tools/api"
 	"github.com/Z-M-Huang/Tools/data"
-	"github.com/Z-M-Huang/Tools/data/constval"
 	"github.com/Z-M-Huang/Tools/data/db"
 	"github.com/Z-M-Huang/Tools/data/webdata"
 	"github.com/Z-M-Huang/Tools/utils"
@@ -16,8 +15,8 @@ import (
 //Like /app/:name/like
 func Like(c *gin.Context) {
 	//Only logged in user can access this
-	claim := c.Keys[constval.ClaimCtxKey].(*data.JWTClaim)
-	response := c.Keys[constval.ResponseCtxKey].(*data.Response)
+	claim := c.Keys[utils.ClaimCtxKey].(*data.JWTClaim)
+	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
 
 	name := c.Param("name")
 	if name == "" {
@@ -99,8 +98,8 @@ func Like(c *gin.Context) {
 //Dislike /app/:name/dislike
 func Dislike(c *gin.Context) {
 	//Only logged in user can access this
-	claim := c.Keys[constval.ClaimCtxKey].(*data.JWTClaim)
-	response := c.Keys[constval.ResponseCtxKey].(*data.Response)
+	claim := c.Keys[utils.ClaimCtxKey].(*data.JWTClaim)
+	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
 
 	name := c.Param("name")
 	if name == "" {

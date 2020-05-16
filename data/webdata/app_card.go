@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/Z-M-Huang/Tools/data/constval"
 	"github.com/Z-M-Huang/Tools/data/db"
+	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/jinzhu/copier"
 )
 
@@ -38,7 +38,7 @@ type AppCard struct {
 //GetApplicationUsed saved in cookie
 func GetApplicationUsed(r *http.Request) ([]string, error) {
 	var usedApps []string
-	usedAppCookie, err := r.Cookie(constval.UsedTokenKey)
+	usedAppCookie, err := r.Cookie(utils.UsedTokenKey)
 	if err == http.ErrNoCookie {
 		return usedApps, nil
 	} else if err != nil {

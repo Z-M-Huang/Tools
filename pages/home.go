@@ -2,16 +2,16 @@ package pages
 
 import (
 	"github.com/Z-M-Huang/Tools/data"
-	"github.com/Z-M-Huang/Tools/data/constval"
 	"github.com/Z-M-Huang/Tools/data/db"
 	"github.com/Z-M-Huang/Tools/data/webdata"
+	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/gin-gonic/gin"
 )
 
 //HomePage home page /
 func HomePage(c *gin.Context) {
-	response := c.Keys[constval.ResponseCtxKey].(*data.Response)
-	claim := c.Keys[constval.ClaimCtxKey].(*data.JWTClaim)
+	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
+	claim := c.Keys[utils.ClaimCtxKey].(*data.JWTClaim)
 	if !(claim == nil) {
 		user := &db.User{
 			Email: claim.Id,

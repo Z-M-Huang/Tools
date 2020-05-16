@@ -13,7 +13,6 @@ import (
 
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/apidata"
-	"github.com/Z-M-Huang/Tools/data/constval"
 	"github.com/Z-M-Huang/Tools/data/db"
 	"github.com/Z-M-Huang/Tools/logic"
 	"github.com/Z-M-Huang/Tools/utils"
@@ -42,7 +41,7 @@ func init() {
 
 //Login request
 func Login(c *gin.Context) {
-	response := c.Keys[constval.ResponseCtxKey].(*data.Response)
+	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
 	request := &apidata.LoginRequest{}
 	err := c.ShouldBind(&request)
 	if err != nil {
@@ -108,21 +107,21 @@ func Login(c *gin.Context) {
 		}
 	}
 	response.Data = result
-	logic.SetCookie(c, constval.SessionCookieKey, tokenStr, expiresAt, true)
+	logic.SetCookie(c, utils.SessionCookieKey, tokenStr, expiresAt, true)
 	WriteResponse(c, 200, response)
 }
 
 //Logout logout
 func Logout(c *gin.Context) {
-	response := c.Keys[constval.ResponseCtxKey].(*data.Response)
-	logic.SetCookie(c, constval.SessionCookieKey, "", time.Now().AddDate(-10, 1, 1), true)
+	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
+	logic.SetCookie(c, utils.SessionCookieKey, "", time.Now().AddDate(-10, 1, 1), true)
 	response.Data = true
 	WriteResponse(c, 200, response)
 }
 
 //SignUp request
 func SignUp(c *gin.Context) {
-	response := c.Keys[constval.ResponseCtxKey].(*data.Response)
+	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
 	request := &apidata.CreateAccountRequest{}
 	err := c.ShouldBind(&request)
 	if err != nil {
@@ -215,7 +214,7 @@ func SignUp(c *gin.Context) {
 		WriteUnexpectedError(c, response)
 	}
 
-	logic.SetCookie(c, constval.SessionCookieKey, tokenStr, expiresAt, true)
+	logic.SetCookie(c, utils.SessionCookieKey, tokenStr, expiresAt, true)
 	response.Data = true
 	WriteResponse(c, 200, response)
 	return
@@ -223,7 +222,7 @@ func SignUp(c *gin.Context) {
 
 //UpdatePassword api
 func UpdatePassword(c *gin.Context) {
-	response := c.Keys[constval.ResponseCtxKey].(*data.Response)
+	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
 	request := &apidata.UpdatePasswordRequest{}
 	err := c.ShouldBind(&request)
 	if err != nil {
@@ -236,7 +235,7 @@ func UpdatePassword(c *gin.Context) {
 		return
 	}
 
-	claim := c.Keys[constval.ClaimCtxKey].(*data.JWTClaim)
+	claim := c.Keys[utils.ClaimCtxKey].(*data.JWTClaim)
 
 	if request.Password != request.ConfirmPassword {
 		response.SetAlert(&data.AlertData{
@@ -341,7 +340,7 @@ func GoogleCallback(c *gin.Context) {
 	if err != nil {
 		utils.Logger.Sugar().Errorf("failed to generate jwt token %s", err.Error())
 	} else {
-		logic.SetCookie(c, constval.SessionCookieKey, tokenStr, expiresAt, false)
+		logic.SetCookie(c, utils.SessionCookieKey, tokenStr, expiresAt, false)
 	}
 	c.Redirect(http.StatusTemporaryRedirect, "/")
 }

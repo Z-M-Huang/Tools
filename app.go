@@ -8,7 +8,6 @@ import (
 	"github.com/Z-M-Huang/Tools/api"
 	appApis "github.com/Z-M-Huang/Tools/api/app"
 	"github.com/Z-M-Huang/Tools/data"
-	"github.com/Z-M-Huang/Tools/data/constval"
 	"github.com/Z-M-Huang/Tools/logic"
 	"github.com/Z-M-Huang/Tools/pages"
 	"github.com/Z-M-Huang/Tools/utils"
@@ -23,21 +22,21 @@ func apiAuthHandler(requireToken bool) gin.HandlerFunc {
 			c.String(http.StatusUnauthorized, "Unauthorized")
 			return
 		}
-		c.Set(constval.ClaimCtxKey, claim)
-		c.Set(constval.ResponseCtxKey, &data.Response{})
+		c.Set(utils.ClaimCtxKey, claim)
+		c.Set(utils.ResponseCtxKey, &data.Response{})
 		c.Next()
 	}
 }
 
 func pageStyleHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		response := c.Keys[constval.ResponseCtxKey].(*data.Response)
+		response := c.Keys[utils.ResponseCtxKey].(*data.Response)
 		style := ""
-		val, err := c.Cookie(constval.PageStyleCookieKey)
+		val, err := c.Cookie(utils.PageStyleCookieKey)
 		if err == nil && val != "" {
 			style = val
 		} else {
-			logic.SetCookie(c, constval.PageStyleCookieKey, "default", time.Now().AddDate(100, 0, 0), false)
+			logic.SetCookie(c, utils.PageStyleCookieKey, "default", time.Now().AddDate(100, 0, 0), false)
 		}
 		response.SetNavStyleName(getPageStyle(style))
 		c.Next()
@@ -63,8 +62,8 @@ func pageAuthHandler(requireToken bool) gin.HandlerFunc {
 				ImageURL: claim.ImageURL,
 			})
 		}
-		c.Set(constval.ClaimCtxKey, claim)
-		c.Set(constval.ResponseCtxKey, response)
+		c.Set(utils.ClaimCtxKey, claim)
+		c.Set(utils.ResponseCtxKey, response)
 		c.Next()
 	}
 }

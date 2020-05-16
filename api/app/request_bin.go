@@ -10,7 +10,6 @@ import (
 	"github.com/Z-M-Huang/Tools/api"
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/apidata/application"
-	"github.com/Z-M-Huang/Tools/data/constval"
 	"github.com/Z-M-Huang/Tools/data/db"
 	webData "github.com/Z-M-Huang/Tools/data/webdata/application"
 	applicationlogic "github.com/Z-M-Huang/Tools/logic/application"
@@ -20,7 +19,7 @@ import (
 
 //CreateRequestBin /api/request-bin/Create
 func CreateRequestBin(c *gin.Context) {
-	response := c.Keys[constval.ResponseCtxKey].(*data.Response)
+	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
 	request := &application.CreateBinRequest{}
 	err := c.ShouldBind(&request)
 	if err != nil {

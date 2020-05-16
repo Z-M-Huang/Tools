@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/Z-M-Huang/Tools/data"
-	"github.com/Z-M-Huang/Tools/data/constval"
 	"github.com/Z-M-Huang/Tools/data/db"
 	"github.com/Z-M-Huang/Tools/data/webdata"
 	"github.com/Z-M-Huang/Tools/data/webdata/application"
@@ -19,7 +18,7 @@ import (
 
 //RenderApplicationPage renders /app/:name
 func RenderApplicationPage(c *gin.Context) {
-	response := c.Keys[constval.ResponseCtxKey].(*data.Response)
+	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
 
 	name := c.Param("name")
 
@@ -53,11 +52,11 @@ func RenderApplicationPage(c *gin.Context) {
 			if err != nil {
 				utils.Logger.Error(err.Error())
 			} else {
-				logic.SetCookie(c, constval.UsedTokenKey, string(encoded), time.Date(2199, time.December, 31, 23, 59, 59, 0, time.UTC), true)
+				logic.SetCookie(c, utils.UsedTokenKey, string(encoded), time.Date(2199, time.December, 31, 23, 59, 59, 0, time.UTC), true)
 			}
 		}
 	} else {
-		logic.SetCookie(c, constval.UsedTokenKey, "", time.Date(2199, time.December, 31, 23, 59, 59, 0, time.UTC), true)
+		logic.SetCookie(c, utils.UsedTokenKey, "", time.Date(2199, time.December, 31, 23, 59, 59, 0, time.UTC), true)
 		utils.Logger.Error(err.Error())
 	}
 

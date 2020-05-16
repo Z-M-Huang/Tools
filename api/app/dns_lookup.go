@@ -9,14 +9,13 @@ import (
 	"github.com/Z-M-Huang/Tools/api"
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/apidata/application"
-	"github.com/Z-M-Huang/Tools/data/constval"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/gin-gonic/gin"
 )
 
 //DNSLookup look up dns
 func DNSLookup(c *gin.Context) {
-	response := c.Keys[constval.ResponseCtxKey].(*data.Response)
+	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
 	request := &application.DNSLookupRequest{}
 
 	err := c.ShouldBind(&request)
