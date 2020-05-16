@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/Z-M-Huang/Tools/api"
@@ -59,28 +60,48 @@ func RequestIn(c *gin.Context) {
 	}
 
 	history := &webData.RequestHistory{
-		TimeReceived: time.Now().UTC(),
-		Method:       c.Request.Method,
-		Proto:        c.Request.Proto,
-		RemoteAddr:   c.Request.RemoteAddr,
-		QueryStrings: c.Request.URL.RawQuery,
+		TimeReceived:        time.Now().UTC(),
+		Method:              c.Request.Method,
+		Proto:               c.Request.Proto,
+		RemoteAddr:          c.Request.RemoteAddr,
+		QueryStrings:        c.Request.URL.RawQuery,
+		Headers:             make(map[string]string),
+		Forms:               make(map[string]string),
+		MultipartFormsFiles: make(map[string]string),
 	}
 
-	headerBytes, err := json.Marshal(c.Request.Header)
-	if err != nil {
-		utils.Logger.Error(err.Error())
-		c.AbortWithStatus(http.StatusBadRequest)
-		return
+	for key, val := range c.Request.Header {
+		if strings.ToLower(key) != "cookie" {
+			headerBytes, err := json.Marshal(val)
+			if err != nil {
+				utils.Logger.Error(err.Error())
+				history.Headers[key] = "Unknown"
+			} else {
+				history.Headers[key] = string(headerBytes)
+			}
+		}
 	}
-	history.Headers = string(headerBytes)
 
-	formBytes, err := json.Marshal(c.Request.Form)
-	if err != nil {
-		utils.Logger.Error(err.Error())
-		c.AbortWithStatus(http.StatusBadRequest)
-		return
+	for _, cookie := range c.Request.Cookies() {
+		history.Cookies = append(history.Cookies, cookie.String())
 	}
-	history.Forms = string(formBytes)
+
+	err := c.Request.ParseMultipartForm(200)
+	if err == nil {
+		for key, val := range c.Request.Form {
+			formBytes, err := json.Marshal(val)
+			if err != nil {
+				utils.Logger.Error(err.Error())
+				history.Forms[key] = "Unknown"
+			} else {
+				history.Forms[key] = string(formBytes)
+			}
+		}
+
+		for key, val := range c.Request.MultipartForm.File {
+			history.MultipartFormsFiles[key] = val[0].Filename
+		}
+	}
 
 	bodyBytes, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {

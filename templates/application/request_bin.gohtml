@@ -2,33 +2,71 @@
 <h1>Request Bin</h1>
 
 <p>Receive and visualize HTTP requests</p>
-<p>Note: All requests are kept for 24 hours since the last request cames in, and only 20 requests maximum will be stored.</p>
+<p>Note: All requests are kept for 24 hours since the last request cames in, and only 20 requests maximum will be
+  stored.</p>
 <p class="text-success">Feel free to click the result content and it will be clipped automatically</p>
 
 
 {{ if .Data }}
-  <div class="row d-flex justify-content-center">
-    <div class="col-sm-10 form-group row">
-        <h1 for="requestURL" class="col-sm-4 col-form-label text-right">Request URL</h1>
-        <div class="col-sm-8">
-          <input type="text" readonly="" class="form-control form-control-lg" id="requestURL" value="{{.Data.URL}}">
-        </div>
-    </div>
-  </div>
+<div class="row d-flex justify-content-center">
+  <h3 for="requestURL" class="row">Request URL</h1>
+</div>
+<div class="row d-flex justify-content-md-center mb-3">
+  <input type="text" readonly="" class="form-control form-control-lg text-center col-md-10" id="requestURL"
+    value="{{.Data.URL}}" onclick="copyValueOnClick(this)">
+</div>
   {{ range $key, $val := .Data.History }}
   <div class="card mb-3">
-    <h3 class="card-header">{{$val.Method}} From {{$val.RemoteAddr}}</h3>
+    <div class="row card-header justify-content-between">
+      <h3 class="col-sm-auto">{{$val.Method}} from {{$val.RemoteAddr}}</h3>
+      <p class="col-sm-auto">{{$val.Proto}}</p>
+    </div>
     <div class="card-body">
-      <h5 class="card-title">Proto</h5>
-      <p class="card-text">{{$val.Proto}}</p>
-      <h5 class="card-title">QueryString</h5>
-      <p class="card-text">{{$val.QueryStrings}}</p>
-      <h5 class="card-title">Headers</h5>
-      <p class="card-text">{{$val.Headers}}</p>
+      {{if ne $val.QueryStrings ""}}
+      <div class="row">
+        <h5 class="card-title col-sm-auto">QueryString: </h5>
+        <p class="card-text col-sm-auto">{{$val.QueryStrings}}</p>
+      </div>
+      {{end}}
+      <div class="row">
+        <div class="col-md-6">
+          <h5 class="card-title">Headers</h5>
+          {{if ne (len $val.Headers) 0}}
+            {{range $hkey, $hval := $val.Headers}}
+            <p class="card-text offset-md-1">{{$hkey}}: {{$hval}}</p>
+            {{end}}
+          {{end}}
+        </div>
+        <div class="col-md-6">
+          <h5 class="card-title">Cookies</h5>
+          {{if ne (len $val.Cookies) 0}}
+            {{range $cindex, $cval := $val.Cookies}}
+            <p class="card-text offset-md-1">{{$cval}}</p>
+            {{end}}
+          {{end}}
+        </div>
+      </div>
+      {{if ne (len $val.Forms) 0}}
       <h5 class="card-title">Forms</h5>
-      <p class="card-text">{{$val.Forms}}</p>
-      <h5 class="card-title">Raw Body</h5>
-      <p class="card-text">{{$val.Body}}</p>
+        {{if ne (len $val.Forms) 0}}
+          {{range $fkey, $fval := $val.Forms}}
+          <p class="card-text offset-md-1">{{$fkey}}: {{$fval}}</p>
+          {{end}}
+        {{end}}
+      {{end}}
+      {{if ne (len $val.MultipartFormsFiles) 0}}
+        <h5 class="card-title">Multi-part Forms</h5>
+        {{if ne (len $val.MultipartFormsFiles) 0}}
+        <h6 class="card-title offset-md-1">Files</h6>
+          {{range $fkey, $fval := $val.MultipartFormsFiles}}
+          <p class="card-text offset-md-2">{{$fkey}}: {{$fval}}</p>
+          {{end}}
+        {{end}}
+      {{end}}
+      {{if ne $val.Body ""}}
+        <h5 class="card-title">Raw Body</h5>
+        <p class="card-text">{{$val.Body}}</p>
+      {{end}}
     </div>
     <div class="card-footer text-muted">
       {{$val.TimeReceived.Format "Jan 02, 2006 15:04:05 UTC"}}
@@ -36,28 +74,28 @@
   </div>
   {{end}}
 {{else}}
-  <form id="createBinForm">
-    <div class="row d-flex mb-2">
-      <div class="col-sm-6 offset-md-3">
-        <button type="submit" class="btn btn-primary btn-lg btn-block">Create New Bin</button>
-      </div>
+<form id="createBinForm">
+  <div class="row d-flex mb-2">
+    <div class="col-sm-6 offset-md-3">
+      <button type="submit" class="btn btn-primary btn-lg btn-block">Create New Bin</button>
     </div>
-    <div class="row justify-content-center">
-      <div class="custom-control custom-switch">
-        <input type="checkbox" class="custom-control-input" id="isPrivate" name="isPrivate" value="true">
-        <label class="custom-control-label" for="isPrivate">Private bin</label>
-      </div>
+  </div>
+  <div class="row justify-content-center">
+    <div class="custom-control custom-switch">
+      <input type="checkbox" class="custom-control-input" id="isPrivate" name="isPrivate" value="true">
+      <label class="custom-control-label" for="isPrivate">Private bin</label>
     </div>
-  </form>
-  <script>
-    bindForm("createBinForm", "/api/request-bin/create", (d) => {
-      if (d != null && d != undefined) {
-        if (d.VerificationKey.length != "") {
-          document.cookie = "request_bin_verification_key=" + d.VerificationKey;
-        }
-        document.location.href = window.location.href.replace(/\/$/, "") + "/" + d.ID;
+  </div>
+</form>
+<script>
+  bindForm("createBinForm", "/api/request-bin/create", (d) => {
+    if (d != null && d != undefined) {
+      if (d.VerificationKey.length != "") {
+        document.cookie = "request_bin_verification_key=" + d.VerificationKey;
       }
-    })
-  </script>
+      document.location.href = "/app/request-bin/" + d.ID;
+    }
+  })
+</script>
 {{end}}
 {{template "footer"}}
