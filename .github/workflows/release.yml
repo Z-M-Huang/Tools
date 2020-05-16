@@ -33,7 +33,7 @@ jobs:
         docker buildx build \
           --platform linux/amd64,linux/arm/v7 --push \
           -t zhironghuang/tools-web:latest \
-          -t zhironghuang/tools-web:${{ github.run_id }} .
+          -t zhironghuang/tools-web:${GITHUB_REF##*/} .
     - name: Docker Logout
       run: |
         docker logout
