@@ -5,9 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Z-M-Huang/Tools/data/dbentity"
+	"github.com/Z-M-Huang/Tools/data/db"
 	"github.com/Z-M-Huang/Tools/data/webdata"
-	applicationlogic "github.com/Z-M-Huang/Tools/logic/application"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/jinzhu/gorm"
 )
@@ -35,7 +34,7 @@ func getAnalyticTools() {
 	tools.AppCards = append(tools.AppCards, betSimulator)
 
 	sortAppCardSlice(tools.AppCards)
-	utils.AppList = append(utils.AppList, tools)
+	webdata.AppList = append(webdata.AppList, tools)
 }
 
 func getFormatTools() {
@@ -48,7 +47,7 @@ func getFormatTools() {
 	tools.AppCards = append(tools.AppCards, encoderDecoder)
 
 	sortAppCardSlice(tools.AppCards)
-	utils.AppList = append(utils.AppList, tools)
+	webdata.AppList = append(webdata.AppList, tools)
 }
 
 func getLookupTools() {
@@ -61,7 +60,7 @@ func getLookupTools() {
 	tools.AppCards = append(tools.AppCards, dnsLookup)
 
 	sortAppCardSlice(tools.AppCards)
-	utils.AppList = append(utils.AppList, tools)
+	webdata.AppList = append(webdata.AppList, tools)
 }
 
 func getWebUtils() {
@@ -74,21 +73,21 @@ func getWebUtils() {
 	tools.AppCards = append(tools.AppCards, dnsLookup)
 
 	sortAppCardSlice(tools.AppCards)
-	utils.AppList = append(utils.AppList, tools)
+	webdata.AppList = append(webdata.AppList, tools)
 }
 
 func loadAppCardsUsage() {
-	for _, category := range utils.AppList {
+	for _, category := range webdata.AppList {
 		for _, appCard := range category.AppCards {
-			app := &dbentity.Application{
+			app := &db.Application{
 				Name: appCard.Title,
 			}
-			err := applicationlogic.Find(utils.DB, app)
+			err := app.Find()
 			if err == gorm.ErrRecordNotFound {
 				app.Name = appCard.Title
 				app.Usage = 0
 				app.Liked = 0
-				err = applicationlogic.Save(utils.DB, app)
+				err = app.Save()
 				if err != nil {
 					utils.Logger.Sugar().Errorf("Failed to insert app %s into database. %s", appCard.Title, err.Error())
 				}

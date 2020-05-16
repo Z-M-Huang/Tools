@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/Z-M-Huang/Tools/data"
-	userlogic "github.com/Z-M-Huang/Tools/logic/user"
+	"github.com/Z-M-Huang/Tools/data/constval"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -15,16 +15,16 @@ import (
 
 //SetCookie sets cookie
 func SetCookie(c *gin.Context, cookieName, cookieVal string, expiresAt time.Time, httpOnly bool) {
-	if utils.Config.HTTPS {
-		c.SetCookie(cookieName, cookieVal, int(expiresAt.Sub(time.Now()).Seconds()), "/", utils.Config.Host, true, httpOnly)
+	if data.Config.HTTPS {
+		c.SetCookie(cookieName, cookieVal, int(expiresAt.Sub(time.Now()).Seconds()), "/", data.Config.Host, true, httpOnly)
 	} else {
-		c.SetCookie(cookieName, cookieVal, int(expiresAt.Sub(time.Now()).Seconds()), "/", utils.Config.Host, false, httpOnly)
+		c.SetCookie(cookieName, cookieVal, int(expiresAt.Sub(time.Now()).Seconds()), "/", data.Config.Host, false, httpOnly)
 	}
 }
 
 //GetClaimFromCookieAndRenew get claim and renew
 func GetClaimFromCookieAndRenew(c *gin.Context) (*data.JWTClaim, error) {
-	val, err := c.Cookie(utils.SessionTokenKey)
+	val, err := c.Cookie(constval.SessionCookieKey)
 	if err != nil || val == "" {
 		return nil, nil
 	}
@@ -33,11 +33,11 @@ func GetClaimFromCookieAndRenew(c *gin.Context) (*data.JWTClaim, error) {
 		return nil, err
 	}
 	if time.Unix(claim.ExpiresAt, 0).Sub(time.Now().UTC()).Hours() < 24 {
-		tokenStr, expiresAt, err := userlogic.GenerateJWTToken(claim.Audience, claim.Id, claim.Subject, claim.ImageURL)
+		tokenStr, expiresAt, err := GenerateJWTToken(claim.Audience, claim.Id, claim.Subject, claim.ImageURL)
 		if err != nil {
 			utils.Logger.Sugar().Errorf("failed to generate jwt token %s", err.Error())
 		} else {
-			SetCookie(c, utils.SessionTokenKey, tokenStr, expiresAt, false)
+			SetCookie(c, constval.SessionCookieKey, tokenStr, expiresAt, false)
 		}
 	}
 	return claim, nil
@@ -56,20 +56,42 @@ func GetClaimFromHeaderAndRenew(c *gin.Context) (*data.JWTClaim, error) {
 		return nil, errors.New("Unauthorized")
 	}
 	if time.Unix(claim.ExpiresAt, 0).Sub(time.Now().UTC()).Hours() < 24 {
-		tokenStr, expiresAt, err := userlogic.GenerateJWTToken(claim.Audience, claim.Id, claim.Subject, claim.ImageURL)
+		tokenStr, expiresAt, err := GenerateJWTToken(claim.Audience, claim.Id, claim.Subject, claim.ImageURL)
 		if err != nil {
 			utils.Logger.Sugar().Errorf("failed to generate jwt token %s", err.Error())
 		} else {
-			SetCookie(c, utils.SessionTokenKey, tokenStr, expiresAt, false)
+			SetCookie(c, constval.SessionCookieKey, tokenStr, expiresAt, false)
 		}
 	}
 	return claim, nil
 }
 
+//GenerateJWTToken generates JWT token
+func GenerateJWTToken(audience, emailAddress, username, imageURL string) (string, time.Time, error) {
+	expiresAt := time.Now().Add(30 * 24 * time.Hour)
+	claim := &data.JWTClaim{
+		ImageURL: imageURL,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expiresAt.Unix(),
+			Id:        emailAddress,
+			Audience:  audience,
+			Subject:   username,
+			Issuer:    data.Config.Host,
+		},
+	}
+	claim.ImageURL = imageURL
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
+	tokenStr, err := token.SignedString(data.Config.JwtKey)
+	if err != nil {
+		return "", time.Now(), fmt.Errorf("failed to generate token %s", err.Error())
+	}
+	return tokenStr, expiresAt, nil
+}
+
 func isTokenValid(token string) (*data.JWTClaim, error) {
 	claims := &data.JWTClaim{}
 	tkn, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
-		return utils.Config.JwtKey, nil
+		return data.Config.JwtKey, nil
 	})
 
 	if err != nil {
@@ -77,7 +99,7 @@ func isTokenValid(token string) (*data.JWTClaim, error) {
 		return nil, fmt.Errorf("Unauthenticated")
 	}
 
-	if !tkn.Valid || !claims.VerifyIssuer(utils.Config.Host, true) {
+	if !tkn.Valid || !claims.VerifyIssuer(data.Config.Host, true) {
 		return nil, fmt.Errorf("Invalid Token")
 	}
 

@@ -4,17 +4,17 @@ import (
 	"net/http"
 
 	"github.com/Z-M-Huang/Tools/data"
-	"github.com/Z-M-Huang/Tools/data/dbentity"
+	"github.com/Z-M-Huang/Tools/data/constval"
+	"github.com/Z-M-Huang/Tools/data/db"
 	"github.com/Z-M-Huang/Tools/data/webdata"
-	userlogic "github.com/Z-M-Huang/Tools/logic/user"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/gin-gonic/gin"
 )
 
 //SignupPage /signup
 func SignupPage(c *gin.Context) {
-	if c.Keys[utils.ClaimCtxKey].(*data.JWTClaim) == nil {
-		response := c.Keys[utils.ResponseCtxKey].(*data.Response)
+	if c.Keys[constval.ClaimCtxKey].(*data.JWTClaim) == nil {
+		response := c.Keys[constval.ResponseCtxKey].(*data.Response)
 		response.Header.Title = "Signup - Fun Apps"
 		response.Header.Description = "Signup - create an account"
 		c.HTML(200, "signup.gohtml", response)
@@ -25,7 +25,7 @@ func SignupPage(c *gin.Context) {
 
 //LoginPage /login
 func LoginPage(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
+	response := c.Keys[constval.ResponseCtxKey].(*data.Response)
 	response.Header.Title = "Login - Fun Apps"
 	response.Header.Description = "Login"
 	redirectURL, ok := c.Request.URL.Query()["redirect"]
@@ -35,7 +35,7 @@ func LoginPage(c *gin.Context) {
 			Message:  "Please login first.",
 		})
 	}
-	if c.Keys[utils.ClaimCtxKey].(*data.JWTClaim) == nil {
+	if c.Keys[constval.ClaimCtxKey].(*data.JWTClaim) == nil {
 		c.HTML(200, "login.gohtml", response)
 	} else {
 		c.Redirect(http.StatusTemporaryRedirect, "/")
@@ -44,14 +44,14 @@ func LoginPage(c *gin.Context) {
 
 //AccountPage /account requires claim
 func AccountPage(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
+	response := c.Keys[constval.ResponseCtxKey].(*data.Response)
 	response.Header.Title = "Account - Fun Apps"
 	response.Header.Description = "Manage account"
-	claim := c.Keys[utils.ClaimCtxKey].(*data.JWTClaim)
-	user := &dbentity.User{
+	claim := c.Keys[constval.ClaimCtxKey].(*data.JWTClaim)
+	user := &db.User{
 		Email: claim.Id,
 	}
-	err := userlogic.Find(utils.DB, user)
+	err := user.Find()
 	if err != nil {
 		utils.Logger.Error(err.Error())
 		response.SetAlert(&data.AlertData{

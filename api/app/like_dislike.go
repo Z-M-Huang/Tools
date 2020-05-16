@@ -5,10 +5,9 @@ import (
 
 	"github.com/Z-M-Huang/Tools/api"
 	"github.com/Z-M-Huang/Tools/data"
-	"github.com/Z-M-Huang/Tools/data/dbentity"
+	"github.com/Z-M-Huang/Tools/data/constval"
+	"github.com/Z-M-Huang/Tools/data/db"
 	"github.com/Z-M-Huang/Tools/data/webdata"
-	applicationlogic "github.com/Z-M-Huang/Tools/logic/application"
-	userlogic "github.com/Z-M-Huang/Tools/logic/user"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -17,8 +16,8 @@ import (
 //Like /app/:name/like
 func Like(c *gin.Context) {
 	//Only logged in user can access this
-	claim := c.Keys[utils.ClaimCtxKey].(*data.JWTClaim)
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
+	claim := c.Keys[constval.ClaimCtxKey].(*data.JWTClaim)
+	response := c.Keys[constval.ResponseCtxKey].(*data.Response)
 
 	name := c.Param("name")
 	if name == "" {
@@ -30,7 +29,7 @@ func Like(c *gin.Context) {
 		return
 	}
 
-	appCard := applicationlogic.GetApplicationsByName(name)
+	appCard := webdata.GetApplicationsByName(name)
 	if appCard == nil {
 		response.SetAlert(&data.AlertData{
 			IsDanger: true,
@@ -40,10 +39,10 @@ func Like(c *gin.Context) {
 		return
 	}
 
-	user := &dbentity.User{
+	user := &db.User{
 		Email: claim.Id,
 	}
-	err := userlogic.Find(utils.DB, user)
+	err := user.Find()
 	if err == gorm.ErrRecordNotFound {
 		utils.Logger.Sugar().Errorf("oh boy... There is a user doesn't found in database but have a token. Email: %s", claim.Id)
 		response.SetAlert(&data.AlertData{
@@ -72,8 +71,8 @@ func Like(c *gin.Context) {
 
 	if !found {
 		user.LikedApps = append(user.LikedApps, appCard.Title)
-		err = utils.DB.Transaction(func(tx *gorm.DB) error {
-			err = userlogic.Save(utils.DB, user)
+		err = db.DoTransaction(func(tx *gorm.DB) error {
+			err = user.SaveWithTx(tx)
 			if err != nil {
 				return fmt.Errorf("failed to add liked app %s to user %s", appCard.Title, claim.Id)
 			}
@@ -100,8 +99,8 @@ func Like(c *gin.Context) {
 //Dislike /app/:name/dislike
 func Dislike(c *gin.Context) {
 	//Only logged in user can access this
-	claim := c.Keys[utils.ClaimCtxKey].(*data.JWTClaim)
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
+	claim := c.Keys[constval.ClaimCtxKey].(*data.JWTClaim)
+	response := c.Keys[constval.ResponseCtxKey].(*data.Response)
 
 	name := c.Param("name")
 	if name == "" {
@@ -113,7 +112,7 @@ func Dislike(c *gin.Context) {
 		return
 	}
 
-	appCard := applicationlogic.GetApplicationsByName(name)
+	appCard := webdata.GetApplicationsByName(name)
 	if appCard == nil {
 		response.SetAlert(&data.AlertData{
 			IsDanger: true,
@@ -123,10 +122,10 @@ func Dislike(c *gin.Context) {
 		return
 	}
 
-	user := &dbentity.User{
+	user := &db.User{
 		Email: claim.Id,
 	}
-	err := userlogic.Find(utils.DB, user)
+	err := user.Find()
 	if err == gorm.ErrRecordNotFound {
 		utils.Logger.Sugar().Errorf("oh boy... There is a user doesn't found in database but have a token. Email: %s", claim.Id)
 		response.SetAlert(&data.AlertData{
@@ -156,8 +155,8 @@ func Dislike(c *gin.Context) {
 	if index > -1 {
 		user.LikedApps[index] = user.LikedApps[len(user.LikedApps)-1]
 		user.LikedApps = user.LikedApps[:len(user.LikedApps)-1]
-		err = utils.DB.Transaction(func(tx *gorm.DB) error {
-			err = userlogic.Save(utils.DB, user)
+		err = db.DoTransaction(func(tx *gorm.DB) error {
+			err = user.Save()
 			if err != nil {
 				return fmt.Errorf("failed to remove liked app %s from user %s", appCard.Title, claim.Id)
 			}
@@ -182,16 +181,16 @@ func Dislike(c *gin.Context) {
 }
 
 func addApplicationLike(tx *gorm.DB, app *webdata.AppCard) error {
-	dbApp := &dbentity.Application{
+	dbApp := &db.Application{
 		Name: app.Title,
 	}
-	err := applicationlogic.Find(tx, dbApp)
+	err := dbApp.FindWithTx(tx)
 	if err != nil {
 		utils.Logger.Error(err.Error())
 		return err
 	}
 	dbApp.Liked++
-	err = applicationlogic.Save(tx, dbApp)
+	err = dbApp.SaveWithTx(tx)
 	if err != nil {
 		utils.Logger.Error(err.Error())
 		return err
@@ -201,16 +200,16 @@ func addApplicationLike(tx *gorm.DB, app *webdata.AppCard) error {
 }
 
 func removeApplicationLike(tx *gorm.DB, app *webdata.AppCard) error {
-	dbApp := &dbentity.Application{
+	dbApp := &db.Application{
 		Name: app.Title,
 	}
-	err := applicationlogic.Find(tx, dbApp)
+	err := dbApp.FindWithTx(tx)
 	if err != nil {
 		utils.Logger.Error(err.Error())
 		return err
 	}
 	dbApp.Liked--
-	err = applicationlogic.Save(tx, dbApp)
+	err = dbApp.SaveWithTx(tx)
 	if err != nil {
 		utils.Logger.Error(err.Error())
 		return err

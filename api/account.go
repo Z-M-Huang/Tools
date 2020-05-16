@@ -13,9 +13,9 @@ import (
 
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/apidata"
-	"github.com/Z-M-Huang/Tools/data/dbentity"
+	"github.com/Z-M-Huang/Tools/data/constval"
+	"github.com/Z-M-Huang/Tools/data/db"
 	"github.com/Z-M-Huang/Tools/logic"
-	userlogic "github.com/Z-M-Huang/Tools/logic/user"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -29,20 +29,20 @@ var googleOauthConfig *oauth2.Config
 
 func init() {
 	googleOauthConfig = &oauth2.Config{
-		RedirectURL:  fmt.Sprintf("https://%s/google_oauth", utils.Config.Host),
-		ClientID:     utils.Config.GoogleOauthConfig.ClientID,
-		ClientSecret: utils.Config.GoogleOauthConfig.ClientSecret,
+		RedirectURL:  fmt.Sprintf("https://%s/google_oauth", data.Config.Host),
+		ClientID:     data.Config.GoogleOauthConfig.ClientID,
+		ClientSecret: data.Config.GoogleOauthConfig.ClientSecret,
 		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"},
 		Endpoint:     google.Endpoint,
 	}
-	if !utils.Config.HTTPS {
-		googleOauthConfig.RedirectURL = fmt.Sprintf("http://%s/google_oauth", utils.Config.Host)
+	if !data.Config.HTTPS {
+		googleOauthConfig.RedirectURL = fmt.Sprintf("http://%s/google_oauth", data.Config.Host)
 	}
 }
 
 //Login request
 func Login(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
+	response := c.Keys[constval.ResponseCtxKey].(*data.Response)
 	request := &apidata.LoginRequest{}
 	err := c.ShouldBind(&request)
 	if err != nil {
@@ -57,10 +57,10 @@ func Login(c *gin.Context) {
 
 	request.Email = strings.TrimSpace(strings.ToLower(request.Email))
 
-	existingUser := &dbentity.User{
+	existingUser := &db.User{
 		Email: request.Email,
 	}
-	err = userlogic.Find(utils.DB, existingUser)
+	err = existingUser.Find()
 	if err == gorm.ErrRecordNotFound {
 		response.SetAlert(&data.AlertData{
 			IsDanger: true,
@@ -84,7 +84,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	tokenStr, expiresAt, err := userlogic.GenerateJWTToken("Direct Login", request.Email, existingUser.Username, getGravatarLink(request.Email, 50))
+	tokenStr, expiresAt, err := logic.GenerateJWTToken("Direct Login", request.Email, existingUser.Username, getGravatarLink(request.Email, 50))
 	if err != nil {
 		utils.Logger.Error(err.Error())
 		WriteUnexpectedError(c, response)
@@ -108,21 +108,21 @@ func Login(c *gin.Context) {
 		}
 	}
 	response.Data = result
-	logic.SetCookie(c, utils.SessionTokenKey, tokenStr, expiresAt, true)
+	logic.SetCookie(c, constval.SessionCookieKey, tokenStr, expiresAt, true)
 	WriteResponse(c, 200, response)
 }
 
 //Logout logout
 func Logout(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
-	logic.SetCookie(c, utils.SessionTokenKey, "", time.Now().AddDate(-10, 1, 1), true)
+	response := c.Keys[constval.ResponseCtxKey].(*data.Response)
+	logic.SetCookie(c, constval.SessionCookieKey, "", time.Now().AddDate(-10, 1, 1), true)
 	response.Data = true
 	WriteResponse(c, 200, response)
 }
 
 //SignUp request
 func SignUp(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
+	response := c.Keys[constval.ResponseCtxKey].(*data.Response)
 	request := &apidata.CreateAccountRequest{}
 	err := c.ShouldBind(&request)
 	if err != nil {
@@ -163,10 +163,10 @@ func SignUp(c *gin.Context) {
 		return
 	}
 
-	existingUser := &dbentity.User{
+	existingUser := &db.User{
 		Email: request.Email,
 	}
-	err = userlogic.Find(utils.DB, existingUser)
+	err = existingUser.Find()
 	if err == nil {
 		response.SetAlert(&data.AlertData{
 			IsWarning: true,
@@ -180,10 +180,10 @@ func SignUp(c *gin.Context) {
 		return
 	}
 
-	existingUser = &dbentity.User{
+	existingUser = &db.User{
 		Username: request.Username,
 	}
-	err = userlogic.Find(utils.DB, existingUser)
+	err = existingUser.Find()
 	if err == nil {
 		response.SetAlert(&data.AlertData{
 			IsWarning: true,
@@ -197,25 +197,25 @@ func SignUp(c *gin.Context) {
 		return
 	}
 
-	user := &dbentity.User{
+	user := &db.User{
 		Username: request.Username,
 		Email:    request.Email,
 		Password: utils.HashAndSalt([]byte(request.Password)),
 	}
-	err = userlogic.Save(utils.DB, user)
+	err = user.Save()
 	if err != nil {
 		utils.Logger.Error(err.Error())
 		WriteUnexpectedError(c, response)
 		return
 	}
 
-	tokenStr, expiresAt, err := userlogic.GenerateJWTToken("Direct Login", request.Email, user.Username, getGravatarLink(request.Email, 50))
+	tokenStr, expiresAt, err := logic.GenerateJWTToken("Direct Login", request.Email, user.Username, getGravatarLink(request.Email, 50))
 	if err != nil {
 		utils.Logger.Error(err.Error())
 		WriteUnexpectedError(c, response)
 	}
 
-	logic.SetCookie(c, utils.SessionTokenKey, tokenStr, expiresAt, true)
+	logic.SetCookie(c, constval.SessionCookieKey, tokenStr, expiresAt, true)
 	response.Data = true
 	WriteResponse(c, 200, response)
 	return
@@ -223,7 +223,7 @@ func SignUp(c *gin.Context) {
 
 //UpdatePassword api
 func UpdatePassword(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
+	response := c.Keys[constval.ResponseCtxKey].(*data.Response)
 	request := &apidata.UpdatePasswordRequest{}
 	err := c.ShouldBind(&request)
 	if err != nil {
@@ -236,7 +236,7 @@ func UpdatePassword(c *gin.Context) {
 		return
 	}
 
-	claim := c.Keys[utils.ClaimCtxKey].(*data.JWTClaim)
+	claim := c.Keys[constval.ClaimCtxKey].(*data.JWTClaim)
 
 	if request.Password != request.ConfirmPassword {
 		response.SetAlert(&data.AlertData{
@@ -254,10 +254,10 @@ func UpdatePassword(c *gin.Context) {
 		return
 	}
 
-	dbUser := &dbentity.User{
+	dbUser := &db.User{
 		Email: claim.Id,
 	}
-	err = userlogic.Find(utils.DB, dbUser)
+	err = dbUser.Find()
 	if err == gorm.ErrRecordNotFound {
 		utils.Logger.Sugar().Errorf("User not found for %s in UpdatePassword", claim.Id)
 		WriteUnexpectedError(c, response)
@@ -285,7 +285,7 @@ func UpdatePassword(c *gin.Context) {
 	}
 
 	dbUser.Password = utils.HashAndSalt([]byte(request.Password))
-	err = userlogic.Save(utils.DB, dbUser)
+	err = dbUser.Save()
 
 	if err != nil {
 		utils.Logger.Error(err.Error())
@@ -302,7 +302,7 @@ func UpdatePassword(c *gin.Context) {
 //GoogleLogin google login request
 func GoogleLogin(c *gin.Context) {
 	state := utils.RandomString(10)
-	err := utils.RedisClient.Set(state, "1", 20*time.Minute).Err()
+	err := db.RedisSet(state, "1", 20*time.Minute)
 	if err != nil {
 		utils.Logger.Error(err.Error())
 		c.String(http.StatusInternalServerError, "Internal Error")
@@ -319,16 +319,16 @@ func GoogleCallback(c *gin.Context) {
 		utils.Logger.Error(err.Error())
 	}
 
-	dbUser := &dbentity.User{
+	dbUser := &db.User{
 		Email: user.Email,
 	}
-	err = userlogic.Find(utils.DB, dbUser)
+	err = dbUser.Find()
 	if err == gorm.ErrRecordNotFound {
 		//User not found
 		dbUser.Username = user.Name
 		dbUser.GoogleID = user.ID
 		dbUser.Email = user.Email
-		err = userlogic.Save(utils.DB, dbUser)
+		err = dbUser.Save()
 		if err != nil {
 			utils.Logger.Error(err.Error())
 		}
@@ -337,21 +337,20 @@ func GoogleCallback(c *gin.Context) {
 		utils.Logger.Error(err.Error())
 	}
 
-	tokenStr, expiresAt, err := userlogic.GenerateJWTToken("Google", user.Email, user.Name, user.Picture)
+	tokenStr, expiresAt, err := logic.GenerateJWTToken("Google", user.Email, user.Name, user.Picture)
 	if err != nil {
 		utils.Logger.Sugar().Errorf("failed to generate jwt token %s", err.Error())
 	} else {
-		logic.SetCookie(c, utils.SessionTokenKey, tokenStr, expiresAt, false)
+		logic.SetCookie(c, constval.SessionCookieKey, tokenStr, expiresAt, false)
 	}
 	c.Redirect(http.StatusTemporaryRedirect, "/")
 }
 
 func getGoogleUserInfo(state string, code string) (*apidata.GoogleUserInfo, error) {
-	_, err := utils.RedisClient.Get(state).Result()
-	if err != nil {
+	if !db.RedisExist(state) {
 		return nil, fmt.Errorf("invalid oauth state")
 	}
-	utils.RedisClient.Del(state)
+	db.RedisDelete(state)
 	token, err := googleOauthConfig.Exchange(oauth2.NoContext, code)
 	if err != nil {
 		return nil, fmt.Errorf("code exchange failed: %s", err.Error())

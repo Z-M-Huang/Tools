@@ -2,33 +2,32 @@ package pages
 
 import (
 	"github.com/Z-M-Huang/Tools/data"
-	"github.com/Z-M-Huang/Tools/data/dbentity"
-	applicationlogic "github.com/Z-M-Huang/Tools/logic/application"
-	userlogic "github.com/Z-M-Huang/Tools/logic/user"
-	"github.com/Z-M-Huang/Tools/utils"
+	"github.com/Z-M-Huang/Tools/data/constval"
+	"github.com/Z-M-Huang/Tools/data/db"
+	"github.com/Z-M-Huang/Tools/data/webdata"
 	"github.com/gin-gonic/gin"
 )
 
 //HomePage home page /
 func HomePage(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
-	claim := c.Keys[utils.ClaimCtxKey].(*data.JWTClaim)
+	response := c.Keys[constval.ResponseCtxKey].(*data.Response)
+	claim := c.Keys[constval.ClaimCtxKey].(*data.JWTClaim)
 	if !(claim == nil) {
-		user := &dbentity.User{
+		user := &db.User{
 			Email: claim.Id,
 		}
-		err := userlogic.Find(utils.DB, user)
+		err := user.Find()
 		if err == nil {
 			if len(user.LikedApps) > 0 {
-				response.Data = applicationlogic.GetApplicationWithLiked(user)
+				response.Data = webdata.GetApplicationWithLiked(user)
 			} else {
-				response.Data = utils.AppList
+				response.Data = webdata.AppList
 			}
 		} else {
-			response.Data = utils.AppList
+			response.Data = webdata.AppList
 		}
 	} else {
-		response.Data = utils.AppList
+		response.Data = webdata.AppList
 	}
 
 	response.Header.Title = "Fun Apps"

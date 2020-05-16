@@ -1,9 +1,12 @@
-package utils
+package main
 
 import (
 	"fmt"
 	"net/http"
 
+	"github.com/Z-M-Huang/Tools/data"
+	"github.com/Z-M-Huang/Tools/data/webdata"
+	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/ikeikeikeike/go-sitemap-generator/stm"
 )
 
@@ -13,12 +16,12 @@ var client http.Client
 func BuildSitemap() *stm.Sitemap {
 	sm := stm.NewSitemap()
 	host := ""
-	if Config.HTTPS {
+	if data.Config.HTTPS {
 		host = "https://"
 	} else {
 		host = "http://"
 	}
-	sm.SetDefaultHost(fmt.Sprintf("%s%s", host, Config.Host))
+	sm.SetDefaultHost(fmt.Sprintf("%s%s", host, data.Config.Host))
 
 	sm.Create()
 
@@ -26,7 +29,7 @@ func BuildSitemap() *stm.Sitemap {
 	sm.Add(getPageSiteMap("/login"))
 	sm.Add(getPageSiteMap("/signup"))
 
-	for _, category := range AppList {
+	for _, category := range webdata.AppList {
 		for _, app := range category.AppCards {
 			sm.Add(getPageSiteMap(app.Link))
 		}
@@ -52,10 +55,10 @@ func GetRobotsTxt() []string {
 		"Disallow: /api/*"}
 
 	sitemapURL := ""
-	if Config.HTTPS {
-		sitemapURL = fmt.Sprintf("https://%s/sitemap.xml", Config.Host)
+	if data.Config.HTTPS {
+		sitemapURL = fmt.Sprintf("https://%s/sitemap.xml", data.Config.Host)
 	} else {
-		sitemapURL = fmt.Sprintf("http://%s/sitemap.xml", Config.Host)
+		sitemapURL = fmt.Sprintf("http://%s/sitemap.xml", data.Config.Host)
 	}
 	content = append(content, fmt.Sprintf("Sitemap: %s", sitemapURL))
 	return content
@@ -64,31 +67,31 @@ func GetRobotsTxt() []string {
 //PingSearchEngines ping search engine
 func PingSearchEngines() {
 	sitemapURL := ""
-	if Config.HTTPS {
-		sitemapURL = fmt.Sprintf("https://%s/sitemap.xml", Config.Host)
+	if data.Config.HTTPS {
+		sitemapURL = fmt.Sprintf("https://%s/sitemap.xml", data.Config.Host)
 	} else {
-		sitemapURL = fmt.Sprintf("http://%s/sitemap.xml", Config.Host)
+		sitemapURL = fmt.Sprintf("http://%s/sitemap.xml", data.Config.Host)
 	}
 
 	resp, err := http.Get(fmt.Sprintf("http://www.google.com/webmasters/tools/ping?sitemap=%s", sitemapURL))
 	if err != nil {
-		Logger.Sugar().Errorf("Failed to ping Google Search Engine %s", err.Error())
+		utils.Logger.Sugar().Errorf("Failed to ping Google Search Engine %s", err.Error())
 	} else if resp.StatusCode != 200 {
-		Logger.Sugar().Errorf("Failed to ping Google Search Engine. Returned %s", resp.Status)
+		utils.Logger.Sugar().Errorf("Failed to ping Google Search Engine. Returned %s", resp.Status)
 		resp.Body.Close()
 	} else {
-		Logger.Info("Successfully Pinged Google")
+		utils.Logger.Info("Successfully Pinged Google")
 		resp.Body.Close()
 	}
 
 	resp, err = http.Get(fmt.Sprintf("http://www.bing.com/webmaster/ping.aspx?siteMap=%s", sitemapURL))
 	if err != nil {
-		Logger.Sugar().Errorf("Failed to ping Bing Search Engine %s", err.Error())
+		utils.Logger.Sugar().Errorf("Failed to ping Bing Search Engine %s", err.Error())
 	} else if resp.StatusCode != 200 {
-		Logger.Sugar().Errorf("Failed to ping Bing Search Engine. Returned %s", resp.Status)
+		utils.Logger.Sugar().Errorf("Failed to ping Bing Search Engine. Returned %s", resp.Status)
 		resp.Body.Close()
 	} else {
-		Logger.Info("Successfully Pinged Bing")
+		utils.Logger.Info("Successfully Pinged Bing")
 		resp.Body.Close()
 	}
 }
