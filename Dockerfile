@@ -12,6 +12,9 @@ WORKDIR /app
 # Copy the source from the current directory to the Working Directory inside the container
 COPY . .
 
+# Clean mod cache
+RUN go clean -modcache .
+
 # Build the Go app
 RUN go build -o main .
 
