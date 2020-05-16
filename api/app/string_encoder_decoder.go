@@ -10,13 +10,14 @@ import (
 	"github.com/Z-M-Huang/Tools/api"
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/apidata/application"
+	"github.com/Z-M-Huang/Tools/data/constval"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/gin-gonic/gin"
 )
 
 //EncodeDecode /api/string/encodedecode
 func EncodeDecode(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
+	response := c.Keys[constval.ResponseCtxKey].(*data.Response)
 	request := &application.StringEncodeDecodeRequest{}
 	var result []string
 	err := c.ShouldBind(&request)

@@ -6,14 +6,14 @@ import (
 	"github.com/Z-M-Huang/Tools/api"
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/apidata/application"
-	"github.com/Z-M-Huang/Tools/utils"
+	"github.com/Z-M-Huang/Tools/data/constval"
 	kellycriterion "github.com/Z-M-Huang/kelly-criterion"
 	"github.com/gin-gonic/gin"
 )
 
 //KellyCriterionSimulate /api/kelly-criterion/simulate
 func KellyCriterionSimulate(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
+	response := c.Keys[constval.ResponseCtxKey].(*data.Response)
 	var simulationResult []*application.KellyCriterionSimulationResponse
 	request := &application.KellyCriterionRequest{}
 	err := c.ShouldBind(&request)

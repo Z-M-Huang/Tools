@@ -10,6 +10,8 @@ import (
 	"github.com/Z-M-Huang/Tools/api"
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/apidata/application"
+	"github.com/Z-M-Huang/Tools/data/constval"
+	"github.com/Z-M-Huang/Tools/data/db"
 	webData "github.com/Z-M-Huang/Tools/data/webdata/application"
 	applicationlogic "github.com/Z-M-Huang/Tools/logic/application"
 	"github.com/Z-M-Huang/Tools/utils"
@@ -18,7 +20,7 @@ import (
 
 //CreateRequestBin /api/request-bin/Create
 func CreateRequestBin(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
+	response := c.Keys[constval.ResponseCtxKey].(*data.Response)
 	request := &application.CreateBinRequest{}
 	err := c.ShouldBind(&request)
 	if err != nil {
@@ -53,8 +55,8 @@ func RequestIn(c *gin.Context) {
 		return
 	}
 
-	data := applicationlogic.GetRequestBinHistory(id)
-	if data == nil {
+	binData := applicationlogic.GetRequestBinHistory(id)
+	if binData == nil {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
@@ -111,18 +113,12 @@ func RequestIn(c *gin.Context) {
 	}
 	history.Body = string(bodyBytes)
 
-	data.History = append([]*webData.RequestHistory{history}, data.History...)
-	if len(data.History) >= 20 {
-		data.History = data.History[0:19]
+	binData.History = append([]*webData.RequestHistory{history}, binData.History...)
+	if len(binData.History) >= 20 {
+		binData.History = binData.History[0:19]
 	}
-	key := applicationlogic.GetRequestBinKey(data.ID)
-	bytes, err := json.Marshal(data)
-	if err != nil {
-		utils.Logger.Error(err.Error())
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-	err = utils.RedisClient.Set(key, bytes, 24*time.Hour).Err()
+	key := applicationlogic.GetRequestBinKey(binData.ID)
+	err = db.RedisSetBytes(key, binData, 24*time.Hour)
 	if err != nil {
 		utils.Logger.Error(err.Error())
 		c.AbortWithStatus(http.StatusInternalServerError)

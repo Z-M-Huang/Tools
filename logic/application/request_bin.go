@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/Z-M-Huang/Tools/data"
+	"github.com/Z-M-Huang/Tools/data/db"
 	webData "github.com/Z-M-Huang/Tools/data/webdata/application"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/go-redis/redis"
@@ -14,16 +16,11 @@ import (
 //GetRequestBinHistory get request history by id
 func GetRequestBinHistory(id string) *webData.RequestBinPageData {
 	key := GetRequestBinKey(id)
-	val, err := utils.RedisClient.Get(key).Result()
+	data := &webData.RequestBinPageData{}
+	err := db.RedisGet(key, data)
 	if err == redis.Nil {
 		return nil
 	} else if err != nil {
-		utils.Logger.Error(err.Error())
-		return nil
-	}
-	data := &webData.RequestBinPageData{}
-	err = json.Unmarshal([]byte(val), &data)
-	if err != nil {
 		utils.Logger.Error(err.Error())
 		return nil
 	}
@@ -32,33 +29,33 @@ func GetRequestBinHistory(id string) *webData.RequestBinPageData {
 
 //NewRequestBinHistory new request history
 func NewRequestBinHistory(private bool) *webData.RequestBinPageData {
-	data := &webData.RequestBinPageData{
+	binData := &webData.RequestBinPageData{
 		ID: strconv.FormatInt(time.Now().Unix(), 10),
 	}
-	if utils.Config.HTTPS {
-		data.URL = "https://"
+	if data.Config.HTTPS {
+		binData.URL = "https://"
 	} else {
-		data.URL = "http://"
+		binData.URL = "http://"
 	}
 
-	data.URL += utils.Config.Host + "/api/request-bin/receive/" + data.ID
+	binData.URL += data.Config.Host + "/api/request-bin/receive/" + binData.ID
 
 	if private {
-		data.VerificationKey = utils.RandomString(30)
+		binData.VerificationKey = utils.RandomString(30)
 	}
 
-	bytes, err := json.Marshal(data)
+	bytes, err := json.Marshal(binData)
 	if err != nil {
 		utils.Logger.Error(err.Error())
 		return nil
 	}
-	key := GetRequestBinKey(data.ID)
-	err = utils.RedisClient.Set(key, bytes, 24*time.Hour).Err()
+	key := GetRequestBinKey(binData.ID)
+	err = db.RedisSet(key, bytes, 24*time.Hour)
 	if err != nil {
 		utils.Logger.Error(err.Error())
 		return nil
 	}
-	return data
+	return binData
 }
 
 //GetRequestBinKey request bin key

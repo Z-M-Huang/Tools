@@ -7,7 +7,8 @@ import (
 	"time"
 
 	"github.com/Z-M-Huang/Tools/data"
-	"github.com/Z-M-Huang/Tools/data/dbentity"
+	"github.com/Z-M-Huang/Tools/data/constval"
+	"github.com/Z-M-Huang/Tools/data/db"
 	"github.com/Z-M-Huang/Tools/data/webdata"
 	"github.com/Z-M-Huang/Tools/data/webdata/application"
 	"github.com/Z-M-Huang/Tools/logic"
@@ -18,7 +19,7 @@ import (
 
 //RenderApplicationPage renders /app/:name
 func RenderApplicationPage(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
+	response := c.Keys[constval.ResponseCtxKey].(*data.Response)
 
 	name := c.Param("name")
 
@@ -27,7 +28,7 @@ func RenderApplicationPage(c *gin.Context) {
 		return
 	}
 
-	appCard := applicationlogic.GetApplicationsByName(name)
+	appCard := webdata.GetApplicationsByName(name)
 	if appCard == nil {
 		c.String(http.StatusNotFound, "404 Not Found")
 		return
@@ -35,7 +36,7 @@ func RenderApplicationPage(c *gin.Context) {
 	response.Header.Title = appCard.Title + " - Fun Apps"
 	response.Header.Description = appCard.Description
 
-	usedApps, err := applicationlogic.GetApplicationUsed(c.Request)
+	usedApps, err := webdata.GetApplicationUsed(c.Request)
 	if err == nil {
 		exists := false
 		for _, str := range usedApps {
@@ -52,11 +53,11 @@ func RenderApplicationPage(c *gin.Context) {
 			if err != nil {
 				utils.Logger.Error(err.Error())
 			} else {
-				logic.SetCookie(c, utils.UsedTokenKey, string(encoded), time.Date(2199, time.December, 31, 23, 59, 59, 0, time.UTC), true)
+				logic.SetCookie(c, constval.UsedTokenKey, string(encoded), time.Date(2199, time.December, 31, 23, 59, 59, 0, time.UTC), true)
 			}
 		}
 	} else {
-		logic.SetCookie(c, utils.UsedTokenKey, "", time.Date(2199, time.December, 31, 23, 59, 59, 0, time.UTC), true)
+		logic.SetCookie(c, constval.UsedTokenKey, "", time.Date(2199, time.December, 31, 23, 59, 59, 0, time.UTC), true)
 		utils.Logger.Error(err.Error())
 	}
 
@@ -100,16 +101,16 @@ func loadRequestBinData(c *gin.Context) *application.RequestBinPageData {
 
 func addApplicationUsage(app *webdata.AppCard) {
 	app.AmountUsed++
-	dbApp := &dbentity.Application{
+	dbApp := &db.Application{
 		Name: app.Title,
 	}
-	err := applicationlogic.Find(utils.DB, dbApp)
+	err := dbApp.Find()
 	if err != nil {
 		utils.Logger.Error(err.Error())
 	}
 
 	dbApp.Usage++
-	err = applicationlogic.Save(utils.DB, dbApp)
+	err = dbApp.Save()
 	if err != nil {
 		utils.Logger.Error(err.Error())
 	}
