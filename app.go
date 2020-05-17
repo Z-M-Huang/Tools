@@ -209,6 +209,8 @@ func main() {
 
 		router.GET("/sitemap.xml", func(c *gin.Context) {
 			c.Writer.Write(sm.XMLContent())
+			c.Writer.WriteHeader(http.StatusOK)
+			c.Writer.Header().Add("Content-Type", "text/xml; charset=UTF-8")
 		})
 		if !data.Config.IsDebug {
 			go func() {
