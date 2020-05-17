@@ -50,7 +50,7 @@ func Login(c *gin.Context) {
 			IsDanger: true,
 			Message:  "Invalid login request.",
 		})
-		WriteResponse(c, 200, response)
+		WriteResponse(c, 400, response)
 		return
 	}
 
@@ -65,7 +65,7 @@ func Login(c *gin.Context) {
 			IsDanger: true,
 			Message:  "We couldn't find any account for this email address... Maybe you need to create one.",
 		})
-		WriteResponse(c, 200, response)
+		WriteResponse(c, 400, response)
 		return
 	} else if err != nil {
 		utils.Logger.Error(err.Error())
@@ -79,7 +79,7 @@ func Login(c *gin.Context) {
 			IsWarning: true,
 			Message:   `Incorrect password. Do you forget your password? If you forget your password, please <a href="#">Click here</a> to reset your password. Uh... We don't have that feature yet, sorry...`,
 		})
-		WriteResponse(c, 200, response)
+		WriteResponse(c, 400, response)
 		return
 	}
 
@@ -130,7 +130,7 @@ func SignUp(c *gin.Context) {
 			IsDanger: true,
 			Message:  "Invalid login request.",
 		})
-		WriteResponse(c, 200, response)
+		WriteResponse(c, 400, response)
 		return
 	}
 	request.Email = strings.TrimSpace(strings.ToLower(request.Email))
@@ -140,7 +140,7 @@ func SignUp(c *gin.Context) {
 			IsDanger: true,
 			Message:  "Invalid email address.",
 		})
-		WriteResponse(c, 200, response)
+		WriteResponse(c, 400, response)
 		return
 	}
 
@@ -149,7 +149,7 @@ func SignUp(c *gin.Context) {
 			IsDanger: true,
 			Message:  "Password doesn't match",
 		})
-		WriteResponse(c, 200, response)
+		WriteResponse(c, 400, response)
 		return
 	}
 
@@ -158,7 +158,7 @@ func SignUp(c *gin.Context) {
 			IsWarning: true,
 			Message:   fmt.Sprintf("Password has minimum length of %d characters.", minPasswordLength),
 		})
-		WriteResponse(c, 200, response)
+		WriteResponse(c, 400, response)
 		return
 	}
 
@@ -171,7 +171,7 @@ func SignUp(c *gin.Context) {
 			IsWarning: true,
 			Message:   "Email address already exists, please try to remember the password, since password recovery function is not yet built. If you cant remember your password, good luck... The password is hashed, and even as an admin, I have no clue what's your password could be... See ya.",
 		})
-		WriteResponse(c, 200, response)
+		WriteResponse(c, 400, response)
 		return
 	} else if err != nil && err != gorm.ErrRecordNotFound {
 		utils.Logger.Error(err.Error())
@@ -188,7 +188,7 @@ func SignUp(c *gin.Context) {
 			IsWarning: true,
 			Message:   "Username already taken. Can't you think of something else? Try harder",
 		})
-		WriteResponse(c, 200, response)
+		WriteResponse(c, 400, response)
 		return
 	} else if err != nil && err != gorm.ErrRecordNotFound {
 		utils.Logger.Error(err.Error())
@@ -231,7 +231,7 @@ func UpdatePassword(c *gin.Context) {
 			IsDanger: true,
 			Message:  "Invalid sign up request.",
 		})
-		WriteResponse(c, 200, response)
+		WriteResponse(c, 400, response)
 		return
 	}
 
@@ -242,14 +242,14 @@ func UpdatePassword(c *gin.Context) {
 			IsWarning: true,
 			Message:   "Password doesn't match.",
 		})
-		WriteResponse(c, 200, response)
+		WriteResponse(c, 400, response)
 		return
 	} else if len(request.Password) < minPasswordLength {
 		response.SetAlert(&data.AlertData{
 			IsWarning: true,
 			Message:   fmt.Sprintf("Password has minimum length of %d.", minPasswordLength),
 		})
-		WriteResponse(c, 200, response)
+		WriteResponse(c, 400, response)
 		return
 	}
 
@@ -272,14 +272,14 @@ func UpdatePassword(c *gin.Context) {
 			IsWarning: true,
 			Message:   "Current password is different compared to what's in database... Try harder...",
 		})
-		WriteResponse(c, 200, response)
+		WriteResponse(c, 400, response)
 		return
 	} else if dbUser.Password != "" && utils.ComparePasswords(dbUser.Password, []byte(request.Password)) {
 		response.SetAlert(&data.AlertData{
 			IsWarning: true,
 			Message:   "New password is exactly the same as the old password...",
 		})
-		WriteResponse(c, 200, response)
+		WriteResponse(c, 400, response)
 		return
 	}
 
@@ -295,7 +295,7 @@ func UpdatePassword(c *gin.Context) {
 		IsSuccess: true,
 		Message:   "Password is updated.",
 	})
-	WriteResponse(c, 200, response)
+	WriteResponse(c, 400, response)
 }
 
 //GoogleLogin google login request

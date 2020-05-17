@@ -67,6 +67,16 @@ function bindForm(id, url, callback) {
             showAlertDanger("Please login first");
           }
         },
+        404: (data) => {
+          if (data != null && data != undefined &&
+            data.Header != null && data.Header != undefined &&
+            data.Header.Alert != null && data.Header.Alert != undefined &&
+            data.Header.Alert.Message != "") {
+            showAlertCondition(data.Header.Alert);
+          } else {
+            showAlertDanger("Please login first");
+          }
+        },
         200: (data) => {
           if (data != null && data != undefined && 
               data.Header != null && data.Header != undefined &&
@@ -108,6 +118,16 @@ function postJSONData(url, data, callback) {
     },
     statusCode: {
       401: (data) => {
+        if (data != null && data != undefined &&
+          data.Header != null && data.Header != undefined &&
+          data.Header.Alert != null && data.Header.Alert != undefined &&
+          data.Header.Alert.Message != "") {
+          showAlertCondition(data.Header.Alert);
+        } else {
+          showAlertDanger("Please login first");
+        }
+      },
+      404: (data) => {
         if (data != null && data != undefined &&
           data.Header != null && data.Header != undefined &&
           data.Header.Alert != null && data.Header.Alert != undefined &&

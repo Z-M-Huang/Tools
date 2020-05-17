@@ -24,7 +24,7 @@ func DNSLookup(c *gin.Context) {
 			IsDanger: true,
 			Message:  "Invalid lookup request.",
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(c, 400, response)
 		return
 	}
 
@@ -39,7 +39,7 @@ func DNSLookup(c *gin.Context) {
 			IsDanger: true,
 			Message:  "Invalid domain name",
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(c, 400, response)
 		return
 	}
 
@@ -48,7 +48,7 @@ func DNSLookup(c *gin.Context) {
 			IsDanger: true,
 			Message:  "Please enter a valid domain name",
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(c, 400, response)
 		return
 	}
 

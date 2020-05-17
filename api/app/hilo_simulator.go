@@ -21,7 +21,7 @@ func HILOSimulate(c *gin.Context) {
 			IsDanger: true,
 			Message:  "Invalid simulation request.",
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(c, 400, response)
 		return
 	}
 
@@ -30,14 +30,14 @@ func HILOSimulate(c *gin.Context) {
 			IsWarning: true,
 			Message:   "Roll Amount: Cannot be negative number",
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(c, 400, response)
 		return
 	} else if request.RollAmount > 50000 {
 		response.SetAlert(&data.AlertData{
 			IsDanger: true,
 			Message:  "Requested Roll Amount is too large. Please do batches and keep the server health. Thank you",
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(c, 400, response)
 		return
 	}
 
@@ -72,7 +72,7 @@ func HILOSimulate(c *gin.Context) {
 			IsDanger: true,
 			Message:  err.Error(),
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(c, 500, response)
 		return
 	}
 
@@ -92,7 +92,7 @@ func HILOVerify(c *gin.Context) {
 			IsDanger: true,
 			Message:  "Invalid simulation request.",
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(c, 400, response)
 		return
 	}
 
@@ -103,7 +103,7 @@ func HILOVerify(c *gin.Context) {
 			IsDanger: true,
 			Message:  err.Error(),
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(c, 400, response)
 		return
 	}
 	response.Data = valid
