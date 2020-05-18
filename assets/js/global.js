@@ -67,16 +67,6 @@ function bindForm(id, url, callback) {
             showAlertDanger("Please login first");
           }
         },
-        404: (data) => {
-          if (data != null && data != undefined &&
-            data.Header != null && data.Header != undefined &&
-            data.Header.Alert != null && data.Header.Alert != undefined &&
-            data.Header.Alert.Message != "") {
-            showAlertCondition(data.Header.Alert);
-          } else {
-            showAlertDanger("Please login first");
-          }
-        },
         200: (data) => {
           if (data != null && data != undefined && 
               data.Header != null && data.Header != undefined &&
@@ -91,10 +81,18 @@ function bindForm(id, url, callback) {
       },
       error: (xhr, status, error) => {
         if (xhr.status != 401) {
-          console.log(xhr.status + ":" + xhr.statusText);
-          showAlertDanger("Failed to receive success response, please try again later.");
+          var data = xhr.responseJSON;
+          if (data != null && data != undefined &&
+            data.Header != null && data.Header != undefined &&
+            data.Header.Alert != null && data.Header.Alert != undefined &&
+            data.Header.Alert.Message != "") {
+            showAlertCondition(data.Header.Alert);
+          } else {
+            console.log(xhr.status + ":" + xhr.statusText);
+            showAlertDanger("Failed to receive success response, please try again later.");
+          }
         }
-      },
+      }
     });
   });
 }
@@ -127,16 +125,6 @@ function postJSONData(url, data, callback) {
           showAlertDanger("Please login first");
         }
       },
-      404: (data) => {
-        if (data != null && data != undefined &&
-          data.Header != null && data.Header != undefined &&
-          data.Header.Alert != null && data.Header.Alert != undefined &&
-          data.Header.Alert.Message != "") {
-          showAlertCondition(data.Header.Alert);
-        } else {
-          showAlertDanger("Please login first");
-        }
-      },
       200: (data) => {
         if (data != null && data != undefined &&
           data.Header != null && data.Header != undefined &&
@@ -151,10 +139,18 @@ function postJSONData(url, data, callback) {
     },
     error: (xhr, status, error) => {
       if (xhr.status != 401) {
-        console.log(xhr.status + ":" + xhr.statusText);
-        showAlertDanger("Failed to receive success response, please try again later.");
+        var data = xhr.responseJSON;
+        if (data != null && data != undefined &&
+          data.Header != null && data.Header != undefined &&
+          data.Header.Alert != null && data.Header.Alert != undefined &&
+          data.Header.Alert.Message != "") {
+          showAlertCondition(data.Header.Alert);
+        } else {
+          console.log(xhr.status + ":" + xhr.statusText);
+          showAlertDanger("Failed to receive success response, please try again later.");
+        }
       }
-    },
+    }
   });
 }
 
@@ -300,7 +296,7 @@ function showAlertCondition(alert) {
 }
 
 /*******************************************************
- *                    onClick functions
+ *                    onClick/onChange functions
  *******************************************************/
 function styleChangeOnClick(styleName) {
   var d = new Date();
@@ -330,6 +326,11 @@ function copyValueOnClick(ele) {
 
 function onClickRedirect(url) {
   window.location.href = url
+}
+
+function onChangeFileInput(ele) {
+  var fileName = $(ele).val();
+  $(ele).next('.custom-file-label').html(fileName);
 }
 
 /*******************************************************

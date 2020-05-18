@@ -14,8 +14,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-//Create /api/qr-code/create
-func Create(c *gin.Context) {
+//CreateQRCode /api/qr-code/create
+func CreateQRCode(c *gin.Context) {
 	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
 	request := &application.QRCodeRequest{}
 	err := c.ShouldBind(&request)
@@ -72,24 +72,30 @@ func Create(c *gin.Context) {
 		return
 	}
 
-	backgroundColor, err := parseHexColorFast(request.BackgroundColor)
-	if err != nil {
-		response.SetAlert(&data.AlertData{
-			IsWarning: true,
-			Message:   "Background Color: " + err.Error(),
-		})
-		api.WriteResponse(c, 400, response)
-		return
+	var backgroundColor color.Color = color.White
+	if request.BackgroundColor != "" {
+		backgroundColor, err = parseHexColorFast(request.BackgroundColor)
+		if err != nil {
+			response.SetAlert(&data.AlertData{
+				IsWarning: true,
+				Message:   "Background Color: " + err.Error(),
+			})
+			api.WriteResponse(c, 400, response)
+			return
+		}
 	}
 
-	foregroundColor, err := parseHexColorFast(request.ForegroundColor)
-	if err != nil {
-		response.SetAlert(&data.AlertData{
-			IsWarning: true,
-			Message:   "Foreground Color: " + err.Error(),
-		})
-		api.WriteResponse(c, 400, response)
-		return
+	var foregroundColor color.Color = color.Black
+	if request.ForegroundColor != "" {
+		foregroundColor, err = parseHexColorFast(request.ForegroundColor)
+		if err != nil {
+			response.SetAlert(&data.AlertData{
+				IsWarning: true,
+				Message:   "Foreground Color: " + err.Error(),
+			})
+			api.WriteResponse(c, 400, response)
+			return
+		}
 	}
 
 	var logo image.Image

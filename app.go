@@ -249,6 +249,7 @@ func main() {
 	apiNoAuth.POST("/dns-lookup/lookup", appApis.DNSLookup)
 	apiNoAuth.POST("/string/encodedecode", appApis.EncodeDecode)
 	apiNoAuth.POST("/request-bin/create", appApis.CreateRequestBin)
+	apiNoAuth.POST("/qr-code/create", appApis.CreateQRCode)
 	apiAuthRequired.POST("/app/:name/like", appApis.Like)
 	apiAuthRequired.POST("/app/:name/dislike", appApis.Dislike)
 
