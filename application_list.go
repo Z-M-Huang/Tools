@@ -14,6 +14,7 @@ import (
 func init() {
 	getAnalyticTools()
 	getFormatTools()
+	getGeneratorTools()
 	getLookupTools()
 	getWebUtils()
 	loadAppCardsUsage()
@@ -44,6 +45,18 @@ func getFormatTools() {
 
 	encoderDecoder := newAppCart("string-encoder-decoder", "string_encoder_decoder.gohtml", "", "fas fa-receipt",
 		"/app/string-encoder-decoder", "Encoder Decoder", "Convert string encoding based on request.")
+	tools.AppCards = append(tools.AppCards, encoderDecoder)
+
+	sortAppCardSlice(tools.AppCards)
+	webdata.AppList = append(webdata.AppList, tools)
+}
+
+func getGeneratorTools() {
+	tools := &webdata.AppCategory{
+		Category: "Generator",
+	}
+
+	encoderDecoder := newAppCart("qr-code", "qr_code.gohtml", "", "fas fa-qrcode", "/app/qr-code", "QR Code", "Generate QR Code with logo and background image.")
 	tools.AppCards = append(tools.AppCards, encoderDecoder)
 
 	sortAppCardSlice(tools.AppCards)

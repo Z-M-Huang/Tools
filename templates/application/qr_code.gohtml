@@ -1,0 +1,79 @@
+{{template "header" .Header}}
+<h1>QR Code Generator</h1>
+
+<a href="https://rapidapi.com/JayemithLLC/api/quick-qr-code" target="_blank">
+  <img src="https://storage.googleapis.com/code-snippets/connect-on-rapidapi-light.png" width="215" alt="Connect on RapidAPI">
+</a>
+<p>Generate QR codes with customized logo and background image</p>
+<p class="text-warn">Rate limit: 20 requests per day. API access in RapidAPI available with higher rate limit.</p>
+ 
+<div class="row">
+  <div class="col-sm-6">
+    <form id="qrCodeForm">
+      <div class="form-group">
+        <label for="content">Content</label>
+        <input type="text" class="form-control" id="content" name="content" aria-describedby="contentHelp"
+          placeholder="Text to put in QR Code" required>
+      </div>
+      <div class="form-group">
+        <label for="size">Size</label>
+        <input type="number" class="form-control" id="size" name="size" aria-describedby="sizeHelp"
+          value="256" required min="1" max="1024">
+      </div>
+      <div class="form-group">
+        <label for="level">Level</label>
+        <div class="custom-control custom-radio custom-control-inline">
+          <input type="radio" id="levelRadio1" name="level" class="custom-control-input" value="L" required>
+          <label class="custom-control-label" for="levelRadio1">L</label>
+        </div>
+        <div class="custom-control custom-radio custom-control-inline">
+          <input type="radio" id="levelRadio2" name="level" class="custom-control-input" value="M" checked="" required>
+          <label class="custom-control-label" for="levelRadio2">M</label>
+        </div>
+        <div class="custom-control custom-radio custom-control-inline">
+          <input type="radio" id="levelRadio3" name="level" class="custom-control-input" value="Q" required>
+          <label class="custom-control-label" for="levelRadio3">Q</label>
+        </div>
+        <div class="custom-control custom-radio custom-control-inline">
+          <input type="radio" id="levelRadio4" name="level" class="custom-control-input" value="H" required>
+          <label class="custom-control-label" for="levelRadio4">H</label>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="backColor" class="col-sm-4">Background Color</label>
+        <input type="text" class="form-control col-sm-8" id="backColor" name="backColor" aria-describedby="backColorHelp"
+          value="ffffff">
+      </div>
+      <div class="form-group row">
+        <label for="foreColor" class="col-sm-4">Foreground Color</label>
+        <input type="text" class="form-control col-sm-8" id="foreColor" name="foreColor" aria-describedby="foreColorHelp"
+          value="000000">
+      </div>
+      <div class="form-group custom-file mb-3">
+        <input type="file" class="custom-file-input" id="logoImage" name="logoImage" onchange="onChangeFileInput(this)">
+        <label class="custom-file-label" for="logoImage">Logo Image</label>
+      </div>
+      <div class="form-group custom-file mb-3">        
+          <input type="file" class="custom-file-input" id="backgroundImage" name="backgroundImage" onchange="onChangeFileInput(this)">
+          <label class="custom-file-label" for="backgroundImage">Background Image</label>
+      </div>
+      <button type="submit" class="btn btn-primary btn-lg btn-block">Submit</button>
+    </form>
+  </div>
+  <div class="col-sm-6">
+    <h3 class="mb-2">QR Code Result View</h3>
+    <div class="d-flex d-flex justify-content-center">
+      <img id="resultImg" />
+    </div>
+  </div>
+</div>
+</form>
+
+<script>
+  bindFormWithFile("qrCodeForm", "/api/qr-code/create", (d) => {
+    if (d != undefined && d != null) {
+      $("#resultImg").attr("src", "data:image/png;base64, " + d)
+    }
+  })
+</script>
+{{template "footer"}}

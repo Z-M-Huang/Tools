@@ -5,8 +5,8 @@ on:
     types: [published]
 
 jobs:
-  build:
-    name: build
+  update:
+    name: Update Images
     runs-on: ubuntu-latest
     steps:
     - name: Docker Login
@@ -28,7 +28,7 @@ jobs:
 
   deploy:
     name: deploy
-    needs: build
+    needs: update
     runs-on: self-hosted
     steps:      
     - uses: actions/checkout@v2

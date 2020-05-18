@@ -24,7 +24,7 @@ func Like(c *gin.Context) {
 			IsDanger: true,
 			Message:  "User not found",
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(c, 400, response)
 		return
 	}
 
@@ -34,7 +34,7 @@ func Like(c *gin.Context) {
 			IsDanger: true,
 			Message:  "User not found",
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(c, 400, response)
 		return
 	}
 
@@ -48,7 +48,7 @@ func Like(c *gin.Context) {
 			IsDanger: true,
 			Message:  "User not found",
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(c, 400, response)
 		return
 	} else if err != nil {
 		utils.Logger.Error(err.Error())
@@ -56,7 +56,7 @@ func Like(c *gin.Context) {
 			IsDanger: true,
 			Message:  "User not found",
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(c, 400, response)
 		return
 	}
 
@@ -107,7 +107,7 @@ func Dislike(c *gin.Context) {
 			IsDanger: true,
 			Message:  "User not found",
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(c, 400, response)
 		return
 	}
 
@@ -117,7 +117,7 @@ func Dislike(c *gin.Context) {
 			IsDanger: true,
 			Message:  "User not found",
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(c, 400, response)
 		return
 	}
 
@@ -131,7 +131,7 @@ func Dislike(c *gin.Context) {
 			IsDanger: true,
 			Message:  "User not found",
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(c, 400, response)
 		return
 	} else if err != nil {
 		utils.Logger.Error(err.Error())
@@ -139,7 +139,7 @@ func Dislike(c *gin.Context) {
 			IsDanger: true,
 			Message:  "User not found",
 		})
-		api.WriteResponse(c, 200, response)
+		api.WriteResponse(c, 400, response)
 		return
 	}
 
