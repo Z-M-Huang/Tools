@@ -3,13 +3,17 @@ package app
 import (
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"image"
 	"image/color"
+	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/Z-M-Huang/Tools/api"
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/apidata/application"
+	"github.com/Z-M-Huang/Tools/data/db"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/Z-M-Huang/go-qrcode"
 	"github.com/gin-gonic/gin"
@@ -150,6 +154,28 @@ func CreateQRCode(c *gin.Context) {
 	q.LogoImage = logo
 	q.BackgroundImage = backgroundImage
 
+	redisKey := getRedisKey(c.ClientIP())
+	if !db.RedisExist(redisKey) {
+		db.RedisSet(redisKey, 19, 24*time.Hour)
+	} else {
+		val, err := db.RedisDecr(redisKey)
+		if err != nil {
+			response.SetAlert(&data.AlertData{
+				IsDanger: true,
+				Message:  "Internal Error",
+			})
+			api.WriteResponse(c, 500, response)
+			return
+		} else if val < 0 {
+			response.SetAlert(&data.AlertData{
+				IsWarning: true,
+				Message:   "Too many requests today. Please come back tomorrow.",
+			})
+			api.WriteResponse(c, http.StatusTooManyRequests, response)
+			return
+		}
+	}
+
 	imageBytes, err := q.PNG(request.Size)
 	if err != nil {
 		utils.Logger.Error(err.Error())
@@ -163,6 +189,10 @@ func CreateQRCode(c *gin.Context) {
 
 	response.Data = base64.StdEncoding.EncodeToString(imageBytes)
 	api.WriteResponse(c, 200, response)
+}
+
+func getRedisKey(ip string) string {
+	return fmt.Sprintf("APP_QR_CODE_%s", ip)
 }
 
 func parseHexColorFast(s string) (c color.RGBA, err error) {

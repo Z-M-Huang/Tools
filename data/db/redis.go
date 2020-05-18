@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/Z-M-Huang/Tools/data"
@@ -43,6 +44,37 @@ func RedisGet(key string, out interface{}) error {
 	return nil
 }
 
+//RedisGetString get string
+func RedisGetString(key string) (string, error) {
+	val, err := redisClient.Get(key).Result()
+	if err == redis.Nil {
+		return "", errors.New("Not found")
+	} else if err != nil {
+		utils.Logger.Error(err.Error())
+		return "", errors.New("Internal Error")
+	}
+	return val, nil
+}
+
+//RedisGetInt get int64
+func RedisGetInt(key string) (int64, error) {
+	val, err := redisClient.Get(key).Result()
+	if err == redis.Nil {
+		return 0, errors.New("Not found")
+	} else if err != nil {
+		utils.Logger.Error(err.Error())
+		return 0, errors.New("Internal Error")
+	}
+
+	ret, err := strconv.ParseInt(val, 10, 64)
+	if err != nil {
+		utils.Logger.Error(err.Error())
+		return 0, fmt.Errorf("Failed to get %s as int", key)
+	}
+
+	return ret, nil
+}
+
 //RedisExist check key exists
 func RedisExist(key string) bool {
 	err := redisClient.Exists(key).Err()
@@ -72,6 +104,12 @@ func RedisSet(key string, val interface{}, expire time.Duration) error {
 	return nil
 }
 
+//RedisSetString set string
+func RedisSetString(key string, val string, expire time.Duration) error {
+	bytes := []byte(val)
+	return RedisSet(key, bytes, expire)
+}
+
 //RedisSetBytes set bytes
 func RedisSetBytes(key string, val interface{}, expire time.Duration) error {
 	bytes, err := json.Marshal(val)
@@ -79,4 +117,24 @@ func RedisSetBytes(key string, val interface{}, expire time.Duration) error {
 		return err
 	}
 	return RedisSet(key, bytes, expire)
+}
+
+//RedisIncr redis increase
+func RedisIncr(key string) (int64, error) {
+	result, err := redisClient.Incr(key).Result()
+	if err != nil {
+		utils.Logger.Error(err.Error())
+		return 0, fmt.Errorf("Failed to incr %s", key)
+	}
+	return result, nil
+}
+
+//RedisDecr redis decrease
+func RedisDecr(key string) (int64, error) {
+	result, err := redisClient.Decr(key).Result()
+	if err != nil {
+		utils.Logger.Error(err.Error())
+		return 0, fmt.Errorf("Failed to decr %s", key)
+	}
+	return result, nil
 }
