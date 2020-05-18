@@ -5,7 +5,7 @@ import "mime/multipart"
 //QRCodeRequest /api/qr-code/create
 type QRCodeRequest struct {
 	Content         string                `json:"content" xml:"content" form:"content" bind:"required"`
-	Level           string                `json:"level" xml:"level" form:"level"`
+	Level           string                `json:"level" xml:"level" form:"level" bind:"required"`
 	Size            int                   `json:"size" xml:"size" form:"size"`
 	BackgroundColor string                `json:"backColor" xml:"backColor" form:"backColor"`
 	ForegroundColor string                `json:"foreColor" xml:"foreColor" form:"foreColor"`

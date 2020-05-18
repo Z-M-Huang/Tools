@@ -5,6 +5,7 @@ import (
 	"errors"
 	"image"
 	"image/color"
+	"strconv"
 
 	"github.com/Z-M-Huang/Tools/api"
 	"github.com/Z-M-Huang/Tools/data"
@@ -17,8 +18,15 @@ import (
 //CreateQRCode /api/qr-code/create
 func CreateQRCode(c *gin.Context) {
 	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
-	request := &application.QRCodeRequest{}
-	err := c.ShouldBind(&request)
+	c.Request.ParseMultipartForm(1024)
+	request := &application.QRCodeRequest{
+		Content:         c.Request.PostFormValue("content"),
+		Level:           c.Request.PostFormValue("level"),
+		BackgroundColor: c.Request.PostFormValue("backColor"),
+		ForegroundColor: c.Request.PostFormValue("foreColor"),
+	}
+	var err error
+	request.Size, err = strconv.Atoi(c.Request.PostFormValue("size"))
 	if err != nil {
 		response.SetAlert(&data.AlertData{
 			IsWarning: true,
@@ -99,17 +107,9 @@ func CreateQRCode(c *gin.Context) {
 	}
 
 	var logo image.Image
-	if request.LogoImage != nil {
-		file, err := request.LogoImage.Open()
-		if err != nil {
-			response.SetAlert(&data.AlertData{
-				IsWarning: true,
-				Message:   "Failed to get logo image",
-			})
-			api.WriteResponse(c, 400, response)
-			return
-		}
-		logo, _, err = image.Decode(file)
+	logoFile, _, err := c.Request.FormFile("logoImage")
+	if err == nil {
+		logo, _, err = image.Decode(logoFile)
 		if err != nil {
 			response.SetAlert(&data.AlertData{
 				IsWarning: true,
@@ -121,17 +121,9 @@ func CreateQRCode(c *gin.Context) {
 	}
 
 	var backgroundImage image.Image
-	if request.BackgroundImage != nil {
-		file, err := request.BackgroundImage.Open()
-		if err != nil {
-			response.SetAlert(&data.AlertData{
-				IsWarning: true,
-				Message:   "Failed to get background image",
-			})
-			api.WriteResponse(c, 400, response)
-			return
-		}
-		backgroundImage, _, err = image.Decode(file)
+	backgroundImageFile, _, err := c.Request.FormFile("backgroundImage")
+	if err == nil {
+		backgroundImage, _, err = image.Decode(backgroundImageFile)
 		if err != nil {
 			response.SetAlert(&data.AlertData{
 				IsWarning: true,

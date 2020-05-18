@@ -97,6 +97,71 @@ function bindForm(id, url, callback) {
   });
 }
 
+function bindFormWithFile(id, url, callback) {
+  id = "#" + id;
+  var form = $(id);
+  form.on("submit", (e) => {
+    e.preventDefault();
+    var formData = new FormData(form[0]);
+    $.ajax({
+      type: "POST",
+      enctype: 'multipart/form-data',
+      url: url,
+      data: formData,
+      processData: false,
+      contentType: false,
+      cache: false,
+      beforeSend: (xhr) => {
+        var sessionToken = getCookieValue("session_token");
+        if (
+          sessionToken != "" &&
+          sessionToken != null &&
+          sessionToken != undefined
+        ) {
+          xhr.setRequestHeader("Authorization", "Bearer " + sessionToken);
+        }
+      },
+      statusCode: {
+        401: (data) => {
+          if (data != null && data != undefined &&
+            data.Header != null && data.Header != undefined &&
+            data.Header.Alert != null && data.Header.Alert != undefined &&
+            data.Header.Alert.Message != "") {
+            showAlertCondition(data.Header.Alert);
+          } else {
+            showAlertDanger("Please login first");
+          }
+        },
+        200: (data) => {
+          if (data != null && data != undefined && 
+              data.Header != null && data.Header != undefined &&
+              data.Header.Alert != null && data.Header.Alert != undefined &&
+              data.Header.Alert.Message != "") {
+            showAlertCondition(data.Header.Alert);
+          } 
+          if (callback != null && callback != undefined) {
+            callback(data.Data);
+          }
+        },
+      },
+      error: (xhr, status, error) => {
+        if (xhr.status != 401) {
+          var data = xhr.responseJSON;
+          if (data != null && data != undefined &&
+            data.Header != null && data.Header != undefined &&
+            data.Header.Alert != null && data.Header.Alert != undefined &&
+            data.Header.Alert.Message != "") {
+            showAlertCondition(data.Header.Alert);
+          } else {
+            console.log(xhr.status + ":" + xhr.statusText);
+            showAlertDanger("Failed to receive success response, please try again later.");
+          }
+        }
+      }
+    });
+  });
+}
+
 function postJSONData(url, data, callback) {
   $.ajax({
     type: "POST",

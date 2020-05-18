@@ -6,7 +6,7 @@
 
 <div class="row">
   <div class="col-sm-6">
-    <form id="qrCodeForm" enctype="multipart/form-data">
+    <form id="qrCodeForm">
       <div class="form-group">
         <label for="content">Content</label>
         <input type="text" class="form-control" id="content" name="content" aria-describedby="contentHelp"
@@ -65,7 +65,7 @@
 </form>
 
 <script>
-  bindForm("qrCodeForm", "/api/qr-code/create", (d) => {
+  bindFormWithFile("qrCodeForm", "/api/qr-code/create", (d) => {
     if (d != undefined && d != null) {
       $("#resultImg").attr("src", "data:image/png;base64, " + d)
     }
