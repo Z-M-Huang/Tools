@@ -5,22 +5,34 @@ on:
     types: [published]
 
 jobs:
-  update:
-    name: Update Images
+  build:
     runs-on: ubuntu-latest
+    name: build
     steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: '12.x'
+    - name: Install dependencies
+      run: npm install
+    - name: Set up Docker Buildx
+      id: buildx
+      uses: crazy-max/ghaction-docker-buildx@v1
+      with:
+        buildx-version: latest
+        qemu-version: latest
     - name: Docker Login
       run: |
         echo "${{ secrets.DOCKER_PASSWORD }}" > ~/cred.txt
         cat ~/cred.txt | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
-    - name: Clean Docker Cred
+    - name: Clean Docker cred
       run: rm ~/cred.txt
-    - name: Pull Docker Image
-      run: docker pull zhironghuang/tools-web:${{ github.sha }}
-    - name: Change Docker Tag
-      run: docker tag zhironghuang/tools-web:${{ github.sha }} zhironghuang/tools-web:latest
-    - name: Push Latest Image
-      run: docker push zhironghuang/tools-web:latest
+    - name: Build using buildx
+      run: | 
+        docker buildx build \
+          --platform linux/amd64,linux/arm/v7 --push \
+          -t zhironghuang/tools-web:${{ github.sha }} -t zhironghuang/tools-web:latest .
     - name: Docker Logout
       run: |
         docker logout
@@ -28,7 +40,7 @@ jobs:
 
   deploy:
     name: deploy
-    needs: update
+    needs: build
     runs-on: self-hosted
     steps:      
     - uses: actions/checkout@v2
