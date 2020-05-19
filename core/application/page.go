@@ -7,9 +7,8 @@ import (
 	"time"
 
 	"github.com/Z-M-Huang/Tools/core"
+	"github.com/Z-M-Huang/Tools/core/requestbin"
 	"github.com/Z-M-Huang/Tools/data"
-	"github.com/Z-M-Huang/Tools/data/webdata/application"
-	applicationlogic "github.com/Z-M-Huang/Tools/logic/application"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/gin-gonic/gin"
 )
@@ -77,29 +76,7 @@ func (Page) RenderApplicationPage(c *gin.Context) {
 func loadAppSpecificData(c *gin.Context, appName string) interface{} {
 	switch appName {
 	case "request-bin":
-		return loadRequestBinData(c)
+		return requestbin.LoadRequestBinData(c)
 	}
 	return nil
-}
-
-func loadRequestBinData(c *gin.Context) *application.RequestBinPageData {
-	id := c.Param("id")
-	if id == "" {
-		return nil
-	}
-	data := applicationlogic.GetRequestBinHistory(id)
-	if data != nil && data.VerificationKey != "" {
-		val, err := c.Cookie("request_bin_verification_key")
-		if err != nil || val == "" {
-			c.Redirect(http.StatusTemporaryRedirect, "/app/request-bin")
-			c.Abort()
-			return nil
-		}
-		if data.VerificationKey != val {
-			c.Redirect(http.StatusTemporaryRedirect, "/app/request-bin")
-			c.Abort()
-			return nil
-		}
-	}
-	return data
 }

@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"time"
 
-	appApis "github.com/Z-M-Huang/Tools/api/app"
 	"github.com/Z-M-Huang/Tools/core"
 	"github.com/Z-M-Huang/Tools/core/account"
 	"github.com/Z-M-Huang/Tools/core/application"
@@ -14,6 +13,7 @@ import (
 	"github.com/Z-M-Huang/Tools/core/home"
 	"github.com/Z-M-Huang/Tools/core/kellycriterion"
 	"github.com/Z-M-Huang/Tools/core/qrcode"
+	"github.com/Z-M-Huang/Tools/core/requestbin"
 	"github.com/Z-M-Huang/Tools/core/stringencoderdecoder"
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/utils"
@@ -243,6 +243,7 @@ func SetupRouter() *gin.Engine {
 	hilosimulatorAPI := &hilosimulator.API{}
 	kellyCriterionAPI := &kellycriterion.API{}
 	qrcodeAPI := &qrcode.API{}
+	requestBinAPI := &requestbin.API{}
 	stringencoderdecoderAPI := &stringencoderdecoder.API{}
 
 	pageNoAuth.GET("/", homePage.Home)
@@ -262,14 +263,14 @@ func SetupRouter() *gin.Engine {
 	pageNoAuth.GET("/app/:name/:id", applicationPage.RenderApplicationPage)
 
 	//app api
-	router.Any("/api/request-bin/receive/:id", appApis.RequestIn)
+	router.Any("/api/request-bin/receive/:id", requestBinAPI.RequestIn)
 	apiNoAuth.POST("/kelly-criterion/simulate", kellyCriterionAPI.Simulate)
 	apiNoAuth.POST("/hilo-simulator/simulate", hilosimulatorAPI.HILOSimulate)
 	apiNoAuth.POST("/hilo-simulator/verify", hilosimulatorAPI.HILOVerify)
 	apiNoAuth.POST("/dns-lookup/lookup", dnslookupAPI.DNSLookup)
 	apiNoAuth.POST("/qr-code/create", qrcodeAPI.CreateQRCode)
 	apiNoAuth.POST("/string/encodedecode", stringencoderdecoderAPI.EncodeDecode)
-	apiNoAuth.POST("/request-bin/create", appApis.CreateRequestBin)
+	apiNoAuth.POST("/request-bin/create", requestBinAPI.CreateRequestBin)
 	apiAuthRequired.POST("/app/:name/like", applicationAPI.Like)
 	apiAuthRequired.POST("/app/:name/dislike", applicationAPI.Dislike)
 
