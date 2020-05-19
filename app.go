@@ -8,6 +8,8 @@ import (
 	"github.com/Z-M-Huang/Tools/api"
 	appApis "github.com/Z-M-Huang/Tools/api/app"
 	"github.com/Z-M-Huang/Tools/core"
+	"github.com/Z-M-Huang/Tools/core/account"
+	"github.com/Z-M-Huang/Tools/core/home"
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/logic"
 	"github.com/Z-M-Huang/Tools/utils"
@@ -227,14 +229,14 @@ func SetupRouter() *gin.Engine {
 	apiNoAuth := router.Group("/api", apiAuthHandler(false))
 	apiAuthRequired := router.Group("/api", apiAuthHandler(true))
 
-	home := &core.Home{}
-	account := &core.Account{}
+	homePage := &home.Page{}
+	accountPage := &account.Page{}
 	application := &core.Application{}
 
-	pageNoAuth.GET("/", home.HomePage)
-	pageNoAuth.GET("/signup", account.SignupPage)
-	pageNoAuth.GET("/login", account.LoginPage)
-	pageAuthRequired.GET("/account", account.AccountPage)
+	pageNoAuth.GET("/", homePage.Home)
+	pageNoAuth.GET("/signup", accountPage.Signup)
+	pageNoAuth.GET("/login", accountPage.Login)
+	pageAuthRequired.GET("/account", accountPage.Account)
 
 	router.GET("/google_login", api.GoogleLogin)
 	router.GET("/google_oauth", api.GoogleCallback)

@@ -1,20 +1,19 @@
-package core
+package home
 
 import (
-	"github.com/Z-M-Huang/Tools/data"
+	"github.com/Z-M-Huang/Tools/core"
 	"github.com/Z-M-Huang/Tools/data/db"
 	"github.com/Z-M-Huang/Tools/data/webdata"
-	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/gin-gonic/gin"
 )
 
-//Home logic
-type Home struct{}
+//Page home page
+type Page struct{}
 
-//HomePage home page /
-func (h *Home) HomePage(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
-	claim := c.Keys[utils.ClaimCtxKey].(*data.JWTClaim)
+//Home home page /
+func (Page) Home(c *gin.Context) {
+	response := core.GetResponseInContext(c.Keys)
+	claim := core.GetClaimInContext(c.Keys)
 	if !(claim == nil) {
 		user := &db.User{
 			Email: claim.Id,
