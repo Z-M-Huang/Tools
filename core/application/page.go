@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Z-M-Huang/Tools/core"
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/webdata/application"
-	"github.com/Z-M-Huang/Tools/logic"
 	applicationlogic "github.com/Z-M-Huang/Tools/logic/application"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/gin-gonic/gin"
@@ -55,15 +55,15 @@ func (Page) RenderApplicationPage(c *gin.Context) {
 				if err != nil {
 					utils.Logger.Error(err.Error())
 				} else {
-					logic.SetCookie(c, utils.UsedTokenKey, string(encoded), time.Date(2199, time.December, 31, 23, 59, 59, 0, time.UTC), true)
+					core.SetCookie(c, utils.UsedTokenKey, string(encoded), time.Date(2199, time.December, 31, 23, 59, 59, 0, time.UTC), true)
 				}
 			}
 		} else {
-			logic.SetCookie(c, utils.UsedTokenKey, "", time.Date(2199, time.December, 31, 23, 59, 59, 0, time.UTC), true)
+			core.SetCookie(c, utils.UsedTokenKey, "", time.Date(2199, time.December, 31, 23, 59, 59, 0, time.UTC), true)
 			utils.Logger.Error(err.Error())
 		}
 	} else {
-		logic.SetCookie(c, utils.UsedTokenKey, "", time.Date(2199, time.December, 31, 23, 59, 59, 0, time.UTC), true)
+		core.SetCookie(c, utils.UsedTokenKey, "", time.Date(2199, time.December, 31, 23, 59, 59, 0, time.UTC), true)
 		utils.Logger.Error(err.Error())
 	}
 	response.Data = loadAppSpecificData(c, appCard.Name)

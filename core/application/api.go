@@ -5,6 +5,7 @@ import (
 
 	"github.com/Z-M-Huang/Tools/api"
 	"github.com/Z-M-Huang/Tools/core"
+	"github.com/Z-M-Huang/Tools/core/account"
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/db"
 	"github.com/Z-M-Huang/Tools/utils"
@@ -18,7 +19,7 @@ type API struct{}
 //Like /app/:name/like
 func (API) Like(c *gin.Context) {
 	//Only logged in user can access this
-	claim := core.GetClaimInContext(c.Keys)
+	claim := account.GetClaimInContext(c.Keys)
 	response := core.GetResponseInContext(c.Keys)
 
 	name := c.Param("name")
@@ -102,7 +103,7 @@ func (API) Like(c *gin.Context) {
 //Dislike /app/:name/dislike
 func (API) Dislike(c *gin.Context) {
 	//Only logged in user can access this
-	claim := c.Keys[utils.ClaimCtxKey].(*data.JWTClaim)
+	claim := c.Keys[utils.ClaimCtxKey].(*account.JWTClaim)
 	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
 
 	name := c.Param("name")

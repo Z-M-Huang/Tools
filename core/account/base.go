@@ -1,4 +1,4 @@
-package logic
+package account
 
 import (
 	"errors"
@@ -6,23 +6,30 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Z-M-Huang/Tools/core"
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
 
-//SetCookie sets cookie
-func SetCookie(c *gin.Context, cookieName, cookieVal string, expiresAt time.Time, httpOnly bool) {
-	if data.Config.HTTPS {
-		c.SetCookie(cookieName, cookieVal, int(expiresAt.Sub(time.Now()).Seconds()), "/", data.Config.Host, true, httpOnly)
-	} else {
-		c.SetCookie(cookieName, cookieVal, int(expiresAt.Sub(time.Now()).Seconds()), "/", data.Config.Host, false, httpOnly)
+//JWTClaim web claim
+type JWTClaim struct {
+	ImageURL string `json:"image_url"`
+	jwt.StandardClaims
+}
+
+//GetClaimInContext get claim struct from context
+func GetClaimInContext(contextKey map[string]interface{}) *JWTClaim {
+	claim := contextKey[utils.ClaimCtxKey]
+	if claim == nil {
+		return nil
 	}
+	return claim.(*JWTClaim)
 }
 
 //GetClaimFromCookieAndRenew get claim and renew
-func GetClaimFromCookieAndRenew(c *gin.Context) (*data.JWTClaim, error) {
+func GetClaimFromCookieAndRenew(c *gin.Context) (*JWTClaim, error) {
 	val, err := c.Cookie(utils.SessionCookieKey)
 	if err != nil || val == "" {
 		return nil, nil
@@ -36,14 +43,14 @@ func GetClaimFromCookieAndRenew(c *gin.Context) (*data.JWTClaim, error) {
 		if err != nil {
 			utils.Logger.Sugar().Errorf("failed to generate jwt token %s", err.Error())
 		} else {
-			SetCookie(c, utils.SessionCookieKey, tokenStr, expiresAt, false)
+			core.SetCookie(c, utils.SessionCookieKey, tokenStr, expiresAt, false)
 		}
 	}
 	return claim, nil
 }
 
 //GetClaimFromHeaderAndRenew get claim and renew. Since auth token is httponly, it will not really be able to get from javascript
-func GetClaimFromHeaderAndRenew(c *gin.Context) (*data.JWTClaim, error) {
+func GetClaimFromHeaderAndRenew(c *gin.Context) (*JWTClaim, error) {
 	token := c.GetHeader("Authorization")
 	if token == "" || !strings.Contains(token, "Bearer ") {
 		return nil, errors.New("Unauthorized")
@@ -59,7 +66,7 @@ func GetClaimFromHeaderAndRenew(c *gin.Context) (*data.JWTClaim, error) {
 		if err != nil {
 			utils.Logger.Sugar().Errorf("failed to generate jwt token %s", err.Error())
 		} else {
-			SetCookie(c, utils.SessionCookieKey, tokenStr, expiresAt, false)
+			core.SetCookie(c, utils.SessionCookieKey, tokenStr, expiresAt, false)
 		}
 	}
 	return claim, nil
@@ -68,7 +75,7 @@ func GetClaimFromHeaderAndRenew(c *gin.Context) (*data.JWTClaim, error) {
 //GenerateJWTToken generates JWT token
 func GenerateJWTToken(audience, emailAddress, username, imageURL string) (string, time.Time, error) {
 	expiresAt := time.Now().Add(30 * 24 * time.Hour)
-	claim := &data.JWTClaim{
+	claim := &JWTClaim{
 		ImageURL: imageURL,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expiresAt.Unix(),
@@ -87,8 +94,8 @@ func GenerateJWTToken(audience, emailAddress, username, imageURL string) (string
 	return tokenStr, expiresAt, nil
 }
 
-func isTokenValid(token string) (*data.JWTClaim, error) {
-	claims := &data.JWTClaim{}
+func isTokenValid(token string) (*JWTClaim, error) {
+	claims := &JWTClaim{}
 	tkn, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
 		return data.Config.JwtKey, nil
 	})

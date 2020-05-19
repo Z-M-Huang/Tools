@@ -7,11 +7,11 @@ import (
 
 	"github.com/Z-M-Huang/Tools/api"
 	appApis "github.com/Z-M-Huang/Tools/api/app"
+	"github.com/Z-M-Huang/Tools/core"
 	"github.com/Z-M-Huang/Tools/core/account"
 	"github.com/Z-M-Huang/Tools/core/application"
 	"github.com/Z-M-Huang/Tools/core/home"
 	"github.com/Z-M-Huang/Tools/data"
-	"github.com/Z-M-Huang/Tools/logic"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
@@ -19,7 +19,7 @@ import (
 
 func apiAuthHandler(requireToken bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		claim, err := logic.GetClaimFromCookieAndRenew(c)
+		claim, err := account.GetClaimFromCookieAndRenew(c)
 		if requireToken && (err != nil || claim == nil) {
 			c.String(http.StatusUnauthorized, "Unauthorized")
 			c.Abort()
@@ -39,7 +39,7 @@ func pageStyleHandler() gin.HandlerFunc {
 		if err == nil && val != "" {
 			style = val
 		} else {
-			logic.SetCookie(c, utils.PageStyleCookieKey, "default", time.Now().AddDate(100, 0, 0), false)
+			core.SetCookie(c, utils.PageStyleCookieKey, "default", time.Now().AddDate(100, 0, 0), false)
 		}
 		response.SetNavStyleName(getPageStyle(style))
 		c.Next()
@@ -54,7 +54,7 @@ func pageAuthHandler(requireToken bool) gin.HandlerFunc {
 			},
 		}
 
-		claim, err := logic.GetClaimFromCookieAndRenew(c)
+		claim, err := account.GetClaimFromCookieAndRenew(c)
 		if requireToken && (err != nil || claim == nil) {
 			c.Redirect(http.StatusTemporaryRedirect, "/login?redirect="+c.Request.URL.Path)
 			c.Abort()

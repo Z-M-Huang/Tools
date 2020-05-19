@@ -2,6 +2,7 @@ package home
 
 import (
 	"github.com/Z-M-Huang/Tools/core"
+	"github.com/Z-M-Huang/Tools/core/account"
 	"github.com/Z-M-Huang/Tools/core/application"
 	"github.com/Z-M-Huang/Tools/data/db"
 	"github.com/gin-gonic/gin"
@@ -13,7 +14,7 @@ type Page struct{}
 //Home home page /
 func (Page) Home(c *gin.Context) {
 	response := core.GetResponseInContext(c.Keys)
-	claim := core.GetClaimInContext(c.Keys)
+	claim := account.GetClaimInContext(c.Keys)
 	if !(claim == nil) {
 		user := &db.User{
 			Email: claim.Id,

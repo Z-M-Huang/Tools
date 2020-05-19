@@ -16,7 +16,7 @@ type Page struct{}
 
 //Signup /signup
 func (Page) Signup(c *gin.Context) {
-	claim := core.GetClaimInContext(c.Keys)
+	claim := GetClaimInContext(c.Keys)
 	if claim == nil {
 		response := core.GetResponseInContext(c.Keys)
 		response.Header.Title = "Signup - Fun Apps"
@@ -29,7 +29,7 @@ func (Page) Signup(c *gin.Context) {
 
 //Login /login
 func (Page) Login(c *gin.Context) {
-	claim := core.GetClaimInContext(c.Keys)
+	claim := GetClaimInContext(c.Keys)
 	if claim != nil {
 		c.Redirect(http.StatusTemporaryRedirect, "/")
 	} else {
@@ -49,7 +49,7 @@ func (Page) Login(c *gin.Context) {
 
 //Account /account requires claim
 func (Page) Account(c *gin.Context) {
-	claim := core.GetClaimInContext(c.Keys)
+	claim := GetClaimInContext(c.Keys)
 	if claim != nil {
 		response := core.GetResponseInContext(c.Keys)
 		response.Header.Title = "Account - Fun Apps"

@@ -11,10 +11,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Z-M-Huang/Tools/core"
+	"github.com/Z-M-Huang/Tools/core/account"
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/apidata"
 	"github.com/Z-M-Huang/Tools/data/db"
-	"github.com/Z-M-Huang/Tools/logic"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -83,7 +84,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	tokenStr, expiresAt, err := logic.GenerateJWTToken("Direct Login", request.Email, existingUser.Username, getGravatarLink(request.Email, 50))
+	tokenStr, expiresAt, err := account.GenerateJWTToken("Direct Login", request.Email, existingUser.Username, getGravatarLink(request.Email, 50))
 	if err != nil {
 		utils.Logger.Error(err.Error())
 		WriteUnexpectedError(c, response)
@@ -107,14 +108,14 @@ func Login(c *gin.Context) {
 		}
 	}
 	response.Data = result
-	logic.SetCookie(c, utils.SessionCookieKey, tokenStr, expiresAt, true)
+	core.SetCookie(c, utils.SessionCookieKey, tokenStr, expiresAt, true)
 	WriteResponse(c, 200, response)
 }
 
 //Logout logout
 func Logout(c *gin.Context) {
 	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
-	logic.SetCookie(c, utils.SessionCookieKey, "", time.Now().AddDate(-10, 1, 1), true)
+	core.SetCookie(c, utils.SessionCookieKey, "", time.Now().AddDate(-10, 1, 1), true)
 	response.Data = true
 	WriteResponse(c, 200, response)
 }
@@ -208,13 +209,13 @@ func SignUp(c *gin.Context) {
 		return
 	}
 
-	tokenStr, expiresAt, err := logic.GenerateJWTToken("Direct Login", request.Email, user.Username, getGravatarLink(request.Email, 50))
+	tokenStr, expiresAt, err := account.GenerateJWTToken("Direct Login", request.Email, user.Username, getGravatarLink(request.Email, 50))
 	if err != nil {
 		utils.Logger.Error(err.Error())
 		WriteUnexpectedError(c, response)
 	}
 
-	logic.SetCookie(c, utils.SessionCookieKey, tokenStr, expiresAt, true)
+	core.SetCookie(c, utils.SessionCookieKey, tokenStr, expiresAt, true)
 	response.Data = true
 	WriteResponse(c, 200, response)
 	return
@@ -235,7 +236,7 @@ func UpdatePassword(c *gin.Context) {
 		return
 	}
 
-	claim := c.Keys[utils.ClaimCtxKey].(*data.JWTClaim)
+	claim := c.Keys[utils.ClaimCtxKey].(*account.JWTClaim)
 
 	if request.Password != request.ConfirmPassword {
 		response.SetAlert(&data.AlertData{
@@ -336,11 +337,11 @@ func GoogleCallback(c *gin.Context) {
 		utils.Logger.Error(err.Error())
 	}
 
-	tokenStr, expiresAt, err := logic.GenerateJWTToken("Google", user.Email, user.Name, user.Picture)
+	tokenStr, expiresAt, err := account.GenerateJWTToken("Google", user.Email, user.Name, user.Picture)
 	if err != nil {
 		utils.Logger.Sugar().Errorf("failed to generate jwt token %s", err.Error())
 	} else {
-		logic.SetCookie(c, utils.SessionCookieKey, tokenStr, expiresAt, false)
+		core.SetCookie(c, utils.SessionCookieKey, tokenStr, expiresAt, false)
 	}
 	c.Redirect(http.StatusTemporaryRedirect, "/")
 }
