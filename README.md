@@ -1,7 +1,7 @@
 # Tools
 Tools for fun
 
-![Docker Image CI](https://github.com/Z-M-Huang/Tools/workflows/Docker%20Image%20CI/badge.svg?branch=master)
+![Docker Release CI](![Docker Release CI](https://github.com/Z-M-Huang/Tools/workflows/Docker%20Release%20CI/badge.svg))
 
 # For future developers who found this interesting.
 Please add environment variables to have this repo run properly.
