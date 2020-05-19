@@ -46,16 +46,6 @@ function bindForm(id, url, callback) {
       type: "POST",
       url: url,
       data: form.serialize(),
-      beforeSend: (xhr) => {
-        var sessionToken = getCookieValue("session_token");
-        if (
-          sessionToken != "" &&
-          sessionToken != null &&
-          sessionToken != undefined
-        ) {
-          xhr.setRequestHeader("Authorization", "Bearer " + sessionToken);
-        }
-      },
       statusCode: {
         401: (data) => {
           if (data != null && data != undefined &&
@@ -111,16 +101,6 @@ function bindFormWithFile(id, url, callback) {
       processData: false,
       contentType: false,
       cache: false,
-      beforeSend: (xhr) => {
-        var sessionToken = getCookieValue("session_token");
-        if (
-          sessionToken != "" &&
-          sessionToken != null &&
-          sessionToken != undefined
-        ) {
-          xhr.setRequestHeader("Authorization", "Bearer " + sessionToken);
-        }
-      },
       statusCode: {
         401: (data) => {
           if (data != null && data != undefined &&
@@ -169,16 +149,6 @@ function postJSONData(url, data, callback) {
     data: JSON.stringify(data),
     dataType: "json",
     contentType: "application/json",
-    beforeSend: (xhr) => {
-      var sessionToken = getCookieValue("session_token");
-      if (
-        sessionToken != "" &&
-        sessionToken != null &&
-        sessionToken != undefined
-      ) {
-        xhr.setRequestHeader("Authorization", "Bearer " + sessionToken);
-      }
-    },
     statusCode: {
       401: (data) => {
         if (data != null && data != undefined &&

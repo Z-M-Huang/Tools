@@ -42,7 +42,7 @@ func GetClaimFromCookieAndRenew(c *gin.Context) (*data.JWTClaim, error) {
 	return claim, nil
 }
 
-//GetClaimFromHeaderAndRenew get claim and renew
+//GetClaimFromHeaderAndRenew get claim and renew. Since auth token is httponly, it will not really be able to get from javascript
 func GetClaimFromHeaderAndRenew(c *gin.Context) (*data.JWTClaim, error) {
 	token := c.GetHeader("Authorization")
 	if token == "" || !strings.Contains(token, "Bearer ") {
