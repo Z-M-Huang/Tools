@@ -1,4 +1,4 @@
-package pages
+package core
 
 import (
 	"encoding/base64"
@@ -15,8 +15,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+//Application logic
+type Application struct{}
+
 //RenderApplicationPage renders /app/:name
-func RenderApplicationPage(c *gin.Context) {
+func (a *Application) RenderApplicationPage(c *gin.Context) {
 	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
 
 	name := c.Param("name")

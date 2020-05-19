@@ -1,4 +1,4 @@
-package pages
+package core
 
 import (
 	"github.com/Z-M-Huang/Tools/data"
@@ -8,8 +8,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+//Home logic
+type Home struct{}
+
 //HomePage home page /
-func HomePage(c *gin.Context) {
+func (h *Home) HomePage(c *gin.Context) {
 	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
 	claim := c.Keys[utils.ClaimCtxKey].(*data.JWTClaim)
 	if !(claim == nil) {

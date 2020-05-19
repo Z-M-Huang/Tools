@@ -7,9 +7,9 @@ import (
 
 	"github.com/Z-M-Huang/Tools/api"
 	appApis "github.com/Z-M-Huang/Tools/api/app"
+	"github.com/Z-M-Huang/Tools/core"
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/logic"
-	"github.com/Z-M-Huang/Tools/pages"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
@@ -227,10 +227,14 @@ func SetupRouter() *gin.Engine {
 	apiNoAuth := router.Group("/api", apiAuthHandler(false))
 	apiAuthRequired := router.Group("/api", apiAuthHandler(true))
 
-	pageNoAuth.GET("/", pages.HomePage)
-	pageNoAuth.GET("/signup", pages.SignupPage)
-	pageNoAuth.GET("/login", pages.LoginPage)
-	pageAuthRequired.GET("/account", pages.AccountPage)
+	home := &core.Home{}
+	account := &core.Account{}
+	application := &core.Application{}
+
+	pageNoAuth.GET("/", home.HomePage)
+	pageNoAuth.GET("/signup", account.SignupPage)
+	pageNoAuth.GET("/login", account.LoginPage)
+	pageAuthRequired.GET("/account", account.AccountPage)
 
 	router.GET("/google_login", api.GoogleLogin)
 	router.GET("/google_oauth", api.GoogleCallback)
@@ -240,8 +244,8 @@ func SetupRouter() *gin.Engine {
 	apiAuthRequired.POST("/account/update/password", api.UpdatePassword)
 
 	//app
-	pageNoAuth.GET("/app/:name", pages.RenderApplicationPage)
-	pageNoAuth.GET("/app/:name/:id", pages.RenderApplicationPage)
+	pageNoAuth.GET("/app/:name", application.RenderApplicationPage)
+	pageNoAuth.GET("/app/:name/:id", application.RenderApplicationPage)
 
 	//app api
 	router.Any("/api/request-bin/receive/:id", appApis.RequestIn)

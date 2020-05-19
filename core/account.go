@@ -1,4 +1,4 @@
-package pages
+package core
 
 import (
 	"net/http"
@@ -10,8 +10,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+//Account account logic
+type Account struct{}
+
 //SignupPage /signup
-func SignupPage(c *gin.Context) {
+func (a *Account) SignupPage(c *gin.Context) {
 	if c.Keys[utils.ClaimCtxKey].(*data.JWTClaim) == nil {
 		response := c.Keys[utils.ResponseCtxKey].(*data.Response)
 		response.Header.Title = "Signup - Fun Apps"
@@ -23,7 +26,7 @@ func SignupPage(c *gin.Context) {
 }
 
 //LoginPage /login
-func LoginPage(c *gin.Context) {
+func (a *Account) LoginPage(c *gin.Context) {
 	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
 	response.Header.Title = "Login - Fun Apps"
 	response.Header.Description = "Login"
@@ -42,7 +45,7 @@ func LoginPage(c *gin.Context) {
 }
 
 //AccountPage /account requires claim
-func AccountPage(c *gin.Context) {
+func (a *Account) AccountPage(c *gin.Context) {
 	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
 	response.Header.Title = "Account - Fun Apps"
 	response.Header.Description = "Manage account"
