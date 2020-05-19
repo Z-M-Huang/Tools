@@ -19,6 +19,50 @@ type JWTClaim struct {
 	jwt.StandardClaims
 }
 
+//CreateAccountRequest /signup
+type CreateAccountRequest struct {
+	Email           string `json:"email" xml:"email" form:"email" binding:"required"`
+	Username        string `json:"username" xml:"username" form:"username" binding:"required"`
+	Password        string `json:"password" xml:"password" form:"password" binding:"required"`
+	ConfirmPassword string `json:"confirmPassword" xml:"confirmPassword" form:"confirmPassword" binding:"required"`
+}
+
+//UpdatePasswordRequest /api/account/update/password
+type UpdatePasswordRequest struct {
+	CurrentPassword string `json:"currentPassword" xml:"currentPassword" form:"currentPassword" binding:"required"`
+	Password        string `json:"password" xml:"password" form:"password" binding:"required"`
+	ConfirmPassword string `json:"confirmPassword" xml:"confirmPassword" form:"confirmPassword" binding:"required"`
+}
+
+//GoogleUserInfo user info
+type GoogleUserInfo struct {
+	ID            string `json:"id"`
+	FamilyName    string `json:"family_name"`
+	Name          string `json:"name"`
+	Picture       string `json:"picture"`
+	Local         string `json:"local"`
+	Email         string `json:"Email"`
+	GivenName     string `json:"GivenName"`
+	VerifiedEmail bool   `json:"verified_email"`
+}
+
+//LoginRequest login request
+type LoginRequest struct {
+	Email    string `json:"email" xml:"email" form:"email" binding:"required"`
+	Password string `json:"password" xml:"password" form:"password" binding:"required"`
+}
+
+//LoginResponse login response
+type LoginResponse struct {
+	IsSuccess bool
+	Redirect  string
+}
+
+//PageData /account
+type PageData struct {
+	HasPassword bool
+}
+
 //GetClaimInContext get claim struct from context
 func GetClaimInContext(contextKey map[string]interface{}) *JWTClaim {
 	claim := contextKey[utils.ClaimCtxKey]

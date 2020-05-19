@@ -4,9 +4,7 @@ import (
 	"net/http"
 
 	"github.com/Z-M-Huang/Tools/core"
-	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/db"
-	"github.com/Z-M-Huang/Tools/data/webdata"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/gin-gonic/gin"
 )
@@ -38,7 +36,7 @@ func (Page) Login(c *gin.Context) {
 		response.Header.Description = "Login"
 		redirectURL, ok := c.Request.URL.Query()["redirect"]
 		if ok && len(redirectURL) > 0 {
-			response.SetAlert(&data.AlertData{
+			response.SetAlert(&core.AlertData{
 				IsDanger: true,
 				Message:  "Please login first.",
 			})
@@ -60,12 +58,12 @@ func (Page) Account(c *gin.Context) {
 		err := user.Find()
 		if err != nil {
 			utils.Logger.Error(err.Error())
-			response.SetAlert(&data.AlertData{
+			response.SetAlert(&core.AlertData{
 				IsDanger: true,
 				Message:  "Um... Your data got eaten by the cyber space... Would you like to try again?",
 			})
 		} else {
-			response.Data = webdata.AccountPageData{
+			response.Data = PageData{
 				HasPassword: user.Password != "",
 			}
 		}

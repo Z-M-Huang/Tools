@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/Z-M-Huang/Tools/core"
-	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/gin-gonic/gin"
 )
@@ -18,13 +17,13 @@ type API struct{}
 
 //EncodeDecode /api/string/encodedecode
 func (API) EncodeDecode(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
+	response := c.Keys[utils.ResponseCtxKey].(*core.Response)
 	request := &Request{}
 	var result []string
 	err := c.ShouldBind(&request)
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.SetAlert(&data.AlertData{
+		response.SetAlert(&core.AlertData{
 			IsDanger: true,
 			Message:  "Invalid lookup request.",
 		})
@@ -38,7 +37,7 @@ func (API) EncodeDecode(c *gin.Context) {
 	lines := strings.Split(request.RequestString, "\r\n")
 
 	if request.Action == "" || (request.Action != "encode" && request.Action != "decode") {
-		response.SetAlert(&data.AlertData{
+		response.SetAlert(&core.AlertData{
 			IsWarning: true,
 			Message:   "Invalid action code.",
 		})
@@ -56,7 +55,7 @@ func (API) EncodeDecode(c *gin.Context) {
 			for _, line := range lines {
 				unescaped, err := base32.StdEncoding.DecodeString(line)
 				if err != nil {
-					response.SetAlert(&data.AlertData{
+					response.SetAlert(&core.AlertData{
 						IsWarning: true,
 						Message:   fmt.Sprintf("Cannot decode string requested %s", err.Error()),
 					})
@@ -76,7 +75,7 @@ func (API) EncodeDecode(c *gin.Context) {
 			for _, line := range lines {
 				unescaped, err := base64.StdEncoding.DecodeString(line)
 				if err != nil {
-					response.SetAlert(&data.AlertData{
+					response.SetAlert(&core.AlertData{
 						IsWarning: true,
 						Message:   fmt.Sprintf("Cannot decode string requested %s", err.Error()),
 					})
@@ -96,7 +95,7 @@ func (API) EncodeDecode(c *gin.Context) {
 			for _, line := range lines {
 				unescaped, err := url.QueryUnescape(line)
 				if err != nil {
-					response.SetAlert(&data.AlertData{
+					response.SetAlert(&core.AlertData{
 						IsDanger: true,
 						Message:  fmt.Sprintf("Cannot decode string requested %s", err.Error()),
 					})
@@ -108,7 +107,7 @@ func (API) EncodeDecode(c *gin.Context) {
 			}
 		}
 	default:
-		response.SetAlert(&data.AlertData{
+		response.SetAlert(&core.AlertData{
 			IsWarning: true,
 			Message:   "Invalid type request.",
 		})

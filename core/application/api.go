@@ -5,7 +5,6 @@ import (
 
 	"github.com/Z-M-Huang/Tools/core"
 	"github.com/Z-M-Huang/Tools/core/account"
-	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/db"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/gin-gonic/gin"
@@ -23,7 +22,7 @@ func (API) Like(c *gin.Context) {
 
 	name := c.Param("name")
 	if name == "" {
-		response.SetAlert(&data.AlertData{
+		response.SetAlert(&core.AlertData{
 			IsDanger: true,
 			Message:  "User not found",
 		})
@@ -33,7 +32,7 @@ func (API) Like(c *gin.Context) {
 
 	appCard := GetApplicationsByName(name)
 	if appCard == nil {
-		response.SetAlert(&data.AlertData{
+		response.SetAlert(&core.AlertData{
 			IsDanger: true,
 			Message:  "User not found",
 		})
@@ -47,7 +46,7 @@ func (API) Like(c *gin.Context) {
 	err := user.Find()
 	if err == gorm.ErrRecordNotFound {
 		utils.Logger.Sugar().Errorf("oh boy... There is a user doesn't found in database but have a token. Email: %s", claim.Id)
-		response.SetAlert(&data.AlertData{
+		response.SetAlert(&core.AlertData{
 			IsDanger: true,
 			Message:  "User not found",
 		})
@@ -55,7 +54,7 @@ func (API) Like(c *gin.Context) {
 		return
 	} else if err != nil {
 		utils.Logger.Error(err.Error())
-		response.SetAlert(&data.AlertData{
+		response.SetAlert(&core.AlertData{
 			IsDanger: true,
 			Message:  "User not found",
 		})
@@ -91,7 +90,7 @@ func (API) Like(c *gin.Context) {
 		}
 		go ReloadAppList()
 	}
-	response.SetAlert(&data.AlertData{
+	response.SetAlert(&core.AlertData{
 		IsSuccess: true,
 		Message:   "Application saved! Thank you for support.",
 	})
@@ -103,11 +102,11 @@ func (API) Like(c *gin.Context) {
 func (API) Dislike(c *gin.Context) {
 	//Only logged in user can access this
 	claim := c.Keys[utils.ClaimCtxKey].(*account.JWTClaim)
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
+	response := c.Keys[utils.ResponseCtxKey].(*core.Response)
 
 	name := c.Param("name")
 	if name == "" {
-		response.SetAlert(&data.AlertData{
+		response.SetAlert(&core.AlertData{
 			IsDanger: true,
 			Message:  "User not found",
 		})
@@ -117,7 +116,7 @@ func (API) Dislike(c *gin.Context) {
 
 	appCard := GetApplicationsByName(name)
 	if appCard == nil {
-		response.SetAlert(&data.AlertData{
+		response.SetAlert(&core.AlertData{
 			IsDanger: true,
 			Message:  "User not found",
 		})
@@ -131,7 +130,7 @@ func (API) Dislike(c *gin.Context) {
 	err := user.Find()
 	if err == gorm.ErrRecordNotFound {
 		utils.Logger.Sugar().Errorf("oh boy... There is a user doesn't found in database but have a token. Email: %s", claim.Id)
-		response.SetAlert(&data.AlertData{
+		response.SetAlert(&core.AlertData{
 			IsDanger: true,
 			Message:  "User not found",
 		})
@@ -139,7 +138,7 @@ func (API) Dislike(c *gin.Context) {
 		return
 	} else if err != nil {
 		utils.Logger.Error(err.Error())
-		response.SetAlert(&data.AlertData{
+		response.SetAlert(&core.AlertData{
 			IsDanger: true,
 			Message:  "User not found",
 		})
@@ -176,7 +175,7 @@ func (API) Dislike(c *gin.Context) {
 		}
 		go ReloadAppList()
 	}
-	response.SetAlert(&data.AlertData{
+	response.SetAlert(&core.AlertData{
 		IsInfo:  true,
 		Message: "If there are anything you want us to improve about this app. Please let us know on the github bug tracker.",
 	})

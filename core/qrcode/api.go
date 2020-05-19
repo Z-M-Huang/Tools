@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/Z-M-Huang/Tools/core"
-	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/db"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/Z-M-Huang/go-qrcode"
@@ -34,7 +33,7 @@ func (API) CreateQRCode(c *gin.Context) {
 	var err error
 	request.Size, err = strconv.Atoi(c.Request.PostFormValue("size"))
 	if err != nil {
-		response.SetAlert(&data.AlertData{
+		response.SetAlert(&core.AlertData{
 			IsWarning: true,
 			Message:   "Invalid request.",
 		})
@@ -43,7 +42,7 @@ func (API) CreateQRCode(c *gin.Context) {
 	}
 
 	if len(request.Content) < 1 {
-		response.SetAlert(&data.AlertData{
+		response.SetAlert(&core.AlertData{
 			IsWarning: true,
 			Message:   "Invalid request.",
 		})
@@ -52,14 +51,14 @@ func (API) CreateQRCode(c *gin.Context) {
 	}
 
 	if request.Size > 1024 {
-		response.SetAlert(&data.AlertData{
+		response.SetAlert(&core.AlertData{
 			IsWarning: true,
 			Message:   "Invalid request. The size is too big.",
 		})
 		core.WriteResponse(c, 400, response)
 		return
 	} else if request.Size < 0 {
-		response.SetAlert(&data.AlertData{
+		response.SetAlert(&core.AlertData{
 			IsWarning: true,
 			Message:   "Invalid request. The size cannot be negative",
 		})
@@ -78,7 +77,7 @@ func (API) CreateQRCode(c *gin.Context) {
 	case "H":
 		level = qrcode.Highest
 	default:
-		response.SetAlert(&data.AlertData{
+		response.SetAlert(&core.AlertData{
 			IsDanger: true,
 			Message:  "Invalid request. Invalid Level.",
 		})
@@ -90,7 +89,7 @@ func (API) CreateQRCode(c *gin.Context) {
 	if request.BackgroundColor != "" {
 		backgroundColor, err = parseHexColorFast(request.BackgroundColor)
 		if err != nil {
-			response.SetAlert(&data.AlertData{
+			response.SetAlert(&core.AlertData{
 				IsWarning: true,
 				Message:   "Background Color: " + err.Error(),
 			})
@@ -103,7 +102,7 @@ func (API) CreateQRCode(c *gin.Context) {
 	if request.ForegroundColor != "" {
 		foregroundColor, err = parseHexColorFast(request.ForegroundColor)
 		if err != nil {
-			response.SetAlert(&data.AlertData{
+			response.SetAlert(&core.AlertData{
 				IsWarning: true,
 				Message:   "Foreground Color: " + err.Error(),
 			})
@@ -117,7 +116,7 @@ func (API) CreateQRCode(c *gin.Context) {
 	if err == nil {
 		logo, _, err = image.Decode(logoFile)
 		if err != nil {
-			response.SetAlert(&data.AlertData{
+			response.SetAlert(&core.AlertData{
 				IsWarning: true,
 				Message:   "Failed to get logo image",
 			})
@@ -131,7 +130,7 @@ func (API) CreateQRCode(c *gin.Context) {
 	if err == nil {
 		backgroundImage, _, err = image.Decode(backgroundImageFile)
 		if err != nil {
-			response.SetAlert(&data.AlertData{
+			response.SetAlert(&core.AlertData{
 				IsWarning: true,
 				Message:   "Failed to get background image",
 			})
@@ -143,7 +142,7 @@ func (API) CreateQRCode(c *gin.Context) {
 	q, err := qrcode.New(request.Content, level)
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.SetAlert(&data.AlertData{
+		response.SetAlert(&core.AlertData{
 			IsDanger: true,
 			Message:  "Internal Error",
 		})
@@ -162,14 +161,14 @@ func (API) CreateQRCode(c *gin.Context) {
 	} else {
 		val, err := db.RedisDecr(redisKey)
 		if err != nil {
-			response.SetAlert(&data.AlertData{
+			response.SetAlert(&core.AlertData{
 				IsDanger: true,
 				Message:  "Internal Error",
 			})
 			core.WriteResponse(c, 500, response)
 			return
 		} else if val < 0 {
-			response.SetAlert(&data.AlertData{
+			response.SetAlert(&core.AlertData{
 				IsWarning: true,
 				Message:   "Too many requests today. Please come back tomorrow.",
 			})
@@ -181,7 +180,7 @@ func (API) CreateQRCode(c *gin.Context) {
 	imageBytes, err := q.PNG(request.Size)
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.SetAlert(&data.AlertData{
+		response.SetAlert(&core.AlertData{
 			IsDanger: true,
 			Message:  "Internal Error",
 		})

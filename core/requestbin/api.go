@@ -21,11 +21,11 @@ type API struct{}
 
 //CreateRequestBin /api/request-bin/Create
 func (API) CreateRequestBin(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
+	response := c.Keys[utils.ResponseCtxKey].(*core.Response)
 	request := &CreateBinRequest{}
 	err := c.ShouldBind(&request)
 	if err != nil {
-		response.SetAlert(&data.AlertData{
+		response.SetAlert(&core.AlertData{
 			IsDanger: true,
 			Message:  "Invalid request.",
 		})

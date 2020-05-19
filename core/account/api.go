@@ -13,7 +13,6 @@ import (
 
 	"github.com/Z-M-Huang/Tools/core"
 	"github.com/Z-M-Huang/Tools/data"
-	"github.com/Z-M-Huang/Tools/data/apidata"
 	"github.com/Z-M-Huang/Tools/data/db"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/gin-gonic/gin"
@@ -44,12 +43,12 @@ func init() {
 
 //Login request
 func (API) Login(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
-	request := &apidata.LoginRequest{}
+	response := c.Keys[utils.ResponseCtxKey].(*core.Response)
+	request := &LoginRequest{}
 	err := c.ShouldBind(&request)
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.SetAlert(&data.AlertData{
+		response.SetAlert(&core.AlertData{
 			IsDanger: true,
 			Message:  "Invalid login request.",
 		})
@@ -64,7 +63,7 @@ func (API) Login(c *gin.Context) {
 	}
 	err = existingUser.Find()
 	if err == gorm.ErrRecordNotFound {
-		response.SetAlert(&data.AlertData{
+		response.SetAlert(&core.AlertData{
 			IsDanger: true,
 			Message:  "We couldn't find any account for this email address... Maybe you need to create one.",
 		})
@@ -78,7 +77,7 @@ func (API) Login(c *gin.Context) {
 
 	if !utils.ComparePasswords(existingUser.Password, []byte(request.Password)) {
 		utils.Logger.Sugar().Errorf("Invalid login attempt received for: %s", request.Email)
-		response.SetAlert(&data.AlertData{
+		response.SetAlert(&core.AlertData{
 			IsWarning: true,
 			Message:   `Incorrect password. Do you forget your password? If you forget your password, please <a href="#">Click here</a> to reset your password. Uh... We don't have that feature yet, sorry...`,
 		})
@@ -96,7 +95,7 @@ func (API) Login(c *gin.Context) {
 	if err != nil {
 		utils.Logger.Error(err.Error())
 	}
-	result := &apidata.LoginResponse{
+	result := &LoginResponse{
 		IsSuccess: true,
 	}
 
@@ -116,7 +115,7 @@ func (API) Login(c *gin.Context) {
 
 //Logout logout
 func (API) Logout(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
+	response := c.Keys[utils.ResponseCtxKey].(*core.Response)
 	core.SetCookie(c, utils.SessionCookieKey, "", time.Now().AddDate(-10, 1, 1), true)
 	response.Data = true
 	core.WriteResponse(c, 200, response)
@@ -124,12 +123,12 @@ func (API) Logout(c *gin.Context) {
 
 //SignUp request
 func (API) SignUp(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
-	request := &apidata.CreateAccountRequest{}
+	response := c.Keys[utils.ResponseCtxKey].(*core.Response)
+	request := &CreateAccountRequest{}
 	err := c.ShouldBind(&request)
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.SetAlert(&data.AlertData{
+		response.SetAlert(&core.AlertData{
 			IsDanger: true,
 			Message:  "Invalid login request.",
 		})
@@ -139,7 +138,7 @@ func (API) SignUp(c *gin.Context) {
 	request.Email = strings.TrimSpace(strings.ToLower(request.Email))
 
 	if !emailRe.Match([]byte(request.Email)) {
-		response.SetAlert(&data.AlertData{
+		response.SetAlert(&core.AlertData{
 			IsDanger: true,
 			Message:  "Invalid email address.",
 		})
@@ -148,7 +147,7 @@ func (API) SignUp(c *gin.Context) {
 	}
 
 	if request.ConfirmPassword != request.Password {
-		response.SetAlert(&data.AlertData{
+		response.SetAlert(&core.AlertData{
 			IsDanger: true,
 			Message:  "Password doesn't match",
 		})
@@ -157,7 +156,7 @@ func (API) SignUp(c *gin.Context) {
 	}
 
 	if len(request.Password) < minPasswordLength {
-		response.SetAlert(&data.AlertData{
+		response.SetAlert(&core.AlertData{
 			IsWarning: true,
 			Message:   fmt.Sprintf("Password has minimum length of %d characters.", minPasswordLength),
 		})
@@ -170,7 +169,7 @@ func (API) SignUp(c *gin.Context) {
 	}
 	err = existingUser.Find()
 	if err == nil {
-		response.SetAlert(&data.AlertData{
+		response.SetAlert(&core.AlertData{
 			IsWarning: true,
 			Message:   "Email address already exists, please try to remember the password, since password recovery function is not yet built. If you cant remember your password, good luck... The password is hashed, and even as an admin, I have no clue what's your password could be... See ya.",
 		})
@@ -187,7 +186,7 @@ func (API) SignUp(c *gin.Context) {
 	}
 	err = existingUser.Find()
 	if err == nil {
-		response.SetAlert(&data.AlertData{
+		response.SetAlert(&core.AlertData{
 			IsWarning: true,
 			Message:   "Username already taken. Can't you think of something else? Try harder",
 		})
@@ -225,12 +224,12 @@ func (API) SignUp(c *gin.Context) {
 
 //UpdatePassword api
 func (API) UpdatePassword(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
-	request := &apidata.UpdatePasswordRequest{}
+	response := c.Keys[utils.ResponseCtxKey].(*core.Response)
+	request := &UpdatePasswordRequest{}
 	err := c.ShouldBind(&request)
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.SetAlert(&data.AlertData{
+		response.SetAlert(&core.AlertData{
 			IsDanger: true,
 			Message:  "Invalid sign up request.",
 		})
@@ -241,14 +240,14 @@ func (API) UpdatePassword(c *gin.Context) {
 	claim := c.Keys[utils.ClaimCtxKey].(*JWTClaim)
 
 	if request.Password != request.ConfirmPassword {
-		response.SetAlert(&data.AlertData{
+		response.SetAlert(&core.AlertData{
 			IsWarning: true,
 			Message:   "Password doesn't match.",
 		})
 		core.WriteResponse(c, 400, response)
 		return
 	} else if len(request.Password) < minPasswordLength {
-		response.SetAlert(&data.AlertData{
+		response.SetAlert(&core.AlertData{
 			IsWarning: true,
 			Message:   fmt.Sprintf("Password has minimum length of %d.", minPasswordLength),
 		})
@@ -271,14 +270,14 @@ func (API) UpdatePassword(c *gin.Context) {
 	}
 
 	if dbUser.Password != "" && !utils.ComparePasswords(dbUser.Password, []byte(request.CurrentPassword)) {
-		response.SetAlert(&data.AlertData{
+		response.SetAlert(&core.AlertData{
 			IsWarning: true,
 			Message:   "Current password is different compared to what's in database... Try harder...",
 		})
 		core.WriteResponse(c, 400, response)
 		return
 	} else if dbUser.Password != "" && utils.ComparePasswords(dbUser.Password, []byte(request.Password)) {
-		response.SetAlert(&data.AlertData{
+		response.SetAlert(&core.AlertData{
 			IsWarning: true,
 			Message:   "New password is exactly the same as the old password...",
 		})
@@ -294,7 +293,7 @@ func (API) UpdatePassword(c *gin.Context) {
 		core.WriteUnexpectedError(c, response)
 		return
 	}
-	response.SetAlert(&data.AlertData{
+	response.SetAlert(&core.AlertData{
 		IsSuccess: true,
 		Message:   "Password is updated.",
 	})
@@ -348,7 +347,7 @@ func (API) GoogleCallback(c *gin.Context) {
 	c.Redirect(http.StatusTemporaryRedirect, "/")
 }
 
-func getGoogleUserInfo(state string, code string) (*apidata.GoogleUserInfo, error) {
+func getGoogleUserInfo(state string, code string) (*GoogleUserInfo, error) {
 	if !db.RedisExist(state) {
 		return nil, fmt.Errorf("invalid oauth state")
 	}
@@ -367,7 +366,7 @@ func getGoogleUserInfo(state string, code string) (*apidata.GoogleUserInfo, erro
 	if err != nil {
 		return nil, fmt.Errorf("failed reading response body: %s", err.Error())
 	}
-	user := &apidata.GoogleUserInfo{}
+	user := &GoogleUserInfo{}
 	err = json.Unmarshal(contents, &user)
 	if err != nil {
 		return nil, fmt.Errorf("failed parsing response to struct %s", err.Error())
