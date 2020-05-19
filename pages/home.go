@@ -17,17 +17,13 @@ func HomePage(c *gin.Context) {
 			Email: claim.Id,
 		}
 		err := user.Find()
-		if err == nil {
-			if len(user.LikedApps) > 0 {
-				response.Data = webdata.GetApplicationWithLiked(user)
-			} else {
-				response.Data = webdata.AppList
-			}
-		} else {
-			response.Data = webdata.AppList
+		if err == nil && len(user.LikedApps) > 0 {
+			response.Data = webdata.GetApplicationWithLiked(user)
 		}
-	} else {
-		response.Data = webdata.AppList
+	}
+
+	if response.Data == nil {
+		response.Data = webdata.GetAppList()
 	}
 
 	response.Header.Title = "Fun Apps"

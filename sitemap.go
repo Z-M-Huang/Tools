@@ -29,7 +29,7 @@ func BuildSitemap() *stm.Sitemap {
 	sm.Add(getPageSiteMap("/login"))
 	sm.Add(getPageSiteMap("/signup"))
 
-	for _, category := range webdata.AppList {
+	for _, category := range webdata.GetAppList() {
 		for _, app := range category.AppCards {
 			sm.Add(getPageSiteMap(app.Link))
 		}
