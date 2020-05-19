@@ -137,6 +137,26 @@ func ReloadAppList() {
 	}
 }
 
+//AddApplicationUsage add usage
+func AddApplicationUsage(app *AppCard) {
+	app.AmountUsed++
+	dbApp := &db.Application{
+		Name: app.Title,
+	}
+	err := dbApp.Find()
+	if err != nil {
+		utils.Logger.Error(err.Error())
+	}
+
+	dbApp.Usage++
+	err = dbApp.Save()
+	if err != nil {
+		utils.Logger.Error(err.Error())
+	} else {
+		ReloadAppList()
+	}
+}
+
 func getAnalyticTools() *AppCategory {
 	tools := &AppCategory{
 		Category: "Analytic Tools",

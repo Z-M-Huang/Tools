@@ -187,7 +187,8 @@ func getPageStyle(style string) *data.PageStyleData {
 	}
 }
 
-func main() {
+//SetupRouter setup gin router
+func SetupRouter() *gin.Engine {
 	router := gin.Default()
 
 	router.Use(gzip.Gzip(gzip.DefaultCompression))
@@ -254,5 +255,9 @@ func main() {
 	apiAuthRequired.POST("/app/:name/like", appApis.Like)
 	apiAuthRequired.POST("/app/:name/dislike", appApis.Dislike)
 
-	utils.Logger.Fatal(http.ListenAndServe(":80", router).Error())
+	return router
+}
+
+func main() {
+	utils.Logger.Fatal(http.ListenAndServe(":80", SetupRouter()).Error())
 }

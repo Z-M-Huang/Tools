@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/Z-M-Huang/Tools/data"
-	"github.com/Z-M-Huang/Tools/data/db"
 	"github.com/Z-M-Huang/Tools/data/webdata"
 	"github.com/Z-M-Huang/Tools/data/webdata/application"
 	"github.com/Z-M-Huang/Tools/logic"
@@ -45,7 +44,7 @@ func RenderApplicationPage(c *gin.Context) {
 			}
 		}
 		if !exists {
-			addApplicationUsage(appCard)
+			webdata.AddApplicationUsage(appCard)
 			usedApps = append(usedApps, appCard.Title)
 			usedAppsBytes, err := json.Marshal(usedApps)
 			encoded := base64.StdEncoding.EncodeToString(usedAppsBytes)
@@ -96,21 +95,4 @@ func loadRequestBinData(c *gin.Context) *application.RequestBinPageData {
 		}
 	}
 	return data
-}
-
-func addApplicationUsage(app *webdata.AppCard) {
-	app.AmountUsed++
-	dbApp := &db.Application{
-		Name: app.Title,
-	}
-	err := dbApp.Find()
-	if err != nil {
-		utils.Logger.Error(err.Error())
-	}
-
-	dbApp.Usage++
-	err = dbApp.Save()
-	if err != nil {
-		utils.Logger.Error(err.Error())
-	}
 }
