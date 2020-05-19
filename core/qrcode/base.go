@@ -1,9 +1,9 @@
-package application
+package qrcode
 
 import "mime/multipart"
 
-//QRCodeRequest /api/qr-code/create
-type QRCodeRequest struct {
+//Request /api/qr-code/create
+type Request struct {
 	Content         string                `json:"content" xml:"content" form:"content" bind:"required"`
 	Level           string                `json:"level" xml:"level" form:"level" bind:"required"`
 	Size            int                   `json:"size" xml:"size" form:"size"`

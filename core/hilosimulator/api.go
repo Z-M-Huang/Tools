@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-//API api
+//API hilo simulator
 type API struct{}
 
 //HILOSimulate /api/hilo-simulator/simulate

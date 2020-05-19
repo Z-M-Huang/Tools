@@ -1,4 +1,4 @@
-package app
+package qrcode
 
 import (
 	"encoding/base64"
@@ -12,18 +12,20 @@ import (
 
 	"github.com/Z-M-Huang/Tools/core"
 	"github.com/Z-M-Huang/Tools/data"
-	"github.com/Z-M-Huang/Tools/data/apidata/application"
 	"github.com/Z-M-Huang/Tools/data/db"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/Z-M-Huang/go-qrcode"
 	"github.com/gin-gonic/gin"
 )
 
+//API qrcode
+type API struct{}
+
 //CreateQRCode /api/qr-code/create
-func CreateQRCode(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
+func (API) CreateQRCode(c *gin.Context) {
+	response := core.GetResponseInContext(c.Keys)
 	c.Request.ParseMultipartForm(1024)
-	request := &application.QRCodeRequest{
+	request := &Request{
 		Content:         c.Request.PostFormValue("content"),
 		Level:           c.Request.PostFormValue("level"),
 		BackgroundColor: c.Request.PostFormValue("backColor"),
