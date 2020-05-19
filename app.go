@@ -14,6 +14,7 @@ import (
 	"github.com/Z-M-Huang/Tools/core/home"
 	"github.com/Z-M-Huang/Tools/core/kellycriterion"
 	"github.com/Z-M-Huang/Tools/core/qrcode"
+	"github.com/Z-M-Huang/Tools/core/stringencoderdecoder"
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/gin-contrib/gzip"
@@ -242,6 +243,7 @@ func SetupRouter() *gin.Engine {
 	hilosimulatorAPI := &hilosimulator.API{}
 	kellyCriterionAPI := &kellycriterion.API{}
 	qrcodeAPI := &qrcode.API{}
+	stringencoderdecoderAPI := &stringencoderdecoder.API{}
 
 	pageNoAuth.GET("/", homePage.Home)
 	pageNoAuth.GET("/signup", accountPage.Signup)
@@ -266,7 +268,7 @@ func SetupRouter() *gin.Engine {
 	apiNoAuth.POST("/hilo-simulator/verify", hilosimulatorAPI.HILOVerify)
 	apiNoAuth.POST("/dns-lookup/lookup", dnslookupAPI.DNSLookup)
 	apiNoAuth.POST("/qr-code/create", qrcodeAPI.CreateQRCode)
-	apiNoAuth.POST("/string/encodedecode", appApis.EncodeDecode)
+	apiNoAuth.POST("/string/encodedecode", stringencoderdecoderAPI.EncodeDecode)
 	apiNoAuth.POST("/request-bin/create", appApis.CreateRequestBin)
 	apiAuthRequired.POST("/app/:name/like", applicationAPI.Like)
 	apiAuthRequired.POST("/app/:name/dislike", applicationAPI.Dislike)

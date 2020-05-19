@@ -1,4 +1,4 @@
-package app
+package stringencoderdecoder
 
 import (
 	"encoding/base32"
@@ -9,15 +9,17 @@ import (
 
 	"github.com/Z-M-Huang/Tools/core"
 	"github.com/Z-M-Huang/Tools/data"
-	"github.com/Z-M-Huang/Tools/data/apidata/application"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/gin-gonic/gin"
 )
 
+//API string encoder decoder
+type API struct{}
+
 //EncodeDecode /api/string/encodedecode
-func EncodeDecode(c *gin.Context) {
+func (API) EncodeDecode(c *gin.Context) {
 	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
-	request := &application.StringEncodeDecodeRequest{}
+	request := &Request{}
 	var result []string
 	err := c.ShouldBind(&request)
 	if err != nil {
