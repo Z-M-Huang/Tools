@@ -5,42 +5,23 @@ on:
     types: [published]
 
 jobs:
-  build:
+  retag:
     runs-on: ubuntu-latest
-    name: build
+    name: retag
     steps:
     - uses: actions/checkout@v2
-    - name: Use Node.js
-      uses: actions/setup-node@v1
+    - name: Retag to latest
+      uses: Z-M-Huang/docker-retag-curl@0.1.0
       with:
-        node-version: '12.x'
-    - name: Install dependencies
-      run: npm install
-    - name: Set up Docker Buildx
-      id: buildx
-      uses: crazy-max/ghaction-docker-buildx@v1
-      with:
-        buildx-version: latest
-        qemu-version: latest
-    - name: Docker Login
-      run: |
-        echo "${{ secrets.DOCKER_PASSWORD }}" > ~/cred.txt
-        cat ~/cred.txt | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
-    - name: Clean Docker cred
-      run: rm ~/cred.txt
-    - name: Build using buildx
-      run: | 
-        docker buildx build \
-          --platform linux/amd64,linux/arm/v7 --push \
-          -t zhironghuang/tools-web:${{ github.sha }} -t zhironghuang/tools-web:latest .
-    - name: Docker Logout
-      run: |
-        docker logout
-        rm ~/.docker/config.json
+        repo: zhironghuang/tools-web
+        old_tag: ${{ github.sha }}
+        new_tag: latest
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
 
   deploy:
     name: deploy
-    needs: build
+    needs: retag
     runs-on: self-hosted
     steps:      
     - uses: actions/checkout@v2
