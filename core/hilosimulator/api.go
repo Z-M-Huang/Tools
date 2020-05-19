@@ -1,18 +1,20 @@
-package app
+package hilosimulator
 
 import (
-	"github.com/Z-M-Huang/Tools/api"
+	"github.com/Z-M-Huang/Tools/core"
 	"github.com/Z-M-Huang/Tools/data"
-	"github.com/Z-M-Huang/Tools/data/apidata/application"
 	"github.com/Z-M-Huang/Tools/utils"
 	hilosimulator "github.com/Z-M-Huang/hilosimulator"
 	"github.com/gin-gonic/gin"
 )
 
+//API api
+type API struct{}
+
 //HILOSimulate /api/hilo-simulator/simulate
-func HILOSimulate(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
-	request := &application.HiLoSimulateRequest{}
+func (API) HILOSimulate(c *gin.Context) {
+	response := core.GetResponseInContext(c.Keys)
+	request := &SimulateRequest{}
 
 	err := c.ShouldBind(&request)
 	if err != nil {
@@ -21,7 +23,7 @@ func HILOSimulate(c *gin.Context) {
 			IsDanger: true,
 			Message:  "Invalid simulation request.",
 		})
-		api.WriteResponse(c, 400, response)
+		core.WriteResponse(c, 400, response)
 		return
 	}
 
@@ -30,14 +32,14 @@ func HILOSimulate(c *gin.Context) {
 			IsWarning: true,
 			Message:   "Roll Amount: Cannot be negative number",
 		})
-		api.WriteResponse(c, 400, response)
+		core.WriteResponse(c, 400, response)
 		return
 	} else if request.RollAmount > 50000 {
 		response.SetAlert(&data.AlertData{
 			IsDanger: true,
 			Message:  "Requested Roll Amount is too large. Please do batches and keep the server health. Thank you",
 		})
-		api.WriteResponse(c, 400, response)
+		core.WriteResponse(c, 400, response)
 		return
 	}
 
@@ -72,18 +74,18 @@ func HILOSimulate(c *gin.Context) {
 			IsDanger: true,
 			Message:  err.Error(),
 		})
-		api.WriteResponse(c, 500, response)
+		core.WriteResponse(c, 500, response)
 		return
 	}
 
 	response.Data = result
-	api.WriteResponse(c, 200, response)
+	core.WriteResponse(c, 200, response)
 }
 
 //HILOVerify /api/hilo-simulator/verify
-func HILOVerify(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
-	request := &application.HiLoVerifyRequest{}
+func (API) HILOVerify(c *gin.Context) {
+	response := core.GetResponseInContext(c.Keys)
+	request := &VerifyRequest{}
 
 	err := c.ShouldBind(&request)
 	if err != nil {
@@ -92,7 +94,7 @@ func HILOVerify(c *gin.Context) {
 			IsDanger: true,
 			Message:  "Invalid simulation request.",
 		})
-		api.WriteResponse(c, 400, response)
+		core.WriteResponse(c, 400, response)
 		return
 	}
 
@@ -103,9 +105,9 @@ func HILOVerify(c *gin.Context) {
 			IsDanger: true,
 			Message:  err.Error(),
 		})
-		api.WriteResponse(c, 400, response)
+		core.WriteResponse(c, 400, response)
 		return
 	}
 	response.Data = valid
-	api.WriteResponse(c, 200, response)
+	core.WriteResponse(c, 200, response)
 }

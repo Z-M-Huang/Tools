@@ -1,12 +1,12 @@
-package application
+package dnslookup
 
-//DNSLookupRequest dns lookup request
-type DNSLookupRequest struct {
+//Request dns lookup request
+type Request struct {
 	DomainName string `json:"domainName" xml:"domainName" form:"domainName" binding:"required"`
 }
 
-//DNSLookupResponse dns lookup response
-type DNSLookupResponse struct {
+//Response dns lookup response
+type Response struct {
 	DomainName string
 	IPAddress  []string
 	CNAME      []string

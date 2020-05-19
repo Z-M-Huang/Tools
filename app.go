@@ -5,11 +5,12 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Z-M-Huang/Tools/api"
 	appApis "github.com/Z-M-Huang/Tools/api/app"
 	"github.com/Z-M-Huang/Tools/core"
 	"github.com/Z-M-Huang/Tools/core/account"
 	"github.com/Z-M-Huang/Tools/core/application"
+	"github.com/Z-M-Huang/Tools/core/dnslookup"
+	"github.com/Z-M-Huang/Tools/core/hilosimulator"
 	"github.com/Z-M-Huang/Tools/core/home"
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/utils"
@@ -234,18 +235,21 @@ func SetupRouter() *gin.Engine {
 	applicationPage := &application.Page{}
 
 	applicationAPI := &application.API{}
+	accountAPI := &account.API{}
+	dnslookupAPI := &dnslookup.API{}
+	hilosimulatorAPI := &hilosimulator.API{}
 
 	pageNoAuth.GET("/", homePage.Home)
 	pageNoAuth.GET("/signup", accountPage.Signup)
 	pageNoAuth.GET("/login", accountPage.Login)
 	pageAuthRequired.GET("/account", accountPage.Account)
 
-	router.GET("/google_login", api.GoogleLogin)
-	router.GET("/google_oauth", api.GoogleCallback)
-	apiNoAuth.POST("/login", api.Login)
-	apiNoAuth.POST("/logout", api.Logout)
-	apiNoAuth.POST("/signup", api.SignUp)
-	apiAuthRequired.POST("/account/update/password", api.UpdatePassword)
+	router.GET("/google_login", accountAPI.GoogleLogin)
+	router.GET("/google_oauth", accountAPI.GoogleCallback)
+	apiNoAuth.POST("/login", accountAPI.Login)
+	apiNoAuth.POST("/logout", accountAPI.Logout)
+	apiNoAuth.POST("/signup", accountAPI.SignUp)
+	apiAuthRequired.POST("/account/update/password", accountAPI.UpdatePassword)
 
 	//app
 	pageNoAuth.GET("/app/:name", applicationPage.RenderApplicationPage)
@@ -254,9 +258,9 @@ func SetupRouter() *gin.Engine {
 	//app api
 	router.Any("/api/request-bin/receive/:id", appApis.RequestIn)
 	apiNoAuth.POST("/kelly-criterion/simulate", appApis.KellyCriterionSimulate)
-	apiNoAuth.POST("/hilo-simulator/simulate", appApis.HILOSimulate)
-	apiNoAuth.POST("/hilo-simulator/verify", appApis.HILOVerify)
-	apiNoAuth.POST("/dns-lookup/lookup", appApis.DNSLookup)
+	apiNoAuth.POST("/hilo-simulator/simulate", hilosimulatorAPI.HILOSimulate)
+	apiNoAuth.POST("/hilo-simulator/verify", hilosimulatorAPI.HILOVerify)
+	apiNoAuth.POST("/dns-lookup/lookup", dnslookupAPI.DNSLookup)
 	apiNoAuth.POST("/string/encodedecode", appApis.EncodeDecode)
 	apiNoAuth.POST("/request-bin/create", appApis.CreateRequestBin)
 	apiNoAuth.POST("/qr-code/create", appApis.CreateQRCode)

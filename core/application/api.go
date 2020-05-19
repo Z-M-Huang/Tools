@@ -3,7 +3,6 @@ package application
 import (
 	"fmt"
 
-	"github.com/Z-M-Huang/Tools/api"
 	"github.com/Z-M-Huang/Tools/core"
 	"github.com/Z-M-Huang/Tools/core/account"
 	"github.com/Z-M-Huang/Tools/data"
@@ -28,7 +27,7 @@ func (API) Like(c *gin.Context) {
 			IsDanger: true,
 			Message:  "User not found",
 		})
-		api.WriteResponse(c, 400, response)
+		core.WriteResponse(c, 400, response)
 		return
 	}
 
@@ -38,7 +37,7 @@ func (API) Like(c *gin.Context) {
 			IsDanger: true,
 			Message:  "User not found",
 		})
-		api.WriteResponse(c, 400, response)
+		core.WriteResponse(c, 400, response)
 		return
 	}
 
@@ -52,7 +51,7 @@ func (API) Like(c *gin.Context) {
 			IsDanger: true,
 			Message:  "User not found",
 		})
-		api.WriteResponse(c, 400, response)
+		core.WriteResponse(c, 400, response)
 		return
 	} else if err != nil {
 		utils.Logger.Error(err.Error())
@@ -60,7 +59,7 @@ func (API) Like(c *gin.Context) {
 			IsDanger: true,
 			Message:  "User not found",
 		})
-		api.WriteResponse(c, 400, response)
+		core.WriteResponse(c, 400, response)
 		return
 	}
 
@@ -86,7 +85,7 @@ func (API) Like(c *gin.Context) {
 			return nil
 		})
 		if err != nil {
-			api.WriteUnexpectedError(c, response)
+			core.WriteUnexpectedError(c, response)
 			utils.Logger.Error(err.Error())
 			return
 		}
@@ -97,7 +96,7 @@ func (API) Like(c *gin.Context) {
 		Message:   "Application saved! Thank you for support.",
 	})
 	response.Data = appCard.AmountLiked
-	api.WriteResponse(c, 200, response)
+	core.WriteResponse(c, 200, response)
 }
 
 //Dislike /app/:name/dislike
@@ -112,7 +111,7 @@ func (API) Dislike(c *gin.Context) {
 			IsDanger: true,
 			Message:  "User not found",
 		})
-		api.WriteResponse(c, 400, response)
+		core.WriteResponse(c, 400, response)
 		return
 	}
 
@@ -122,7 +121,7 @@ func (API) Dislike(c *gin.Context) {
 			IsDanger: true,
 			Message:  "User not found",
 		})
-		api.WriteResponse(c, 400, response)
+		core.WriteResponse(c, 400, response)
 		return
 	}
 
@@ -136,7 +135,7 @@ func (API) Dislike(c *gin.Context) {
 			IsDanger: true,
 			Message:  "User not found",
 		})
-		api.WriteResponse(c, 400, response)
+		core.WriteResponse(c, 400, response)
 		return
 	} else if err != nil {
 		utils.Logger.Error(err.Error())
@@ -144,7 +143,7 @@ func (API) Dislike(c *gin.Context) {
 			IsDanger: true,
 			Message:  "User not found",
 		})
-		api.WriteResponse(c, 400, response)
+		core.WriteResponse(c, 400, response)
 		return
 	}
 
@@ -171,7 +170,7 @@ func (API) Dislike(c *gin.Context) {
 			return nil
 		})
 		if err != nil {
-			api.WriteUnexpectedError(c, response)
+			core.WriteUnexpectedError(c, response)
 			utils.Logger.Error(err.Error())
 			return
 		}
@@ -182,7 +181,7 @@ func (API) Dislike(c *gin.Context) {
 		Message: "If there are anything you want us to improve about this app. Please let us know on the github bug tracker.",
 	})
 	response.Data = appCard.AmountLiked
-	api.WriteResponse(c, 200, response)
+	core.WriteResponse(c, 200, response)
 }
 
 func addApplicationLike(tx *gorm.DB, app *AppCard) error {

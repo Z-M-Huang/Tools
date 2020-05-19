@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Z-M-Huang/Tools/api"
+	"github.com/Z-M-Huang/Tools/core"
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/apidata/application"
 	"github.com/Z-M-Huang/Tools/data/db"
@@ -27,13 +27,13 @@ func CreateRequestBin(c *gin.Context) {
 			IsDanger: true,
 			Message:  "Invalid request.",
 		})
-		api.WriteResponse(c, 200, response)
+		core.WriteResponse(c, 200, response)
 		return
 	}
 
 	bin := applicationlogic.NewRequestBinHistory(request.IsPrivate)
 	if bin == nil {
-		api.WriteUnexpectedError(c, response)
+		core.WriteUnexpectedError(c, response)
 		c.Abort()
 		return
 	}
@@ -43,7 +43,7 @@ func CreateRequestBin(c *gin.Context) {
 	}
 
 	response.Data = result
-	api.WriteResponse(c, 200, response)
+	core.WriteResponse(c, 200, response)
 }
 
 //RequestIn /api/request-bin/receive/:id

@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/Z-M-Huang/Tools/api"
+	"github.com/Z-M-Huang/Tools/core"
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/apidata/application"
 	"github.com/Z-M-Huang/Tools/data/db"
@@ -36,7 +36,7 @@ func CreateQRCode(c *gin.Context) {
 			IsWarning: true,
 			Message:   "Invalid request.",
 		})
-		api.WriteResponse(c, 400, response)
+		core.WriteResponse(c, 400, response)
 		return
 	}
 
@@ -45,7 +45,7 @@ func CreateQRCode(c *gin.Context) {
 			IsWarning: true,
 			Message:   "Invalid request.",
 		})
-		api.WriteResponse(c, 400, response)
+		core.WriteResponse(c, 400, response)
 		return
 	}
 
@@ -54,14 +54,14 @@ func CreateQRCode(c *gin.Context) {
 			IsWarning: true,
 			Message:   "Invalid request. The size is too big.",
 		})
-		api.WriteResponse(c, 400, response)
+		core.WriteResponse(c, 400, response)
 		return
 	} else if request.Size < 0 {
 		response.SetAlert(&data.AlertData{
 			IsWarning: true,
 			Message:   "Invalid request. The size cannot be negative",
 		})
-		api.WriteResponse(c, 400, response)
+		core.WriteResponse(c, 400, response)
 		return
 	}
 
@@ -80,7 +80,7 @@ func CreateQRCode(c *gin.Context) {
 			IsDanger: true,
 			Message:  "Invalid request. Invalid Level.",
 		})
-		api.WriteResponse(c, 400, response)
+		core.WriteResponse(c, 400, response)
 		return
 	}
 
@@ -92,7 +92,7 @@ func CreateQRCode(c *gin.Context) {
 				IsWarning: true,
 				Message:   "Background Color: " + err.Error(),
 			})
-			api.WriteResponse(c, 400, response)
+			core.WriteResponse(c, 400, response)
 			return
 		}
 	}
@@ -105,7 +105,7 @@ func CreateQRCode(c *gin.Context) {
 				IsWarning: true,
 				Message:   "Foreground Color: " + err.Error(),
 			})
-			api.WriteResponse(c, 400, response)
+			core.WriteResponse(c, 400, response)
 			return
 		}
 	}
@@ -119,7 +119,7 @@ func CreateQRCode(c *gin.Context) {
 				IsWarning: true,
 				Message:   "Failed to get logo image",
 			})
-			api.WriteResponse(c, 400, response)
+			core.WriteResponse(c, 400, response)
 			return
 		}
 	}
@@ -133,7 +133,7 @@ func CreateQRCode(c *gin.Context) {
 				IsWarning: true,
 				Message:   "Failed to get background image",
 			})
-			api.WriteResponse(c, 400, response)
+			core.WriteResponse(c, 400, response)
 			return
 		}
 	}
@@ -145,7 +145,7 @@ func CreateQRCode(c *gin.Context) {
 			IsDanger: true,
 			Message:  "Internal Error",
 		})
-		api.WriteResponse(c, 500, response)
+		core.WriteResponse(c, 500, response)
 		return
 	}
 
@@ -164,14 +164,14 @@ func CreateQRCode(c *gin.Context) {
 				IsDanger: true,
 				Message:  "Internal Error",
 			})
-			api.WriteResponse(c, 500, response)
+			core.WriteResponse(c, 500, response)
 			return
 		} else if val < 0 {
 			response.SetAlert(&data.AlertData{
 				IsWarning: true,
 				Message:   "Too many requests today. Please come back tomorrow.",
 			})
-			api.WriteResponse(c, http.StatusTooManyRequests, response)
+			core.WriteResponse(c, http.StatusTooManyRequests, response)
 			return
 		}
 	}
@@ -183,12 +183,12 @@ func CreateQRCode(c *gin.Context) {
 			IsDanger: true,
 			Message:  "Internal Error",
 		})
-		api.WriteResponse(c, 500, response)
+		core.WriteResponse(c, 500, response)
 		return
 	}
 
 	response.Data = base64.StdEncoding.EncodeToString(imageBytes)
-	api.WriteResponse(c, 200, response)
+	core.WriteResponse(c, 200, response)
 }
 
 func getRedisKey(ip string) string {

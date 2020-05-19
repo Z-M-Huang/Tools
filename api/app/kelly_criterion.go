@@ -3,7 +3,7 @@ package app
 import (
 	"math"
 
-	"github.com/Z-M-Huang/Tools/api"
+	"github.com/Z-M-Huang/Tools/core"
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/apidata/application"
 	"github.com/Z-M-Huang/Tools/utils"
@@ -22,7 +22,7 @@ func KellyCriterionSimulate(c *gin.Context) {
 			IsDanger: true,
 			Message:  "Invalid simulation request.",
 		})
-		api.WriteResponse(c, 200, response)
+		core.WriteResponse(c, 200, response)
 		return
 	}
 
@@ -37,5 +37,5 @@ func KellyCriterionSimulate(c *gin.Context) {
 		})
 	}
 	response.Data = simulationResult
-	api.WriteResponse(c, 200, response)
+	core.WriteResponse(c, 200, response)
 }

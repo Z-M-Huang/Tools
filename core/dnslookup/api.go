@@ -1,4 +1,4 @@
-package app
+package dnslookup
 
 import (
 	"fmt"
@@ -6,17 +6,19 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/Z-M-Huang/Tools/api"
+	"github.com/Z-M-Huang/Tools/core"
 	"github.com/Z-M-Huang/Tools/data"
-	"github.com/Z-M-Huang/Tools/data/apidata/application"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/gin-gonic/gin"
 )
 
+//API dnslookup
+type API struct{}
+
 //DNSLookup look up dns
-func DNSLookup(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
-	request := &application.DNSLookupRequest{}
+func (API) DNSLookup(c *gin.Context) {
+	response := core.GetResponseInContext(c.Keys)
+	request := &Request{}
 
 	err := c.ShouldBind(&request)
 	if err != nil {
@@ -24,7 +26,7 @@ func DNSLookup(c *gin.Context) {
 			IsDanger: true,
 			Message:  "Invalid lookup request.",
 		})
-		api.WriteResponse(c, 400, response)
+		core.WriteResponse(c, 400, response)
 		return
 	}
 
@@ -39,7 +41,7 @@ func DNSLookup(c *gin.Context) {
 			IsDanger: true,
 			Message:  "Invalid domain name",
 		})
-		api.WriteResponse(c, 400, response)
+		core.WriteResponse(c, 400, response)
 		return
 	}
 
@@ -48,11 +50,11 @@ func DNSLookup(c *gin.Context) {
 			IsDanger: true,
 			Message:  "Please enter a valid domain name",
 		})
-		api.WriteResponse(c, 400, response)
+		core.WriteResponse(c, 400, response)
 		return
 	}
 
-	result := &application.DNSLookupResponse{
+	result := &Response{
 		DomainName: uri.Hostname(),
 		PTR:        make(map[string][]string),
 	}
@@ -135,5 +137,5 @@ func DNSLookup(c *gin.Context) {
 	}
 
 	response.Data = result
-	api.WriteResponse(c, 200, response)
+	core.WriteResponse(c, 200, response)
 }
