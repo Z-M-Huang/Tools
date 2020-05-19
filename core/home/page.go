@@ -2,8 +2,8 @@ package home
 
 import (
 	"github.com/Z-M-Huang/Tools/core"
+	"github.com/Z-M-Huang/Tools/core/application"
 	"github.com/Z-M-Huang/Tools/data/db"
-	"github.com/Z-M-Huang/Tools/data/webdata"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,12 +20,12 @@ func (Page) Home(c *gin.Context) {
 		}
 		err := user.Find()
 		if err == nil && len(user.LikedApps) > 0 {
-			response.Data = webdata.GetApplicationWithLiked(user)
+			response.Data = application.GetApplicationWithLiked(user)
 		}
 	}
 
 	if response.Data == nil {
-		response.Data = webdata.GetAppList()
+		response.Data = application.GetAppList()
 	}
 
 	response.Header.Title = "Fun Apps"

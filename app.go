@@ -7,8 +7,8 @@ import (
 
 	"github.com/Z-M-Huang/Tools/api"
 	appApis "github.com/Z-M-Huang/Tools/api/app"
-	"github.com/Z-M-Huang/Tools/core"
 	"github.com/Z-M-Huang/Tools/core/account"
+	"github.com/Z-M-Huang/Tools/core/application"
 	"github.com/Z-M-Huang/Tools/core/home"
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/logic"
@@ -231,7 +231,9 @@ func SetupRouter() *gin.Engine {
 
 	homePage := &home.Page{}
 	accountPage := &account.Page{}
-	application := &core.Application{}
+	applicationPage := &application.Page{}
+
+	applicationAPI := &application.API{}
 
 	pageNoAuth.GET("/", homePage.Home)
 	pageNoAuth.GET("/signup", accountPage.Signup)
@@ -246,8 +248,8 @@ func SetupRouter() *gin.Engine {
 	apiAuthRequired.POST("/account/update/password", api.UpdatePassword)
 
 	//app
-	pageNoAuth.GET("/app/:name", application.RenderApplicationPage)
-	pageNoAuth.GET("/app/:name/:id", application.RenderApplicationPage)
+	pageNoAuth.GET("/app/:name", applicationPage.RenderApplicationPage)
+	pageNoAuth.GET("/app/:name/:id", applicationPage.RenderApplicationPage)
 
 	//app api
 	router.Any("/api/request-bin/receive/:id", appApis.RequestIn)
@@ -258,8 +260,8 @@ func SetupRouter() *gin.Engine {
 	apiNoAuth.POST("/string/encodedecode", appApis.EncodeDecode)
 	apiNoAuth.POST("/request-bin/create", appApis.CreateRequestBin)
 	apiNoAuth.POST("/qr-code/create", appApis.CreateQRCode)
-	apiAuthRequired.POST("/app/:name/like", appApis.Like)
-	apiAuthRequired.POST("/app/:name/dislike", appApis.Dislike)
+	apiAuthRequired.POST("/app/:name/like", applicationAPI.Like)
+	apiAuthRequired.POST("/app/:name/dislike", applicationAPI.Dislike)
 
 	return router
 }

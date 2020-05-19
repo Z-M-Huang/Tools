@@ -1,4 +1,4 @@
-package appcard
+package application
 
 import (
 	"fmt"
@@ -7,7 +7,6 @@ import (
 	"github.com/Z-M-Huang/Tools/core"
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/db"
-	"github.com/Z-M-Huang/Tools/data/webdata"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -32,7 +31,7 @@ func (API) Like(c *gin.Context) {
 		return
 	}
 
-	appCard := webdata.GetApplicationsByName(name)
+	appCard := GetApplicationsByName(name)
 	if appCard == nil {
 		response.SetAlert(&data.AlertData{
 			IsDanger: true,
@@ -90,7 +89,7 @@ func (API) Like(c *gin.Context) {
 			utils.Logger.Error(err.Error())
 			return
 		}
-		go webdata.ReloadAppList()
+		go ReloadAppList()
 	}
 	response.SetAlert(&data.AlertData{
 		IsSuccess: true,
@@ -116,7 +115,7 @@ func (API) Dislike(c *gin.Context) {
 		return
 	}
 
-	appCard := webdata.GetApplicationsByName(name)
+	appCard := GetApplicationsByName(name)
 	if appCard == nil {
 		response.SetAlert(&data.AlertData{
 			IsDanger: true,
@@ -175,7 +174,7 @@ func (API) Dislike(c *gin.Context) {
 			utils.Logger.Error(err.Error())
 			return
 		}
-		go webdata.ReloadAppList()
+		go ReloadAppList()
 	}
 	response.SetAlert(&data.AlertData{
 		IsInfo:  true,
@@ -185,7 +184,7 @@ func (API) Dislike(c *gin.Context) {
 	api.WriteResponse(c, 200, response)
 }
 
-func addApplicationLike(tx *gorm.DB, app *webdata.AppCard) error {
+func addApplicationLike(tx *gorm.DB, app *AppCard) error {
 	dbApp := &db.Application{
 		Name: app.Title,
 	}
@@ -204,7 +203,7 @@ func addApplicationLike(tx *gorm.DB, app *webdata.AppCard) error {
 	return nil
 }
 
-func removeApplicationLike(tx *gorm.DB, app *webdata.AppCard) error {
+func removeApplicationLike(tx *gorm.DB, app *AppCard) error {
 	dbApp := &db.Application{
 		Name: app.Title,
 	}

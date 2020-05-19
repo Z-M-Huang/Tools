@@ -1,4 +1,4 @@
-package core
+package application
 
 import (
 	"encoding/base64"
@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/Z-M-Huang/Tools/data"
-	"github.com/Z-M-Huang/Tools/data/webdata"
 	"github.com/Z-M-Huang/Tools/data/webdata/application"
 	"github.com/Z-M-Huang/Tools/logic"
 	applicationlogic "github.com/Z-M-Huang/Tools/logic/application"
@@ -15,11 +14,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-//Application logic
-type Application struct{}
+//Page logic
+type Page struct{}
 
 //RenderApplicationPage renders /app/:name
-func (a *Application) RenderApplicationPage(c *gin.Context) {
+func (Page) RenderApplicationPage(c *gin.Context) {
 	response := c.Keys[utils.ResponseCtxKey].(*data.Response)
 
 	name := c.Param("name")
@@ -29,7 +28,7 @@ func (a *Application) RenderApplicationPage(c *gin.Context) {
 		return
 	}
 
-	appCard := webdata.GetApplicationsByName(name)
+	appCard := GetApplicationsByName(name)
 	if appCard == nil {
 		c.String(http.StatusNotFound, "404 Not Found")
 		return
@@ -37,31 +36,36 @@ func (a *Application) RenderApplicationPage(c *gin.Context) {
 	response.Header.Title = appCard.Title + " - Fun Apps"
 	response.Header.Description = appCard.Description
 
-	usedApps, err := webdata.GetApplicationUsed(c.Request)
-	if err == nil {
-		exists := false
-		for _, str := range usedApps {
-			if str == appCard.Title {
-				exists = true
-				break
+	cookie, err := c.Cookie(utils.UsedTokenKey)
+	if err == nil && cookie != "" {
+		usedApps, err := GetApplicationUsed(cookie)
+		if err == nil {
+			exists := false
+			for _, str := range usedApps {
+				if str == appCard.Title {
+					exists = true
+					break
+				}
 			}
-		}
-		if !exists {
-			webdata.AddApplicationUsage(appCard)
-			usedApps = append(usedApps, appCard.Title)
-			usedAppsBytes, err := json.Marshal(usedApps)
-			encoded := base64.StdEncoding.EncodeToString(usedAppsBytes)
-			if err != nil {
-				utils.Logger.Error(err.Error())
-			} else {
-				logic.SetCookie(c, utils.UsedTokenKey, string(encoded), time.Date(2199, time.December, 31, 23, 59, 59, 0, time.UTC), true)
+			if !exists {
+				AddApplicationUsage(appCard)
+				usedApps = append(usedApps, appCard.Title)
+				usedAppsBytes, err := json.Marshal(usedApps)
+				encoded := base64.StdEncoding.EncodeToString(usedAppsBytes)
+				if err != nil {
+					utils.Logger.Error(err.Error())
+				} else {
+					logic.SetCookie(c, utils.UsedTokenKey, string(encoded), time.Date(2199, time.December, 31, 23, 59, 59, 0, time.UTC), true)
+				}
 			}
+		} else {
+			logic.SetCookie(c, utils.UsedTokenKey, "", time.Date(2199, time.December, 31, 23, 59, 59, 0, time.UTC), true)
+			utils.Logger.Error(err.Error())
 		}
 	} else {
 		logic.SetCookie(c, utils.UsedTokenKey, "", time.Date(2199, time.December, 31, 23, 59, 59, 0, time.UTC), true)
 		utils.Logger.Error(err.Error())
 	}
-
 	response.Data = loadAppSpecificData(c, appCard.Name)
 	if c.IsAborted() {
 		return

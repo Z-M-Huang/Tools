@@ -1,4 +1,4 @@
-package appcard
+package application
 
 //AppCategory card list for single category
 type AppCategory struct {

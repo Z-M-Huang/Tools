@@ -1,9 +1,8 @@
-package webdata
+package application
 
 import (
 	"encoding/base64"
 	"encoding/json"
-	"net/http"
 	"net/url"
 	"sort"
 	"strings"
@@ -14,42 +13,15 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-//AppCategory card list for single category
-type AppCategory struct {
-	Category string
-	AppCards []*AppCard
-}
-
-//AppCard used to render app card in pages
-type AppCard struct {
-	Name            string
-	TemplateName    string
-	ImageURL        string
-	FontsAwesomeTag string
-	Link            string
-	Title           string
-	Description     string
-	Used            bool
-	AmountUsed      uint64
-	Liked           bool
-	AmountLiked     uint64
-}
-
 //GetApplicationUsed saved in cookie
-func GetApplicationUsed(r *http.Request) ([]string, error) {
+func GetApplicationUsed(cookieVal string) ([]string, error) {
 	var usedApps []string
-	usedAppCookie, err := r.Cookie(utils.UsedTokenKey)
-	if err == http.ErrNoCookie {
-		return usedApps, nil
-	} else if err != nil {
-		return nil, err
-	}
 
-	if usedAppCookie.Value == "" {
+	if cookieVal == "" {
 		return usedApps, nil
 	}
 
-	queryDecoded, err := url.QueryUnescape(usedAppCookie.Value)
+	queryDecoded, err := url.QueryUnescape(cookieVal)
 	if err != nil {
 		return nil, err
 	}
