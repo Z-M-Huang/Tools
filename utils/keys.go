@@ -11,4 +11,6 @@ const (
 	UsedTokenKey string = "used_token"
 	//PageStyleCookieKey allows users to choose the style wants to use for page
 	PageStyleCookieKey string = "page_style"
+	//RedisAppListKey redis app list key
+	RedisAppListKey string = "APPLIST"
 )

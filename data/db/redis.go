@@ -31,7 +31,8 @@ func init() {
 func RedisGet(key string, out interface{}) error {
 	val, err := redisClient.Get(key).Result()
 	if err == redis.Nil {
-		return errors.New("Not found")
+		out = nil
+		return nil
 	} else if err != nil {
 		utils.Logger.Error(err.Error())
 		return errors.New("Internal Error")
@@ -48,7 +49,7 @@ func RedisGet(key string, out interface{}) error {
 func RedisGetString(key string) (string, error) {
 	val, err := redisClient.Get(key).Result()
 	if err == redis.Nil {
-		return "", errors.New("Not found")
+		return "", nil
 	} else if err != nil {
 		utils.Logger.Error(err.Error())
 		return "", errors.New("Internal Error")

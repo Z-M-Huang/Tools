@@ -17,9 +17,10 @@ import (
 
 func apiAuthHandler(requireToken bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		claim, err := logic.GetClaimFromHeaderAndRenew(c)
+		claim, err := logic.GetClaimFromCookieAndRenew(c)
 		if requireToken && (err != nil || claim == nil) {
 			c.String(http.StatusUnauthorized, "Unauthorized")
+			c.Abort()
 			return
 		}
 		c.Set(utils.ClaimCtxKey, claim)

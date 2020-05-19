@@ -10,7 +10,6 @@ import (
 	"github.com/Z-M-Huang/Tools/data/db"
 	webData "github.com/Z-M-Huang/Tools/data/webdata/application"
 	"github.com/Z-M-Huang/Tools/utils"
-	"github.com/go-redis/redis"
 )
 
 //GetRequestBinHistory get request history by id
@@ -18,9 +17,7 @@ func GetRequestBinHistory(id string) *webData.RequestBinPageData {
 	key := GetRequestBinKey(id)
 	data := &webData.RequestBinPageData{}
 	err := db.RedisGet(key, data)
-	if err == redis.Nil {
-		return nil
-	} else if err != nil {
+	if err != nil {
 		utils.Logger.Error(err.Error())
 		return nil
 	}

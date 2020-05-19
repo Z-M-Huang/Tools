@@ -86,6 +86,7 @@ func Like(c *gin.Context) {
 			utils.Logger.Error(err.Error())
 			return
 		}
+		go webdata.ReloadAppList()
 	}
 	response.SetAlert(&data.AlertData{
 		IsSuccess: true,
@@ -170,6 +171,7 @@ func Dislike(c *gin.Context) {
 			utils.Logger.Error(err.Error())
 			return
 		}
+		go webdata.ReloadAppList()
 	}
 	response.SetAlert(&data.AlertData{
 		IsInfo:  true,
