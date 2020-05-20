@@ -83,7 +83,7 @@ func GetClaimFromCookieAndRenew(c *gin.Context) (*JWTClaim, error) {
 		return nil, err
 	}
 	if time.Unix(claim.ExpiresAt, 0).Sub(time.Now().UTC()).Hours() < 24 {
-		tokenStr, expiresAt, err := GenerateJWTToken(claim.Audience, claim.Id, claim.Subject, claim.ImageURL)
+		tokenStr, expiresAt, err := generateJWTToken(claim.Audience, claim.Id, claim.Subject, claim.ImageURL)
 		if err != nil {
 			utils.Logger.Sugar().Errorf("failed to generate jwt token %s", err.Error())
 		} else {
@@ -106,7 +106,7 @@ func GetClaimFromHeaderAndRenew(c *gin.Context) (*JWTClaim, error) {
 		return nil, errors.New("Unauthorized")
 	}
 	if time.Unix(claim.ExpiresAt, 0).Sub(time.Now().UTC()).Hours() < 24 {
-		tokenStr, expiresAt, err := GenerateJWTToken(claim.Audience, claim.Id, claim.Subject, claim.ImageURL)
+		tokenStr, expiresAt, err := generateJWTToken(claim.Audience, claim.Id, claim.Subject, claim.ImageURL)
 		if err != nil {
 			utils.Logger.Sugar().Errorf("failed to generate jwt token %s", err.Error())
 		} else {
@@ -116,8 +116,7 @@ func GetClaimFromHeaderAndRenew(c *gin.Context) (*JWTClaim, error) {
 	return claim, nil
 }
 
-//GenerateJWTToken generates JWT token
-func GenerateJWTToken(audience, emailAddress, username, imageURL string) (string, time.Time, error) {
+func generateJWTToken(audience, emailAddress, username, imageURL string) (string, time.Time, error) {
 	expiresAt := time.Now().Add(30 * 24 * time.Hour)
 	claim := &JWTClaim{
 		ImageURL: imageURL,

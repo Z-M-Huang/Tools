@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 	"regexp"
 	"strings"
 	"time"
@@ -41,144 +40,92 @@ func init() {
 	}
 }
 
-//Login request
-func (API) Login(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*core.Response)
-	request := &LoginRequest{}
-	err := c.ShouldBind(&request)
-	if err != nil {
-		utils.Logger.Error(err.Error())
-		response.SetAlert(&core.AlertData{
-			IsDanger: true,
-			Message:  "Invalid login request.",
-		})
-		core.WriteResponse(c, 400, response)
-		return
-	}
-
+func login(request *LoginRequest) (int, *data.APIResponse, string, time.Time) {
+	response := &data.APIResponse{}
 	request.Email = strings.TrimSpace(strings.ToLower(request.Email))
-
 	existingUser := &db.User{
 		Email: request.Email,
 	}
-	err = existingUser.Find()
+	err := existingUser.Find()
 	if err == gorm.ErrRecordNotFound {
-		response.SetAlert(&core.AlertData{
-			IsDanger: true,
-			Message:  "We couldn't find any account for this email address... Maybe you need to create one.",
-		})
-		core.WriteResponse(c, 400, response)
-		return
+		response.ErrorMessage = "We couldn't find any account for this email address... Maybe you need to create one."
+		return http.StatusNotFound, response, "", time.Now()
 	} else if err != nil {
 		utils.Logger.Error(err.Error())
-		core.WriteUnexpectedError(c, response)
-		return
+		return http.StatusInternalServerError, nil, "", time.Now()
 	}
 
 	if !utils.ComparePasswords(existingUser.Password, []byte(request.Password)) {
 		utils.Logger.Sugar().Errorf("Invalid login attempt received for: %s", request.Email)
-		response.SetAlert(&core.AlertData{
-			IsWarning: true,
-			Message:   `Incorrect password. Do you forget your password? If you forget your password, please <a href="#">Click here</a> to reset your password. Uh... We don't have that feature yet, sorry...`,
+		response.ErrorMessage = `Incorrect password. Do you forget your password? If you forget your password, please <a href="#">Click here</a> to reset your password. Uh... We don't have that feature yet, sorry...`
+		return http.StatusBadRequest, response, "", time.Now()
+	}
+
+	tokenStr, expiresAt, err := generateJWTToken("Direct Login", request.Email, existingUser.Username, getGravatarLink(request.Email, 50))
+	if err != nil {
+		utils.Logger.Error(err.Error())
+		return http.StatusInternalServerError, nil, "", time.Now()
+	}
+	return http.StatusOK, response, tokenStr, expiresAt
+}
+
+//Login request
+func (API) Login(c *gin.Context) {
+	request := &LoginRequest{}
+	err := c.ShouldBind(&request)
+	if err != nil {
+		utils.Logger.Error(err.Error())
+		core.WriteResponse(c, http.StatusBadRequest, &data.APIResponse{
+			ErrorMessage: "Bad Request",
 		})
-		core.WriteResponse(c, 400, response)
 		return
 	}
 
-	tokenStr, expiresAt, err := GenerateJWTToken("Direct Login", request.Email, existingUser.Username, getGravatarLink(request.Email, 50))
-	if err != nil {
-		utils.Logger.Error(err.Error())
-		core.WriteUnexpectedError(c, response)
-	}
+	status, response, tokenStr, expiresAt := login(request)
 
-	uri, err := url.ParseRequestURI(c.GetHeader("Referer"))
-	if err != nil {
-		utils.Logger.Error(err.Error())
+	if status == http.StatusOK {
+		core.SetCookie(c, utils.SessionCookieKey, tokenStr, expiresAt, true)
 	}
-	result := &LoginResponse{
-		IsSuccess: true,
-	}
-
-	redirect := uri.Query().Get("redirect")
-	if len(redirect) > 0 {
-		uri, err = url.ParseRequestURI(redirect)
-		if err == nil && uri.Host == "" {
-			result.Redirect = redirect
-		} else {
-			utils.Logger.Sugar().Warnf("Illegal redirect uri detected. %s", uri.RequestURI)
-		}
-	}
-	response.Data = result
-	core.SetCookie(c, utils.SessionCookieKey, tokenStr, expiresAt, true)
-	core.WriteResponse(c, 200, response)
+	core.WriteResponse(c, status, response)
 }
 
 //Logout logout
 func (API) Logout(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*core.Response)
+	response := c.Keys[utils.ResponseCtxKey].(*data.PageResponse)
 	core.SetCookie(c, utils.SessionCookieKey, "", time.Now().AddDate(-10, 1, 1), true)
 	response.Data = true
 	core.WriteResponse(c, 200, response)
 }
 
-//SignUp request
-func (API) SignUp(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*core.Response)
-	request := &CreateAccountRequest{}
-	err := c.ShouldBind(&request)
-	if err != nil {
-		utils.Logger.Error(err.Error())
-		response.SetAlert(&core.AlertData{
-			IsDanger: true,
-			Message:  "Invalid login request.",
-		})
-		core.WriteResponse(c, 400, response)
-		return
-	}
+func singUp(request *CreateAccountRequest) (int, *data.APIResponse, string, time.Time) {
+	response := &data.APIResponse{}
 	request.Email = strings.TrimSpace(strings.ToLower(request.Email))
 
 	if !emailRe.Match([]byte(request.Email)) {
-		response.SetAlert(&core.AlertData{
-			IsDanger: true,
-			Message:  "Invalid email address.",
-		})
-		core.WriteResponse(c, 400, response)
-		return
+		response.ErrorMessage = "Invalid email address."
+		return http.StatusBadRequest, response, "", time.Now()
 	}
 
 	if request.ConfirmPassword != request.Password {
-		response.SetAlert(&core.AlertData{
-			IsDanger: true,
-			Message:  "Password doesn't match",
-		})
-		core.WriteResponse(c, 400, response)
-		return
+		response.ErrorMessage = "Invalid password."
+		return http.StatusBadRequest, response, "", time.Now()
 	}
 
 	if len(request.Password) < minPasswordLength {
-		response.SetAlert(&core.AlertData{
-			IsWarning: true,
-			Message:   fmt.Sprintf("Password has minimum length of %d characters.", minPasswordLength),
-		})
-		core.WriteResponse(c, 400, response)
-		return
+		response.ErrorMessage = fmt.Sprintf("Password has minimum length of %d characters.", minPasswordLength)
+		return http.StatusBadRequest, response, "", time.Now()
 	}
 
 	existingUser := &db.User{
 		Email: request.Email,
 	}
-	err = existingUser.Find()
+	err := existingUser.Find()
 	if err == nil {
-		response.SetAlert(&core.AlertData{
-			IsWarning: true,
-			Message:   "Email address already exists, please try to remember the password, since password recovery function is not yet built. If you cant remember your password, good luck... The password is hashed, and even as an admin, I have no clue what's your password could be... See ya.",
-		})
-		core.WriteResponse(c, 400, response)
-		return
+		response.ErrorMessage = "Email address already exists, please try to remember the password, since password recovery function is not yet built. If you cant remember your password, good luck... The password is hashed, and even as an admin, I have no clue what's your password could be... See ya."
+		return http.StatusBadRequest, response, "", time.Now()
 	} else if err != nil && err != gorm.ErrRecordNotFound {
 		utils.Logger.Error(err.Error())
-		core.WriteUnexpectedError(c, response)
-		return
+		return http.StatusInternalServerError, nil, "", time.Now()
 	}
 
 	existingUser = &db.User{
@@ -186,16 +133,11 @@ func (API) SignUp(c *gin.Context) {
 	}
 	err = existingUser.Find()
 	if err == nil {
-		response.SetAlert(&core.AlertData{
-			IsWarning: true,
-			Message:   "Username already taken. Can't you think of something else? Try harder",
-		})
-		core.WriteResponse(c, 400, response)
-		return
+		response.ErrorMessage = "Username already taken. Can't you think of something else? Try harder"
+		return http.StatusBadRequest, response, "", time.Now()
 	} else if err != nil && err != gorm.ErrRecordNotFound {
 		utils.Logger.Error(err.Error())
-		core.WriteUnexpectedError(c, response)
-		return
+		return http.StatusInternalServerError, nil, "", time.Now()
 	}
 
 	user := &db.User{
@@ -205,99 +147,93 @@ func (API) SignUp(c *gin.Context) {
 	}
 	err = user.Save()
 	if err != nil {
-		utils.Logger.Error(err.Error())
-		core.WriteUnexpectedError(c, response)
-		return
+		return http.StatusInternalServerError, nil, "", time.Now()
 	}
 
-	tokenStr, expiresAt, err := GenerateJWTToken("Direct Login", request.Email, user.Username, getGravatarLink(request.Email, 50))
+	tokenStr, expiresAt, err := generateJWTToken("Direct Login", request.Email, user.Username, getGravatarLink(request.Email, 50))
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		core.WriteUnexpectedError(c, response)
+		return http.StatusInternalServerError, nil, "", time.Now()
 	}
 
-	core.SetCookie(c, utils.SessionCookieKey, tokenStr, expiresAt, true)
-	response.Data = true
-	core.WriteResponse(c, 200, response)
-	return
+	return http.StatusOK, response, tokenStr, expiresAt
 }
 
-//UpdatePassword api
-func (API) UpdatePassword(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*core.Response)
-	request := &UpdatePasswordRequest{}
+//SignUp request
+func (API) SignUp(c *gin.Context) {
+	request := &CreateAccountRequest{}
 	err := c.ShouldBind(&request)
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.SetAlert(&core.AlertData{
-			IsDanger: true,
-			Message:  "Invalid sign up request.",
+		core.WriteResponse(c, http.StatusBadRequest, &data.APIResponse{
+			ErrorMessage: "Bad Request",
 		})
-		core.WriteResponse(c, 400, response)
 		return
 	}
 
-	claim := c.Keys[utils.ClaimCtxKey].(*JWTClaim)
+	status, response, tokenStr, expiresAt := singUp(request)
+
+	if status == http.StatusOK {
+		core.SetCookie(c, utils.SessionCookieKey, tokenStr, expiresAt, true)
+	}
+	core.WriteResponse(c, status, response)
+}
+
+func updatePassword(request *UpdatePasswordRequest, email string) (int, *data.APIResponse) {
+	response := &data.APIResponse{}
 
 	if request.Password != request.ConfirmPassword {
-		response.SetAlert(&core.AlertData{
-			IsWarning: true,
-			Message:   "Password doesn't match.",
-		})
-		core.WriteResponse(c, 400, response)
-		return
+		response.ErrorMessage = "Password doesn't match."
+		return http.StatusBadRequest, response
 	} else if len(request.Password) < minPasswordLength {
-		response.SetAlert(&core.AlertData{
-			IsWarning: true,
-			Message:   fmt.Sprintf("Password has minimum length of %d.", minPasswordLength),
-		})
-		core.WriteResponse(c, 400, response)
-		return
+		response.ErrorMessage = fmt.Sprintf("Password has minimum length of %d.", minPasswordLength)
+		return http.StatusBadRequest, response
 	}
 
 	dbUser := &db.User{
-		Email: claim.Id,
+		Email: email,
 	}
-	err = dbUser.Find()
+	err := dbUser.Find()
 	if err == gorm.ErrRecordNotFound {
-		utils.Logger.Sugar().Errorf("User not found for %s in UpdatePassword", claim.Id)
-		core.WriteUnexpectedError(c, response)
-		return
+		utils.Logger.Sugar().Errorf("User not found for %s in UpdatePassword", email)
+		return http.StatusInternalServerError, nil
 	} else if err != nil {
 		utils.Logger.Error(err.Error())
-		core.WriteUnexpectedError(c, response)
-		return
+		return http.StatusInternalServerError, nil
 	}
 
 	if dbUser.Password != "" && !utils.ComparePasswords(dbUser.Password, []byte(request.CurrentPassword)) {
-		response.SetAlert(&core.AlertData{
-			IsWarning: true,
-			Message:   "Current password is different compared to what's in database... Try harder...",
-		})
-		core.WriteResponse(c, 400, response)
-		return
+		response.ErrorMessage = "Current password is different compared to what's in database... Try harder..."
+		return http.StatusBadRequest, response
 	} else if dbUser.Password != "" && utils.ComparePasswords(dbUser.Password, []byte(request.Password)) {
-		response.SetAlert(&core.AlertData{
-			IsWarning: true,
-			Message:   "New password is exactly the same as the old password...",
-		})
-		core.WriteResponse(c, 400, response)
-		return
+		response.ErrorMessage = "New password is exactly the same as the old password..."
+		return http.StatusBadRequest, response
 	}
 
 	dbUser.Password = utils.HashAndSalt([]byte(request.Password))
 	err = dbUser.Save()
-
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		core.WriteUnexpectedError(c, response)
+		return http.StatusInternalServerError, nil
+	}
+	return http.StatusOK, nil
+}
+
+//UpdatePassword api
+func (API) UpdatePassword(c *gin.Context) {
+	request := &UpdatePasswordRequest{}
+	err := c.ShouldBind(&request)
+	if err != nil {
+		utils.Logger.Error(err.Error())
+		core.WriteResponse(c, http.StatusBadRequest, &data.APIResponse{
+			ErrorMessage: "Bad Request",
+		})
 		return
 	}
-	response.SetAlert(&core.AlertData{
-		IsSuccess: true,
-		Message:   "Password is updated.",
-	})
-	core.WriteResponse(c, 400, response)
+	claim := c.Keys[utils.ClaimCtxKey].(*JWTClaim)
+
+	status, response := updatePassword(request, claim.Id)
+	core.WriteResponse(c, status, response)
 }
 
 //GoogleLogin google login request
@@ -338,7 +274,7 @@ func (API) GoogleCallback(c *gin.Context) {
 		utils.Logger.Error(err.Error())
 	}
 
-	tokenStr, expiresAt, err := GenerateJWTToken("Google", user.Email, user.Name, user.Picture)
+	tokenStr, expiresAt, err := generateJWTToken("Google", user.Email, user.Name, user.Picture)
 	if err != nil {
 		utils.Logger.Sugar().Errorf("failed to generate jwt token %s", err.Error())
 	} else {

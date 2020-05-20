@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/Z-M-Huang/Tools/core"
+	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/gin-gonic/gin"
 )
@@ -21,7 +22,7 @@ func (API) DNSLookup(c *gin.Context) {
 
 	err := c.ShouldBind(&request)
 	if err != nil {
-		response.SetAlert(&core.AlertData{
+		response.SetAlert(&data.AlertData{
 			IsDanger: true,
 			Message:  "Invalid lookup request.",
 		})
@@ -36,7 +37,7 @@ func (API) DNSLookup(c *gin.Context) {
 
 	uri, err := url.Parse(request.DomainName)
 	if err != nil {
-		response.SetAlert(&core.AlertData{
+		response.SetAlert(&data.AlertData{
 			IsDanger: true,
 			Message:  "Invalid domain name",
 		})
@@ -45,7 +46,7 @@ func (API) DNSLookup(c *gin.Context) {
 	}
 
 	if uri.Hostname() == "" {
-		response.SetAlert(&core.AlertData{
+		response.SetAlert(&data.AlertData{
 			IsDanger: true,
 			Message:  "Please enter a valid domain name",
 		})
@@ -61,7 +62,7 @@ func (API) DNSLookup(c *gin.Context) {
 	ips, err := net.LookupIP(uri.Hostname())
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.SetAlert(&core.AlertData{
+		response.SetAlert(&data.AlertData{
 			IsWarning: true,
 			Message:   "Failed to lookup A records",
 		})
@@ -71,7 +72,7 @@ func (API) DNSLookup(c *gin.Context) {
 			ptrs, err := net.LookupAddr(ip.String())
 			if err != nil {
 				utils.Logger.Error(err.Error())
-				response.SetAlert(&core.AlertData{
+				response.SetAlert(&data.AlertData{
 					IsWarning: true,
 					Message:   fmt.Sprintf("Failed to lookup PTR records for %s", ip.String()),
 				})
@@ -86,7 +87,7 @@ func (API) DNSLookup(c *gin.Context) {
 	cnames, err := net.LookupCNAME(uri.Hostname())
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.SetAlert(&core.AlertData{
+		response.SetAlert(&data.AlertData{
 			IsWarning: true,
 			Message:   "Failed to lookup CNAME records",
 		})
@@ -99,7 +100,7 @@ func (API) DNSLookup(c *gin.Context) {
 	nses, err := net.LookupNS(uri.Hostname())
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.SetAlert(&core.AlertData{
+		response.SetAlert(&data.AlertData{
 			IsWarning: true,
 			Message:   "Failed to lookup NS records",
 		})
@@ -112,7 +113,7 @@ func (API) DNSLookup(c *gin.Context) {
 	mxes, err := net.LookupMX(uri.Hostname())
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.SetAlert(&core.AlertData{
+		response.SetAlert(&data.AlertData{
 			IsWarning: true,
 			Message:   "Failed to lookup MX records",
 		})
@@ -125,7 +126,7 @@ func (API) DNSLookup(c *gin.Context) {
 	txts, err := net.LookupTXT(uri.Hostname())
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.SetAlert(&core.AlertData{
+		response.SetAlert(&data.AlertData{
 			IsWarning: true,
 			Message:   "Failed to lookup TXT records",
 		})

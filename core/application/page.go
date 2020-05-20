@@ -8,6 +8,7 @@ import (
 
 	"github.com/Z-M-Huang/Tools/core"
 	"github.com/Z-M-Huang/Tools/core/requestbin"
+	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/gin-gonic/gin"
 )
@@ -17,7 +18,7 @@ type Page struct{}
 
 //RenderApplicationPage renders /app/:name
 func (Page) RenderApplicationPage(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*core.Response)
+	response := c.Keys[utils.ResponseCtxKey].(*data.PageResponse)
 
 	name := c.Param("name")
 

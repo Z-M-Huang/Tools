@@ -1,7 +1,10 @@
 package hilosimulator
 
 import (
+	"net/http"
+
 	"github.com/Z-M-Huang/Tools/core"
+	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/utils"
 	hilosimulator "github.com/Z-M-Huang/hilosimulator"
 	"github.com/gin-gonic/gin"
@@ -18,7 +21,7 @@ func (API) HILOSimulate(c *gin.Context) {
 	err := c.ShouldBind(&request)
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.SetAlert(&core.AlertData{
+		response.SetAlert(&data.AlertData{
 			IsDanger: true,
 			Message:  "Invalid simulation request.",
 		})
@@ -27,14 +30,14 @@ func (API) HILOSimulate(c *gin.Context) {
 	}
 
 	if request.RollAmount < 0 {
-		response.SetAlert(&core.AlertData{
+		response.SetAlert(&data.AlertData{
 			IsWarning: true,
 			Message:   "Roll Amount: Cannot be negative number",
 		})
 		core.WriteResponse(c, 400, response)
 		return
 	} else if request.RollAmount > 50000 {
-		response.SetAlert(&core.AlertData{
+		response.SetAlert(&data.AlertData{
 			IsDanger: true,
 			Message:  "Requested Roll Amount is too large. Please do batches and keep the server health. Thank you",
 		})
@@ -69,11 +72,11 @@ func (API) HILOSimulate(c *gin.Context) {
 	result, err := hilosimulator.Simulate(simConfig)
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.SetAlert(&core.AlertData{
+		response.SetAlert(&data.AlertData{
 			IsDanger: true,
 			Message:  err.Error(),
 		})
-		core.WriteResponse(c, 500, response)
+		core.WriteResponse(c, http.StatusInternalServerError, response)
 		return
 	}
 
@@ -89,7 +92,7 @@ func (API) HILOVerify(c *gin.Context) {
 	err := c.ShouldBind(&request)
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.SetAlert(&core.AlertData{
+		response.SetAlert(&data.AlertData{
 			IsDanger: true,
 			Message:  "Invalid simulation request.",
 		})
@@ -100,7 +103,7 @@ func (API) HILOVerify(c *gin.Context) {
 	valid, err := hilosimulator.Verify(request.ClientSeed, request.ServerSeed, request.Nonce, request.Roll)
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.SetAlert(&core.AlertData{
+		response.SetAlert(&data.AlertData{
 			IsDanger: true,
 			Message:  err.Error(),
 		})

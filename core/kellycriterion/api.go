@@ -4,6 +4,7 @@ import (
 	"math"
 
 	"github.com/Z-M-Huang/Tools/core"
+	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/utils"
 	kellycriterion "github.com/Z-M-Huang/kelly-criterion"
 	"github.com/gin-gonic/gin"
@@ -14,12 +15,12 @@ type API struct{}
 
 //Simulate /api/kelly-criterion/simulate
 func (API) Simulate(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*core.Response)
+	response := c.Keys[utils.ResponseCtxKey].(*data.PageResponse)
 	var simulationResult []*Response
 	request := &Request{}
 	err := c.ShouldBind(&request)
 	if err != nil {
-		response.SetAlert(&core.AlertData{
+		response.SetAlert(&data.AlertData{
 			IsDanger: true,
 			Message:  "Invalid simulation request.",
 		})
