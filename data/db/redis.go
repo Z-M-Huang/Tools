@@ -14,8 +14,8 @@ import (
 
 var redisClient *redis.Client
 
-func init() {
-
+//InitRedis init Redis
+func InitRedis() {
 	redisClient = redis.NewClient(&redis.Options{
 		Addr:     data.Config.RedisConfig.Addr,
 		Password: data.Config.RedisConfig.Password,

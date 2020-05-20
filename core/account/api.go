@@ -27,7 +27,8 @@ var emailRe = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](
 var minPasswordLength int = 12
 var googleOauthConfig *oauth2.Config
 
-func init() {
+//InitGoogleOauth init google oauth
+func InitGoogleOauth() {
 	googleOauthConfig = &oauth2.Config{
 		RedirectURL:  fmt.Sprintf("https://%s/google_oauth", data.Config.Host),
 		ClientID:     data.Config.GoogleOauthConfig.ClientID,
@@ -49,22 +50,22 @@ func login(request *LoginRequest) (int, *data.APIResponse, string, time.Time) {
 	err := existingUser.Find()
 	if err == gorm.ErrRecordNotFound {
 		response.ErrorMessage = "We couldn't find any account for this email address... Maybe you need to create one."
-		return http.StatusNotFound, response, "", time.Now()
+		return http.StatusNotFound, response, "", time.Time{}
 	} else if err != nil {
 		utils.Logger.Error(err.Error())
-		return http.StatusInternalServerError, nil, "", time.Now()
+		return http.StatusInternalServerError, nil, "", time.Time{}
 	}
 
 	if !utils.ComparePasswords(existingUser.Password, []byte(request.Password)) {
 		utils.Logger.Sugar().Errorf("Invalid login attempt received for: %s", request.Email)
 		response.ErrorMessage = `Incorrect password. Do you forget your password? If you forget your password, please <a href="#">Click here</a> to reset your password. Uh... We don't have that feature yet, sorry...`
-		return http.StatusBadRequest, response, "", time.Now()
+		return http.StatusBadRequest, response, "", time.Time{}
 	}
 
 	tokenStr, expiresAt, err := generateJWTToken("Direct Login", request.Email, existingUser.Username, getGravatarLink(request.Email, 50))
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		return http.StatusInternalServerError, nil, "", time.Now()
+		return http.StatusInternalServerError, nil, "", time.Time{}
 	}
 	return http.StatusOK, response, tokenStr, expiresAt
 }
@@ -103,17 +104,17 @@ func signUp(request *CreateAccountRequest) (int, *data.APIResponse, string, time
 
 	if !emailRe.Match([]byte(request.Email)) {
 		response.ErrorMessage = "Invalid email address."
-		return http.StatusBadRequest, response, "", time.Now()
+		return http.StatusBadRequest, response, "", time.Time{}
 	}
 
 	if request.ConfirmPassword != request.Password {
 		response.ErrorMessage = "Invalid password."
-		return http.StatusBadRequest, response, "", time.Now()
+		return http.StatusBadRequest, response, "", time.Time{}
 	}
 
 	if len(request.Password) < minPasswordLength {
 		response.ErrorMessage = fmt.Sprintf("Password has minimum length of %d characters.", minPasswordLength)
-		return http.StatusBadRequest, response, "", time.Now()
+		return http.StatusBadRequest, response, "", time.Time{}
 	}
 
 	existingUser := &db.User{
@@ -125,7 +126,7 @@ func signUp(request *CreateAccountRequest) (int, *data.APIResponse, string, time
 		return http.StatusBadRequest, response, "", time.Now()
 	} else if err != nil && err != gorm.ErrRecordNotFound {
 		utils.Logger.Error(err.Error())
-		return http.StatusInternalServerError, nil, "", time.Now()
+		return http.StatusInternalServerError, nil, "", time.Time{}
 	}
 
 	existingUser = &db.User{
@@ -134,10 +135,10 @@ func signUp(request *CreateAccountRequest) (int, *data.APIResponse, string, time
 	err = existingUser.Find()
 	if err == nil {
 		response.ErrorMessage = "Username already taken. Can't you think of something else? Try harder"
-		return http.StatusBadRequest, response, "", time.Now()
+		return http.StatusBadRequest, response, "", time.Time{}
 	} else if err != nil && err != gorm.ErrRecordNotFound {
 		utils.Logger.Error(err.Error())
-		return http.StatusInternalServerError, nil, "", time.Now()
+		return http.StatusInternalServerError, nil, "", time.Time{}
 	}
 
 	user := &db.User{
@@ -147,13 +148,13 @@ func signUp(request *CreateAccountRequest) (int, *data.APIResponse, string, time
 	}
 	err = user.Save()
 	if err != nil {
-		return http.StatusInternalServerError, nil, "", time.Now()
+		return http.StatusInternalServerError, nil, "", time.Time{}
 	}
 
 	tokenStr, expiresAt, err := generateJWTToken("Direct Login", request.Email, user.Username, getGravatarLink(request.Email, 50))
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		return http.StatusInternalServerError, nil, "", time.Now()
+		return http.StatusInternalServerError, nil, "", time.Time{}
 	}
 
 	return http.StatusOK, response, tokenStr, expiresAt
@@ -196,7 +197,8 @@ func updatePassword(request *UpdatePasswordRequest, email string) (int, *data.AP
 	err := dbUser.Find()
 	if err == gorm.ErrRecordNotFound {
 		utils.Logger.Sugar().Errorf("User not found for %s in UpdatePassword", email)
-		return http.StatusInternalServerError, nil
+		response.ErrorMessage = "Are you from cyber space?"
+		return http.StatusBadRequest, response
 	} else if err != nil {
 		utils.Logger.Error(err.Error())
 		return http.StatusInternalServerError, nil
@@ -216,7 +218,7 @@ func updatePassword(request *UpdatePasswordRequest, email string) (int, *data.AP
 		utils.Logger.Error(err.Error())
 		return http.StatusInternalServerError, nil
 	}
-	return http.StatusOK, nil
+	return http.StatusOK, response
 }
 
 //UpdatePassword api

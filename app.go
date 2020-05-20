@@ -20,6 +20,7 @@ import (
 	"github.com/Z-M-Huang/Tools/core/requestbin"
 	"github.com/Z-M-Huang/Tools/core/stringencoderdecoder"
 	"github.com/Z-M-Huang/Tools/data"
+	"github.com/Z-M-Huang/Tools/data/db"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
@@ -311,6 +312,9 @@ func SetupRouter() *gin.Engine {
 
 func main() {
 	data.Config.LoadProductionConfig()
+	db.InitDB()
+	db.InitRedis()
+	account.InitGoogleOauth()
 	go application.ReloadAppList()
 	utils.Logger.Fatal(http.ListenAndServe(":80", SetupRouter()).Error())
 }
