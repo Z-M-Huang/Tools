@@ -201,15 +201,15 @@ func getPageStyle(style string) *data.PageStyleData {
 func getTemplateRenderer() *template.Template {
 	var err error
 	t := template.New("")
-	t, err = t.ParseFiles(getAlltemplates("templates/")...)
-	if err != nil {
-		utils.Logger.Fatal(err.Error())
-	}
 	t.Funcs(template.FuncMap{"add": func(i, j int) int { return i + j }})
 	t.Funcs(template.FuncMap{"mod": func(i, j int) int { return i % j }})
 	t.Funcs(template.FuncMap{"nospace": func(i string) string {
 		return strings.ReplaceAll(i, " ", "")
 	}})
+	t, err = t.ParseFiles(getAlltemplates("templates/")...)
+	if err != nil {
+		utils.Logger.Fatal(err.Error())
+	}
 	return t
 }
 
@@ -311,7 +311,7 @@ func SetupRouter() *gin.Engine {
 }
 
 func main() {
-	data.Config.LoadProductionConfig()
+	data.LoadProductionConfig()
 	db.InitDB()
 	db.InitRedis()
 	account.InitGoogleOauth()

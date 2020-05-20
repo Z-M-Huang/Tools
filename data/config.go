@@ -46,7 +46,7 @@ type DatabaseConfiguration struct {
 }
 
 //LoadProductionConfig load config
-func (c *Configuration) LoadProductionConfig() {
+func LoadProductionConfig() {
 	redisDBNum, err := strconv.ParseInt(strings.TrimSpace(os.Getenv("REDIS_DB")), 10, 32)
 	if err != nil {
 		utils.Logger.Sugar().Warnf("failed to parse redis db number, set to default 0 %s", err.Error())
@@ -75,7 +75,7 @@ func (c *Configuration) LoadProductionConfig() {
 		}
 	}
 
-	c = &Configuration{
+	Config = &Configuration{
 		DatabaseConfig: &DatabaseConfiguration{
 			ConnectionString: strings.TrimSpace(os.Getenv("CONNECTION_STRING")),
 			Driver:           strings.TrimSpace(os.Getenv("DB_DRIVER")),
@@ -97,15 +97,15 @@ func (c *Configuration) LoadProductionConfig() {
 		EnableSitemap:   enableSitemap,
 	}
 
-	if c.RedisConfig.Addr == "" {
+	if Config.RedisConfig.Addr == "" {
 		utils.Logger.Fatal("REDIS_ADDR cannot be empty")
-	} else if c.GoogleOauthConfig.ClientID == "" {
+	} else if Config.GoogleOauthConfig.ClientID == "" {
 		utils.Logger.Fatal("GOOGLE_CLIENT_ID cannot be empty")
-	} else if c.GoogleOauthConfig.ClientSecret == "" {
+	} else if Config.GoogleOauthConfig.ClientSecret == "" {
 		utils.Logger.Fatal("GOOGLE_CLIENT_SECRET cannot be empty")
-	} else if len(c.JwtKey) == 0 {
+	} else if len(Config.JwtKey) == 0 {
 		utils.Logger.Fatal("JWT_KEY cannot be empty")
-	} else if c.Host == "" {
+	} else if Config.Host == "" {
 		utils.Logger.Fatal("HOST cannot be empty")
 	}
 }

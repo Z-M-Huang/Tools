@@ -49,7 +49,7 @@ func login(request *LoginRequest) (int, *data.APIResponse, string, time.Time) {
 	}
 	err := existingUser.Find()
 	if err == gorm.ErrRecordNotFound {
-		response.ErrorMessage = "We couldn't find any account for this email address... Maybe you need to create one."
+		response.Message = "We couldn't find any account for this email address... Maybe you need to create one."
 		return http.StatusNotFound, response, "", time.Time{}
 	} else if err != nil {
 		utils.Logger.Error(err.Error())
@@ -58,7 +58,7 @@ func login(request *LoginRequest) (int, *data.APIResponse, string, time.Time) {
 
 	if !utils.ComparePasswords(existingUser.Password, []byte(request.Password)) {
 		utils.Logger.Sugar().Errorf("Invalid login attempt received for: %s", request.Email)
-		response.ErrorMessage = `Incorrect password. Do you forget your password? If you forget your password, please <a href="#">Click here</a> to reset your password. Uh... We don't have that feature yet, sorry...`
+		response.Message = `Incorrect password. Do you forget your password? If you forget your password, please <a href="#">Click here</a> to reset your password. Uh... We don't have that feature yet, sorry...`
 		return http.StatusBadRequest, response, "", time.Time{}
 	}
 
@@ -77,7 +77,7 @@ func (API) Login(c *gin.Context) {
 	if err != nil {
 		utils.Logger.Error(err.Error())
 		core.WriteResponse(c, http.StatusBadRequest, &data.APIResponse{
-			ErrorMessage: "Bad Request",
+			Message: "Bad Request",
 		})
 		return
 	}
@@ -103,17 +103,17 @@ func signUp(request *CreateAccountRequest) (int, *data.APIResponse, string, time
 	request.Email = strings.TrimSpace(strings.ToLower(request.Email))
 
 	if !emailRe.Match([]byte(request.Email)) {
-		response.ErrorMessage = "Invalid email address."
+		response.Message = "Invalid email address."
 		return http.StatusBadRequest, response, "", time.Time{}
 	}
 
 	if request.ConfirmPassword != request.Password {
-		response.ErrorMessage = "Invalid password."
+		response.Message = "Invalid password."
 		return http.StatusBadRequest, response, "", time.Time{}
 	}
 
 	if len(request.Password) < minPasswordLength {
-		response.ErrorMessage = fmt.Sprintf("Password has minimum length of %d characters.", minPasswordLength)
+		response.Message = fmt.Sprintf("Password has minimum length of %d characters.", minPasswordLength)
 		return http.StatusBadRequest, response, "", time.Time{}
 	}
 
@@ -122,7 +122,7 @@ func signUp(request *CreateAccountRequest) (int, *data.APIResponse, string, time
 	}
 	err := existingUser.Find()
 	if err == nil {
-		response.ErrorMessage = "Email address already exists, please try to remember the password, since password recovery function is not yet built. If you cant remember your password, good luck... The password is hashed, and even as an admin, I have no clue what's your password could be... See ya."
+		response.Message = "Email address already exists, please try to remember the password, since password recovery function is not yet built. If you cant remember your password, good luck... The password is hashed, and even as an admin, I have no clue what's your password could be... See ya."
 		return http.StatusBadRequest, response, "", time.Now()
 	} else if err != nil && err != gorm.ErrRecordNotFound {
 		utils.Logger.Error(err.Error())
@@ -134,7 +134,7 @@ func signUp(request *CreateAccountRequest) (int, *data.APIResponse, string, time
 	}
 	err = existingUser.Find()
 	if err == nil {
-		response.ErrorMessage = "Username already taken. Can't you think of something else? Try harder"
+		response.Message = "Username already taken. Can't you think of something else? Try harder"
 		return http.StatusBadRequest, response, "", time.Time{}
 	} else if err != nil && err != gorm.ErrRecordNotFound {
 		utils.Logger.Error(err.Error())
@@ -167,7 +167,7 @@ func (API) SignUp(c *gin.Context) {
 	if err != nil {
 		utils.Logger.Error(err.Error())
 		core.WriteResponse(c, http.StatusBadRequest, &data.APIResponse{
-			ErrorMessage: "Bad Request",
+			Message: "Bad Request",
 		})
 		return
 	}
@@ -184,10 +184,10 @@ func updatePassword(request *UpdatePasswordRequest, email string) (int, *data.AP
 	response := &data.APIResponse{}
 
 	if request.Password != request.ConfirmPassword {
-		response.ErrorMessage = "Password doesn't match."
+		response.Message = "Password doesn't match."
 		return http.StatusBadRequest, response
 	} else if len(request.Password) < minPasswordLength {
-		response.ErrorMessage = fmt.Sprintf("Password has minimum length of %d.", minPasswordLength)
+		response.Message = fmt.Sprintf("Password has minimum length of %d.", minPasswordLength)
 		return http.StatusBadRequest, response
 	}
 
@@ -197,7 +197,7 @@ func updatePassword(request *UpdatePasswordRequest, email string) (int, *data.AP
 	err := dbUser.Find()
 	if err == gorm.ErrRecordNotFound {
 		utils.Logger.Sugar().Errorf("User not found for %s in UpdatePassword", email)
-		response.ErrorMessage = "Are you from cyber space?"
+		response.Message = "Are you from cyber space?"
 		return http.StatusBadRequest, response
 	} else if err != nil {
 		utils.Logger.Error(err.Error())
@@ -205,10 +205,10 @@ func updatePassword(request *UpdatePasswordRequest, email string) (int, *data.AP
 	}
 
 	if dbUser.Password != "" && !utils.ComparePasswords(dbUser.Password, []byte(request.CurrentPassword)) {
-		response.ErrorMessage = "Current password is different compared to what's in database... Try harder..."
+		response.Message = "Current password is different compared to what's in database... Try harder..."
 		return http.StatusBadRequest, response
 	} else if dbUser.Password != "" && utils.ComparePasswords(dbUser.Password, []byte(request.Password)) {
-		response.ErrorMessage = "New password is exactly the same as the old password..."
+		response.Message = "New password is exactly the same as the old password..."
 		return http.StatusBadRequest, response
 	}
 
@@ -228,7 +228,7 @@ func (API) UpdatePassword(c *gin.Context) {
 	if err != nil {
 		utils.Logger.Error(err.Error())
 		core.WriteResponse(c, http.StatusBadRequest, &data.APIResponse{
-			ErrorMessage: "Bad Request",
+			Message: "Bad Request",
 		})
 		return
 	}

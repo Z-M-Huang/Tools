@@ -73,7 +73,7 @@ func TestSignupSuccess(t *testing.T) {
 
 	status, response, tokenStr, expiresAt := signUp(request)
 
-	assert.Empty(t, response.ErrorMessage)
+	assert.Empty(t, response.Message)
 	assert.NotEmpty(t, tokenStr)
 	assert.Equal(t, http.StatusOK, status)
 	assert.False(t, expiresAt.IsZero())
@@ -114,7 +114,7 @@ func TestSignupFail(t *testing.T) {
 	for _, r := range requests {
 		status, response, tokenStr, expiresAt := signUp(r)
 		assert.Empty(t, tokenStr)
-		assert.NotEmpty(t, response.ErrorMessage)
+		assert.NotEmpty(t, response.Message)
 		assert.NotEqual(t, http.StatusOK, status)
 		assert.NotEqual(t, http.StatusInternalServerError, status)
 		assert.True(t, expiresAt.IsZero())
@@ -137,7 +137,7 @@ func TestLoginSuccess(t *testing.T) {
 	status, response, tokenStr, expiresAt := login(loginRequest)
 
 	assert.Equal(t, http.StatusOK, status)
-	assert.Empty(t, response.ErrorMessage)
+	assert.Empty(t, response.Message)
 	assert.NotEmpty(t, tokenStr)
 	assert.False(t, expiresAt.IsZero())
 	assert.True(t, expiresAt.After(time.Now()))
@@ -166,7 +166,7 @@ func TestLoginFail(t *testing.T) {
 	for _, r := range loginRequests {
 		status, response, tokenStr, expiresAt := login(r)
 		assert.Empty(t, tokenStr)
-		assert.NotEmpty(t, response.ErrorMessage)
+		assert.NotEmpty(t, response.Message)
 		assert.NotEqual(t, http.StatusOK, status)
 		assert.NotEqual(t, http.StatusInternalServerError, status)
 		assert.True(t, expiresAt.IsZero())
@@ -190,7 +190,7 @@ func TestUpdatePasswordSuccess(t *testing.T) {
 	status, response := updatePassword(request, signupRequest.Email)
 
 	assert.Equal(t, http.StatusOK, status)
-	assert.Empty(t, response.ErrorMessage)
+	assert.Empty(t, response.Message)
 }
 
 func TestUpdatePasswordFail(t *testing.T) {
@@ -233,7 +233,7 @@ func TestUpdatePasswordFail(t *testing.T) {
 
 		assert.NotEqual(t, http.StatusOK, status)
 		assert.NotEqual(t, http.StatusInternalServerError, status)
-		assert.NotEmpty(t, response.ErrorMessage)
+		assert.NotEmpty(t, response.Message)
 	}
 
 	request := &UpdatePasswordRequest{
@@ -246,5 +246,5 @@ func TestUpdatePasswordFail(t *testing.T) {
 	status, response := updatePassword(request, "notfound@test.com")
 	assert.NotEqual(t, http.StatusOK, status)
 	assert.NotEqual(t, http.StatusInternalServerError, status)
-	assert.NotEmpty(t, response.ErrorMessage)
+	assert.NotEmpty(t, response.Message)
 }
