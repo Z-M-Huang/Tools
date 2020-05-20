@@ -35,9 +35,7 @@
 
 <script>
   bindForm("dnsLookupForm", "/api/dns-lookup/lookup", (d) => {
-      console.log(d);
     if (d != null && d != undefined) {
-      console.log(d);
       var table = $("table tbody");
       table.html("");
       $.each(d.IPAddress, (i, val) => {

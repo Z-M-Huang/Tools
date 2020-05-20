@@ -3,7 +3,9 @@ package dnslookup
 import (
 	"fmt"
 	"net"
+	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 
 	"github.com/Z-M-Huang/Tools/core"
@@ -12,46 +14,26 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var urlRe = regexp.MustCompile(`[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)`)
+
 //API dnslookup
 type API struct{}
 
-//DNSLookup look up dns
-func (API) DNSLookup(c *gin.Context) {
-	response := core.GetResponseInContext(c.Keys)
-	request := &Request{}
-
-	err := c.ShouldBind(&request)
-	if err != nil {
-		response.SetAlert(&data.AlertData{
-			IsDanger: true,
-			Message:  "Invalid lookup request.",
-		})
-		core.WriteResponse(c, 400, response)
-		return
-	}
-
+func lookup(request *Request) (int, *data.APIResponse) {
+	response := &data.APIResponse{}
 	request.DomainName = strings.TrimSpace(request.DomainName)
 	if !strings.HasPrefix(request.DomainName, "http") {
 		request.DomainName = "http://" + request.DomainName
 	}
 
-	uri, err := url.Parse(request.DomainName)
-	if err != nil {
-		response.SetAlert(&data.AlertData{
-			IsDanger: true,
-			Message:  "Invalid domain name",
-		})
-		core.WriteResponse(c, 400, response)
-		return
+	if !urlRe.Match([]byte(request.DomainName)) {
+		response.Message = "Invalid domain name"
+		return http.StatusBadRequest, response
 	}
 
-	if uri.Hostname() == "" {
-		response.SetAlert(&data.AlertData{
-			IsDanger: true,
-			Message:  "Please enter a valid domain name",
-		})
-		core.WriteResponse(c, 400, response)
-		return
+	uri, err := url.Parse(request.DomainName)
+	if err != nil {
+		return http.StatusInternalServerError, response
 	}
 
 	result := &Response{
@@ -62,20 +44,14 @@ func (API) DNSLookup(c *gin.Context) {
 	ips, err := net.LookupIP(uri.Hostname())
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.SetAlert(&data.AlertData{
-			IsWarning: true,
-			Message:   "Failed to lookup A records",
-		})
+		response.Message = "Failed to lookup A records"
 	} else {
 		for _, ip := range ips {
 			result.IPAddress = append(result.IPAddress, ip.String())
 			ptrs, err := net.LookupAddr(ip.String())
 			if err != nil {
 				utils.Logger.Error(err.Error())
-				response.SetAlert(&data.AlertData{
-					IsWarning: true,
-					Message:   fmt.Sprintf("Failed to lookup PTR records for %s", ip.String()),
-				})
+				response.Message = fmt.Sprintf("Failed to lookup PTR records for %s", ip.String())
 			} else {
 				for _, ptr := range ptrs {
 					result.PTR[ip.String()] = append(result.PTR[ip.String()], ptr)
@@ -87,10 +63,7 @@ func (API) DNSLookup(c *gin.Context) {
 	cnames, err := net.LookupCNAME(uri.Hostname())
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.SetAlert(&data.AlertData{
-			IsWarning: true,
-			Message:   "Failed to lookup CNAME records",
-		})
+		response.Message = "Failed to lookup CNAME records"
 	} else {
 		for _, cname := range cnames {
 			result.CNAME = append(result.CNAME, string(cname))
@@ -100,10 +73,7 @@ func (API) DNSLookup(c *gin.Context) {
 	nses, err := net.LookupNS(uri.Hostname())
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.SetAlert(&data.AlertData{
-			IsWarning: true,
-			Message:   "Failed to lookup NS records",
-		})
+		response.Message = "Failed to lookup NS records"
 	} else {
 		for _, ns := range nses {
 			result.CNAME = append(result.NS, ns.Host)
@@ -113,10 +83,7 @@ func (API) DNSLookup(c *gin.Context) {
 	mxes, err := net.LookupMX(uri.Hostname())
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.SetAlert(&data.AlertData{
-			IsWarning: true,
-			Message:   "Failed to lookup MX records",
-		})
+		response.Message = "Failed to lookup MX records"
 	} else {
 		for _, mx := range mxes {
 			result.CNAME = append(result.MX, mx.Host)
@@ -126,16 +93,29 @@ func (API) DNSLookup(c *gin.Context) {
 	txts, err := net.LookupTXT(uri.Hostname())
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.SetAlert(&data.AlertData{
-			IsWarning: true,
-			Message:   "Failed to lookup TXT records",
-		})
+		response.Message = "Failed to lookup TXT records"
 	} else {
 		for _, tx := range txts {
 			result.CNAME = append(result.MX, tx)
 		}
 	}
-
 	response.Data = result
-	core.WriteResponse(c, 200, response)
+	return http.StatusOK, response
+}
+
+//DNSLookup look up dns
+func (API) DNSLookup(c *gin.Context) {
+	request := &Request{}
+
+	err := c.ShouldBind(&request)
+	if err != nil {
+		core.WriteResponse(c, http.StatusBadRequest, &data.APIResponse{
+			Message: "Bad Request",
+		})
+		return
+	}
+
+	status, response := lookup(request)
+
+	core.WriteResponse(c, status, response)
 }
