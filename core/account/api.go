@@ -97,7 +97,7 @@ func (API) Logout(c *gin.Context) {
 	core.WriteResponse(c, 200, response)
 }
 
-func singUp(request *CreateAccountRequest) (int, *data.APIResponse, string, time.Time) {
+func signUp(request *CreateAccountRequest) (int, *data.APIResponse, string, time.Time) {
 	response := &data.APIResponse{}
 	request.Email = strings.TrimSpace(strings.ToLower(request.Email))
 
@@ -171,7 +171,7 @@ func (API) SignUp(c *gin.Context) {
 		return
 	}
 
-	status, response, tokenStr, expiresAt := singUp(request)
+	status, response, tokenStr, expiresAt := signUp(request)
 
 	if status == http.StatusOK {
 		core.SetCookie(c, utils.SessionCookieKey, tokenStr, expiresAt, true)

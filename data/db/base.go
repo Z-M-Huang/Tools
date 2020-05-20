@@ -4,6 +4,11 @@ import (
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/jinzhu/gorm"
+
+	_ "github.com/jinzhu/gorm/dialects/mssql" //supporting packages
+	_ "github.com/jinzhu/gorm/dialects/mysql"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
 //dbContext database connection

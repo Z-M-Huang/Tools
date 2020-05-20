@@ -2,7 +2,11 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/Z-M-Huang/Tools/core"
@@ -193,6 +197,34 @@ func getPageStyle(style string) *data.PageStyleData {
 	}
 }
 
+func getTemplateRenderer() *template.Template {
+	var err error
+	t := template.New("")
+	t, err = t.ParseFiles(getAlltemplates("templates/")...)
+	if err != nil {
+		utils.Logger.Fatal(err.Error())
+	}
+	t.Funcs(template.FuncMap{"add": func(i, j int) int { return i + j }})
+	t.Funcs(template.FuncMap{"mod": func(i, j int) int { return i % j }})
+	t.Funcs(template.FuncMap{"nospace": func(i string) string {
+		return strings.ReplaceAll(i, " ", "")
+	}})
+	return t
+}
+
+func getAlltemplates(inputPath string) []string {
+	var ret []string
+	filepath.Walk(inputPath, func(path string, info os.FileInfo, err error) error {
+		if path != inputPath && info.IsDir() {
+			ret = append(ret, getAlltemplates(path)...)
+		} else if strings.Contains(info.Name(), ".gohtml") {
+			ret = append(ret, path)
+		}
+		return nil
+	})
+	return ret
+}
+
 //SetupRouter setup gin router
 func SetupRouter() *gin.Engine {
 	router := gin.Default()
@@ -200,7 +232,7 @@ func SetupRouter() *gin.Engine {
 	router.Use(gzip.Gzip(gzip.DefaultCompression))
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
-	router.SetHTMLTemplate(utils.Templates)
+	router.SetHTMLTemplate(getTemplateRenderer())
 
 	router.Static(fmt.Sprintf("/assets/%s", data.Config.ResourceVersion), "assets/")
 	router.Static(fmt.Sprintf("/vendor/%s", data.Config.ResourceVersion), "node_modules/")
@@ -278,5 +310,7 @@ func SetupRouter() *gin.Engine {
 }
 
 func main() {
+	data.Config.LoadProductionConfig()
+	go application.ReloadAppList()
 	utils.Logger.Fatal(http.ListenAndServe(":80", SetupRouter()).Error())
 }
