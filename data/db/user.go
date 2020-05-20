@@ -10,7 +10,7 @@ type User struct {
 	gorm.Model
 	Username  string `gorm:"unique_index"`
 	Password  string
-	Email     string `gorm:"primary_key"`
+	Email     string `gorm:"primary_key;unique"`
 	GoogleID  string
 	LikedApps pq.StringArray `gorm:"type:text[]"`
 }
