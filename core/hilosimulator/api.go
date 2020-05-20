@@ -13,36 +13,14 @@ import (
 //API hilo simulator
 type API struct{}
 
-//HILOSimulate /api/hilo-simulator/simulate
-func (API) HILOSimulate(c *gin.Context) {
-	response := core.GetResponseInContext(c.Keys)
-	request := &SimulateRequest{}
-
-	err := c.ShouldBind(&request)
-	if err != nil {
-		utils.Logger.Error(err.Error())
-		response.SetAlert(&data.AlertData{
-			IsDanger: true,
-			Message:  "Invalid simulation request.",
-		})
-		core.WriteResponse(c, 400, response)
-		return
-	}
-
+func simulate(request *SimulateRequest) (int, *data.APIResponse) {
+	response := &data.APIResponse{}
 	if request.RollAmount < 0 {
-		response.SetAlert(&data.AlertData{
-			IsWarning: true,
-			Message:   "Roll Amount: Cannot be negative number",
-		})
-		core.WriteResponse(c, 400, response)
-		return
+		response.Message = "Roll Amount: Cannot be negative number"
+		return http.StatusBadRequest, response
 	} else if request.RollAmount > 50000 {
-		response.SetAlert(&data.AlertData{
-			IsDanger: true,
-			Message:  "Requested Roll Amount is too large. Please do batches and keep the server health. Thank you",
-		})
-		core.WriteResponse(c, 400, response)
-		return
+		response.Message = "Requested Roll Amount is too large. Please do batches and keep the server health. Thank you"
+		return http.StatusBadRequest, response
 	}
 
 	simConfig := &hilosimulator.Configuration{
@@ -72,44 +50,57 @@ func (API) HILOSimulate(c *gin.Context) {
 	result, err := hilosimulator.Simulate(simConfig)
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.SetAlert(&data.AlertData{
-			IsDanger: true,
-			Message:  err.Error(),
-		})
-		core.WriteResponse(c, http.StatusInternalServerError, response)
-		return
+		response.Message = err.Error()
+		return http.StatusBadRequest, response
 	}
 
 	response.Data = result
-	core.WriteResponse(c, 200, response)
+
+	return http.StatusOK, response
+}
+
+func verify(request *VerifyRequest) (int, *data.APIResponse) {
+	response := &data.APIResponse{}
+	valid, err := hilosimulator.Verify(request.ClientSeed, request.ServerSeed, request.Nonce, request.Roll)
+	if err != nil {
+		utils.Logger.Error(err.Error())
+		response.Message = err.Error()
+		return http.StatusBadRequest, response
+	}
+	response.Data = valid
+	return http.StatusOK, response
+}
+
+//HILOSimulate /api/hilo-simulator/simulate
+func (API) HILOSimulate(c *gin.Context) {
+	request := &SimulateRequest{}
+	err := c.ShouldBind(&request)
+	if err != nil {
+		utils.Logger.Error(err.Error())
+		core.WriteResponse(c, 400, &data.APIResponse{
+			Message: "Invalid simulation request.",
+		})
+		return
+	}
+
+	status, response := simulate(request)
+
+	core.WriteResponse(c, status, response)
 }
 
 //HILOVerify /api/hilo-simulator/verify
 func (API) HILOVerify(c *gin.Context) {
-	response := core.GetResponseInContext(c.Keys)
 	request := &VerifyRequest{}
-
 	err := c.ShouldBind(&request)
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.SetAlert(&data.AlertData{
-			IsDanger: true,
-			Message:  "Invalid simulation request.",
+		core.WriteResponse(c, 400, &data.APIResponse{
+			Message: "Invalid verify request.",
 		})
-		core.WriteResponse(c, 400, response)
 		return
 	}
 
-	valid, err := hilosimulator.Verify(request.ClientSeed, request.ServerSeed, request.Nonce, request.Roll)
-	if err != nil {
-		utils.Logger.Error(err.Error())
-		response.SetAlert(&data.AlertData{
-			IsDanger: true,
-			Message:  err.Error(),
-		})
-		core.WriteResponse(c, 400, response)
-		return
-	}
-	response.Data = valid
-	core.WriteResponse(c, 200, response)
+	status, response := verify(request)
+
+	core.WriteResponse(c, status, response)
 }
