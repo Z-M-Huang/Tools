@@ -15,7 +15,6 @@ require (
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/gin-contrib/gzip v0.0.1
 	github.com/gin-gonic/gin v1.6.3
-	github.com/go-playground/assert/v2 v2.0.1
 	github.com/go-redis/redis v6.15.7+incompatible
 	github.com/go-sql-driver/mysql v1.5.0 // indirect
 	github.com/golang/protobuf v1.4.2 // indirect

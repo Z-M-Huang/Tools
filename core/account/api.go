@@ -73,9 +73,6 @@ func login(request *LoginRequest) (int, *data.APIResponse, string, time.Time) {
 //Login request
 func (API) Login(c *gin.Context) {
 	request := &LoginRequest{}
-	loginResponse := &LoginResponse{
-		IsSuccess: false,
-	}
 	err := c.ShouldBind(&request)
 	if err != nil {
 		utils.Logger.Error(err.Error())
@@ -89,13 +86,8 @@ func (API) Login(c *gin.Context) {
 
 	if status == http.StatusOK {
 		core.SetCookie(c, utils.SessionCookieKey, tokenStr, expiresAt, true)
-		redirect := c.Param("redirect")
-		if redirect != "" {
-			loginResponse.Redirect = redirect
-		}
-		loginResponse.IsSuccess = true
+		response.Data = c.Param("redirect")
 	}
-	response.Data = loginResponse
 	core.WriteResponse(c, status, response)
 }
 

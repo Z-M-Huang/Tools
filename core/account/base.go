@@ -52,12 +52,6 @@ type LoginRequest struct {
 	Password string `json:"password" xml:"password" form:"password" binding:"required"`
 }
 
-//LoginResponse login response
-type LoginResponse struct {
-	IsSuccess bool
-	Redirect  string
-}
-
 //PageData /account
 type PageData struct {
 	HasPassword bool
