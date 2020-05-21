@@ -4,6 +4,7 @@ import (
 	"encoding/base32"
 	"encoding/base64"
 	"fmt"
+	"net/http"
 	"net/url"
 	"strings"
 
@@ -16,35 +17,17 @@ import (
 //API string encoder decoder
 type API struct{}
 
-//EncodeDecode /api/string/encodedecode
-func (API) EncodeDecode(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*data.PageResponse)
-	request := &Request{}
+func encodeDecode(request *Request) (int, *data.APIResponse) {
+	response := &data.APIResponse{}
 	var result []string
-	err := c.ShouldBind(&request)
-	if err != nil {
-		utils.Logger.Error(err.Error())
-		response.SetAlert(&data.AlertData{
-			IsDanger: true,
-			Message:  "Invalid lookup request.",
-		})
-		response.Data = []string{response.Header.Alert.Message}
-		core.WriteResponse(c, 400, response)
-		return
-	}
-
 	request.Action = strings.TrimSpace(request.Action)
 	request.Type = strings.TrimSpace(request.Type)
 	lines := strings.Split(request.RequestString, "\r\n")
 
 	if request.Action == "" || (request.Action != "encode" && request.Action != "decode") {
-		response.SetAlert(&data.AlertData{
-			IsWarning: true,
-			Message:   "Invalid action code.",
-		})
-		response.Data = []string{response.Header.Alert.Message}
-		core.WriteResponse(c, 400, response)
-		return
+		response.Message = "Invalid action code."
+		response.Data = "Invalid action code."
+		return http.StatusBadRequest, response
 	}
 	switch request.Type {
 	case "Base32":
@@ -56,13 +39,9 @@ func (API) EncodeDecode(c *gin.Context) {
 			for _, line := range lines {
 				unescaped, err := base32.StdEncoding.DecodeString(line)
 				if err != nil {
-					response.SetAlert(&data.AlertData{
-						IsWarning: true,
-						Message:   fmt.Sprintf("Cannot decode string requested %s", err.Error()),
-					})
-					response.Data = []string{response.Header.Alert.Message}
-					core.WriteResponse(c, 400, response)
-					return
+					response.Message = fmt.Sprintf("Cannot decode string requested %s", err.Error())
+					response.Data = response.Message
+					return http.StatusBadRequest, response
 				}
 				result = append(result, string(unescaped))
 			}
@@ -76,13 +55,9 @@ func (API) EncodeDecode(c *gin.Context) {
 			for _, line := range lines {
 				unescaped, err := base64.StdEncoding.DecodeString(line)
 				if err != nil {
-					response.SetAlert(&data.AlertData{
-						IsWarning: true,
-						Message:   fmt.Sprintf("Cannot decode string requested %s", err.Error()),
-					})
-					response.Data = []string{response.Header.Alert.Message}
-					core.WriteResponse(c, 400, response)
-					return
+					response.Message = fmt.Sprintf("Cannot decode string requested %s", err.Error())
+					response.Data = response.Message
+					return http.StatusBadRequest, response
 				}
 				result = append(result, string(unescaped))
 			}
@@ -96,27 +71,36 @@ func (API) EncodeDecode(c *gin.Context) {
 			for _, line := range lines {
 				unescaped, err := url.QueryUnescape(line)
 				if err != nil {
-					response.SetAlert(&data.AlertData{
-						IsDanger: true,
-						Message:  fmt.Sprintf("Cannot decode string requested %s", err.Error()),
-					})
-					response.Data = []string{response.Header.Alert.Message}
-					core.WriteResponse(c, 400, response)
-					return
+					response.Message = fmt.Sprintf("Cannot decode string requested %s", err.Error())
+					response.Data = response.Message
+					return http.StatusBadRequest, response
 				}
 				result = append(result, unescaped)
 			}
 		}
 	default:
-		response.SetAlert(&data.AlertData{
-			IsWarning: true,
-			Message:   "Invalid type request.",
-		})
-		response.Data = []string{response.Header.Alert.Message}
-		core.WriteResponse(c, 400, response)
+		response.Message = "Invalid type request."
+		response.Data = response.Message
+		return http.StatusBadRequest, response
+	}
+	response.Data = result
+	return http.StatusOK, response
+}
+
+//EncodeDecode /api/string/encodedecode
+func (API) EncodeDecode(c *gin.Context) {
+	response := &data.APIResponse{}
+	request := &Request{}
+	err := c.ShouldBind(&request)
+	if err != nil {
+		utils.Logger.Error(err.Error())
+		response.Message = "Invalid request."
+		response.Data = "Invalid request."
+		core.WriteResponse(c, http.StatusBadRequest, response)
 		return
 	}
 
-	response.Data = result
-	core.WriteResponse(c, 200, response)
+	status, response := encodeDecode(request)
+
+	core.WriteResponse(c, status, response)
 }
