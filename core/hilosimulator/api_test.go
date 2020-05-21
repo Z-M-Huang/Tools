@@ -82,7 +82,7 @@ func TestVerify(t *testing.T) {
 
 func TestVerifyFail(t *testing.T) {
 	request := &VerifyRequest{
-		ServerSeed: "ab",
+		ServerSeed: "a",
 		ClientSeed: "cd",
 		Nonce:      0,
 		Roll:       45.53,
@@ -90,6 +90,6 @@ func TestVerifyFail(t *testing.T) {
 
 	status, response := verify(request)
 
-	assert.Equal(t, http.StatusOK, status)
+	assert.Equal(t, http.StatusBadRequest, status)
 	assert.Equal(t, false, response.Data)
 }

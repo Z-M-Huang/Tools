@@ -65,6 +65,7 @@ func verify(request *VerifyRequest) (int, *data.APIResponse) {
 	if err != nil {
 		utils.Logger.Error(err.Error())
 		response.Message = err.Error()
+		response.Data = false
 		return http.StatusBadRequest, response
 	}
 	response.Data = valid

@@ -2,10 +2,10 @@ package kellycriterion
 
 import (
 	"math"
+	"net/http"
 
 	"github.com/Z-M-Huang/Tools/core"
 	"github.com/Z-M-Huang/Tools/data"
-	"github.com/Z-M-Huang/Tools/utils"
 	kellycriterion "github.com/Z-M-Huang/kelly-criterion"
 	"github.com/gin-gonic/gin"
 )
@@ -13,21 +13,9 @@ import (
 //API kelly criterion
 type API struct{}
 
-//Simulate /api/kelly-criterion/simulate
-func (API) Simulate(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*data.PageResponse)
+func simualte(request *Request) (int, *data.APIResponse) {
+	response := &data.APIResponse{}
 	var simulationResult []*Response
-	request := &Request{}
-	err := c.ShouldBind(&request)
-	if err != nil {
-		response.SetAlert(&data.AlertData{
-			IsDanger: true,
-			Message:  "Invalid simulation request.",
-		})
-		core.WriteResponse(c, 200, response)
-		return
-	}
-
 	total := request.MaxWinChance * request.MaxWinChancePayout / 100
 	for i := 0; i < 1000; i++ {
 		payout := float64(request.MaxWinChancePayout) + (float64(i) * 0.01)
@@ -39,5 +27,21 @@ func (API) Simulate(c *gin.Context) {
 		})
 	}
 	response.Data = simulationResult
-	core.WriteResponse(c, 200, response)
+	return http.StatusOK, response
+}
+
+//Simulate /api/kelly-criterion/simulate
+func (API) Simulate(c *gin.Context) {
+	request := &Request{}
+	err := c.ShouldBind(&request)
+	if err != nil {
+		core.WriteResponse(c, http.StatusBadRequest, &data.APIResponse{
+			Message: "Invalid simulation request.",
+		})
+		return
+	}
+
+	status, response := simualte(request)
+
+	core.WriteResponse(c, status, response)
 }
