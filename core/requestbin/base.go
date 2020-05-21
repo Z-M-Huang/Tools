@@ -7,8 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-//PageData page data /app/request-bin
-type PageData struct {
+//BinData page data /app/request-bin
+type BinData struct {
 	ID              string
 	URL             string
 	VerificationKey string
@@ -41,7 +41,7 @@ type CreateBinResponse struct {
 }
 
 //LoadRequestBinData load request bin data
-func LoadRequestBinData(c *gin.Context) *PageData {
+func LoadRequestBinData(c *gin.Context) *BinData {
 	id := c.Param("id")
 	if id == "" {
 		return nil

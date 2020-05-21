@@ -19,23 +19,51 @@ import (
 //API request bin
 type API struct{}
 
+func create(private bool) *BinData {
+	binData := &BinData{
+		ID: strconv.FormatInt(time.Now().Unix(), 10),
+	}
+	if data.Config.HTTPS {
+		binData.URL = "https://"
+	} else {
+		binData.URL = "http://"
+	}
+
+	binData.URL += data.Config.Host + "/api/request-bin/receive/" + binData.ID
+
+	if private {
+		binData.VerificationKey = utils.RandomString(30)
+	}
+
+	bytes, err := json.Marshal(binData)
+	if err != nil {
+		utils.Logger.Error(err.Error())
+		return nil
+	}
+	key := GetRequestBinKey(binData.ID)
+	err = db.RedisSet(key, bytes, 24*time.Hour)
+	if err != nil {
+		utils.Logger.Error(err.Error())
+		return nil
+	}
+	return binData
+}
+
 //CreateRequestBin /api/request-bin/Create
 func (API) CreateRequestBin(c *gin.Context) {
-	response := c.Keys[utils.ResponseCtxKey].(*data.PageResponse)
+	response := &data.APIResponse{}
 	request := &CreateBinRequest{}
 	err := c.ShouldBind(&request)
 	if err != nil {
-		response.SetAlert(&data.AlertData{
-			IsDanger: true,
-			Message:  "Invalid request.",
+		core.WriteResponse(c, http.StatusBadRequest, &data.APIResponse{
+			Message: "Invalid request.",
 		})
-		core.WriteResponse(c, 200, response)
 		return
 	}
 
-	bin := NewRequestBinHistory(request.IsPrivate)
+	bin := create(request.IsPrivate)
 	if bin == nil {
-		core.WriteUnexpectedError(c, response)
+		core.WriteResponse(c, http.StatusInternalServerError, response)
 		c.Abort()
 		return
 	}
@@ -129,46 +157,15 @@ func (API) RequestIn(c *gin.Context) {
 }
 
 //GetRequestBinHistory get request history by id
-func GetRequestBinHistory(id string) *PageData {
+func GetRequestBinHistory(id string) *BinData {
 	key := GetRequestBinKey(id)
-	data := &PageData{}
+	data := &BinData{}
 	err := db.RedisGet(key, data)
 	if err != nil {
 		utils.Logger.Error(err.Error())
 		return nil
 	}
 	return data
-}
-
-//NewRequestBinHistory new request history
-func NewRequestBinHistory(private bool) *PageData {
-	binData := &PageData{
-		ID: strconv.FormatInt(time.Now().Unix(), 10),
-	}
-	if data.Config.HTTPS {
-		binData.URL = "https://"
-	} else {
-		binData.URL = "http://"
-	}
-
-	binData.URL += data.Config.Host + "/api/request-bin/receive/" + binData.ID
-
-	if private {
-		binData.VerificationKey = utils.RandomString(30)
-	}
-
-	bytes, err := json.Marshal(binData)
-	if err != nil {
-		utils.Logger.Error(err.Error())
-		return nil
-	}
-	key := GetRequestBinKey(binData.ID)
-	err = db.RedisSet(key, bytes, 24*time.Hour)
-	if err != nil {
-		utils.Logger.Error(err.Error())
-		return nil
-	}
-	return binData
 }
 
 //GetRequestBinKey request bin key
