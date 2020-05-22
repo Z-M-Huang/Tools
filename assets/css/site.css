@@ -87,14 +87,6 @@
   font-size: 1.25rem;
 }
 
-.ellipsis-1 {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 1; /* number of lines to show */
-  -webkit-box-orient: vertical;
-}
-
 .ellipsis-2 {
   overflow: hidden;
   text-overflow: ellipsis;

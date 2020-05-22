@@ -84,6 +84,7 @@ func GetAppList() []*AppCategory {
 			utils.Logger.Error(err.Error())
 		}
 		categories = appList
+		categories = append([]*AppCategory{getPopular(categories)}, categories...)
 	}
 	return categories
 }
@@ -101,6 +102,7 @@ func ReloadAppList() {
 		appList = append(appList, getAnalyticTools(), getFormatTools(), getGeneratorTools(),
 			getLookupTools(), getWebUtils())
 		categories = appList
+		categories = append([]*AppCategory{getPopular(categories)}, categories...)
 	}
 	loadAppCardsUsage(categories)
 	err = db.RedisSetBytes(utils.RedisAppListKey, categories, 24*time.Hour)
@@ -196,6 +198,24 @@ func getWebUtils() *AppCategory {
 
 	sortAppCardSlice(tools.AppCards)
 	return tools
+}
+
+func getPopular(apps []*AppCategory) *AppCategory {
+	popular := &AppCategory{
+		Category: "Popular",
+	}
+
+	for _, c := range apps {
+		for _, a := range c.AppCards {
+			popular.AppCards = append(popular.AppCards, a)
+		}
+	}
+
+	sort.Slice(popular.AppCards, func(i, j int) bool {
+		return popular.AppCards[i].AmountUsed > popular.AppCards[j].AmountLiked
+	})
+
+	return popular
 }
 
 func loadAppCardsUsage(appList []*AppCategory) {

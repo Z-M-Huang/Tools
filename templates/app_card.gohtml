@@ -8,7 +8,7 @@
         <h5 class="card-title col-sm-9">{{.Title}}</h5>
         {{else if ne .FontsAwesomeTag ""}}
         <h2 class="col-sm-3"><i class="{{.FontsAwesomeTag}}"></i></h2>
-        <h5 class="card-title col-sm-9">{{.Title}}</h5>
+        <h5 class="card-title col-sm-9 text-truncate">{{.Title}}</h5>
         {{else}}
         <h4>{{.Title}}</h3>
           {{end}}
@@ -22,9 +22,9 @@
         </div>
         <div class="col">
           {{if .Liked}}
-        <i class="fas fa-thumbs-up mr-1 hover-pointer hover-150" onclick="likeOnClick(this, '{{.Name}}')"></i> {{.AmountLiked}}
+        <i class="fas fa-thumbs-up mr-1 hover-pointer hover-150 {{.Name}}" onclick="likeOnClick('{{.Name}}')"></i> {{.AmountLiked}}
           {{else}}
-          <i class="far fa-thumbs-up mr-1 hover-pointer hover-150" onclick="likeOnClick(this, '{{.Name}}')"></i> {{.AmountLiked}}
+          <i class="far fa-thumbs-up mr-1 hover-pointer hover-150 {{.Name}}" onclick="likeOnClick('{{.Name}}')"></i> {{.AmountLiked}}
           {{end}}
         </div>
       </div>

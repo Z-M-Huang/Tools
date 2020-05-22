@@ -18,17 +18,17 @@ function getCookieValue(name) {
 /*******************************************************
  *                    Like/Dislike Section
  *******************************************************/
-function likeOnClick(obj, name) {
-  var ele = $(obj);
+function likeOnClick(name) {
+  var ele = $("." + name);
   if (ele.hasClass("fas")) {
     //Unlike
     postLink("/api/app/" + name + "/dislike", (d) => {
-      ele.parent().html("<i class=\"far fa-thumbs-up mr-1 hover-pointer hover-150\" onclick=\"likeOnClick(this, '" + name +  "')\"></i>" + d)
+      ele.parent().html("<i class=\"far fa-thumbs-up mr-1 hover-pointer hover-150 " + name + "\" onclick=\"likeOnClick('" + name +  "')\"></i>" + d)
     })
   } else {
     //like
     postLink("/api/app/" + name + "/like", (d) => {
-      ele.parent().html("<i class=\"fas fa-thumbs-up mr-1 hover-pointer hover-150\" onclick=\"likeOnClick(this, '" + name +  "')\"></i>" + d)
+      ele.parent().html("<i class=\"fas fa-thumbs-up mr-1 hover-pointer hover-150 " + name + "\" onclick=\"likeOnClick('" + name +  "')\"></i>" + d)
     })
   }
 }

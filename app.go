@@ -333,6 +333,7 @@ func main() {
 	db.InitDB()
 	db.InitRedis()
 	account.InitGoogleOauth()
+	db.RedisDelete(utils.RedisAppListKey)
 	go application.ReloadAppList()
 	utils.Logger.Fatal(http.ListenAndServe(":80", SetupRouter()).Error())
 }
