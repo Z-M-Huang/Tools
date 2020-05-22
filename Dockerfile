@@ -12,11 +12,14 @@ WORKDIR /app
 # Copy the source from the current directory to the Working Directory inside the container
 COPY . .
 
+# Unit test
+RUN go test ./...
+
 # Build the Go app
-RUN go build -o main .
+RUN go build -o tools .
 
 # Expose port 8080 to the outside world
 EXPOSE 80
 
 # Command to run the executable
-CMD ["./main"]
+CMD ["./tools"]

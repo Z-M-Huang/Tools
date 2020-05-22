@@ -45,9 +45,9 @@
 
 <script>
   bindForm("signInForm", "/api/login", (d) => {
-    if (d != null && d != undefined && d.IsSuccess == true) {
-      if (d.Redirect != null && d.Redirect != undefined && d.Redirect.length > 0) {
-        document.location.href = d.Redirect;
+    if (d != null && d != undefined) {
+      if (d != "") {
+        document.location.href = d;
       } else {
         document.location.href = "/";
       }

@@ -4,12 +4,9 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"sync"
 
 	"github.com/Z-M-Huang/Tools/utils"
 )
-
-var onceInit sync.Once
 
 //Config global config
 var Config *Configuration
@@ -48,13 +45,8 @@ type DatabaseConfiguration struct {
 	Driver           string
 }
 
-func init() {
-	onceInit.Do(func() {
-		initConfig()
-	})
-}
-
-func initConfig() {
+//LoadProductionConfig load config
+func LoadProductionConfig() {
 	redisDBNum, err := strconv.ParseInt(strings.TrimSpace(os.Getenv("REDIS_DB")), 10, 32)
 	if err != nil {
 		utils.Logger.Sugar().Warnf("failed to parse redis db number, set to default 0 %s", err.Error())

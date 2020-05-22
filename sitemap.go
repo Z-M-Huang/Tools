@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/Z-M-Huang/Tools/core/application"
 	"github.com/Z-M-Huang/Tools/data"
-	"github.com/Z-M-Huang/Tools/data/webdata"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/ikeikeikeike/go-sitemap-generator/stm"
 )
@@ -29,7 +29,7 @@ func BuildSitemap() *stm.Sitemap {
 	sm.Add(getPageSiteMap("/login"))
 	sm.Add(getPageSiteMap("/signup"))
 
-	for _, category := range webdata.GetAppList() {
+	for _, category := range application.GetAppList() {
 		for _, app := range category.AppCards {
 			sm.Add(getPageSiteMap(app.Link))
 		}

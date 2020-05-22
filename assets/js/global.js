@@ -46,41 +46,26 @@ function bindForm(id, url, callback) {
       type: "POST",
       url: url,
       data: form.serialize(),
-      statusCode: {
-        401: (data) => {
-          if (data != null && data != undefined &&
-            data.Header != null && data.Header != undefined &&
-            data.Header.Alert != null && data.Header.Alert != undefined &&
-            data.Header.Alert.Message != "") {
-            showAlertCondition(data.Header.Alert);
-          } else {
-            showAlertDanger("Please login first");
+      success: (data) => {
+        if (data != null && data != undefined) {
+          if (data.Message != "" && data.Message != null && data.Message != undefined) {
+            showAlertInfo(data.Message, true, 3500);
           }
-        },
-        200: (data) => {
-          if (data != null && data != undefined && 
-              data.Header != null && data.Header != undefined &&
-              data.Header.Alert != null && data.Header.Alert != undefined &&
-              data.Header.Alert.Message != "") {
-            showAlertCondition(data.Header.Alert);
-          } 
           if (callback != null && callback != undefined) {
             callback(data.Data);
           }
-        },
+        }
       },
-      error: (xhr, status, error) => {
-        if (xhr.status != 401) {
-          var data = xhr.responseJSON;
-          if (data != null && data != undefined &&
-            data.Header != null && data.Header != undefined &&
-            data.Header.Alert != null && data.Header.Alert != undefined &&
-            data.Header.Alert.Message != "") {
-            showAlertCondition(data.Header.Alert);
+      error: (xhr) => {
+        var data = xhr.responseJSON;
+        if (data != "" && data != undefined && data != null) {
+          if (xhr.status == 401) {
+            showAlertDanger("Please login first");
           } else {
-            console.log(xhr.status + ":" + xhr.statusText);
-            showAlertDanger("Failed to receive success response, please try again later.");
+            showAlertCondition(xhr.status, data.Message);
           }
+        } else {
+          showAlertDanger("Failed to receive success response, please try again later.");
         }
       }
     });
@@ -101,41 +86,26 @@ function bindFormWithFile(id, url, callback) {
       processData: false,
       contentType: false,
       cache: false,
-      statusCode: {
-        401: (data) => {
-          if (data != null && data != undefined &&
-            data.Header != null && data.Header != undefined &&
-            data.Header.Alert != null && data.Header.Alert != undefined &&
-            data.Header.Alert.Message != "") {
-            showAlertCondition(data.Header.Alert);
-          } else {
-            showAlertDanger("Please login first");
+      success: (data) => {
+        if (data != null && data != undefined) {
+          if (data.Message != "" && data.Message != null && data.Message != undefined) {
+            showAlertInfo(data.Message, true, 3500);
           }
-        },
-        200: (data) => {
-          if (data != null && data != undefined && 
-              data.Header != null && data.Header != undefined &&
-              data.Header.Alert != null && data.Header.Alert != undefined &&
-              data.Header.Alert.Message != "") {
-            showAlertCondition(data.Header.Alert);
-          } 
           if (callback != null && callback != undefined) {
             callback(data.Data);
           }
-        },
+        }
       },
-      error: (xhr, status, error) => {
-        if (xhr.status != 401) {
-          var data = xhr.responseJSON;
-          if (data != null && data != undefined &&
-            data.Header != null && data.Header != undefined &&
-            data.Header.Alert != null && data.Header.Alert != undefined &&
-            data.Header.Alert.Message != "") {
-            showAlertCondition(data.Header.Alert);
+      error: (xhr) => {
+        var data = xhr.responseJSON;
+        if (data != "" && data != undefined && data != null) {
+          if (xhr.status == 401) {
+            showAlertDanger("Please login first");
           } else {
-            console.log(xhr.status + ":" + xhr.statusText);
-            showAlertDanger("Failed to receive success response, please try again later.");
+            showAlertCondition(xhr.status, data.Message);
           }
+        } else {
+          showAlertDanger("Failed to receive success response, please try again later.");
         }
       }
     });
@@ -149,41 +119,26 @@ function postJSONData(url, data, callback) {
     data: JSON.stringify(data),
     dataType: "json",
     contentType: "application/json",
-    statusCode: {
-      401: (data) => {
-        if (data != null && data != undefined &&
-          data.Header != null && data.Header != undefined &&
-          data.Header.Alert != null && data.Header.Alert != undefined &&
-          data.Header.Alert.Message != "") {
-          showAlertCondition(data.Header.Alert);
-        } else {
-          showAlertDanger("Please login first");
+    success: (data) => {
+      if (data != null && data != undefined) {
+        if (data.Message != "" && data.Message != null && data.Message != undefined) {
+          showAlertInfo(data.Message, true, 3500);
         }
-      },
-      200: (data) => {
-        if (data != null && data != undefined &&
-          data.Header != null && data.Header != undefined &&
-          data.Header.Alert != null && data.Header.Alert != undefined &&
-          data.Header.Alert.Message != "") {
-          showAlertCondition(data.Header.Alert);
-        } 
         if (callback != null && callback != undefined) {
           callback(data.Data);
         }
-      },
+      }
     },
-    error: (xhr, status, error) => {
-      if (xhr.status != 401) {
-        var data = xhr.responseJSON;
-        if (data != null && data != undefined &&
-          data.Header != null && data.Header != undefined &&
-          data.Header.Alert != null && data.Header.Alert != undefined &&
-          data.Header.Alert.Message != "") {
-          showAlertCondition(data.Header.Alert);
+    error: (xhr) => {
+      var data = xhr.responseJSON;
+      if (data != "" && data != undefined && data != null) {
+        if (xhr.status == 401) {
+          showAlertDanger("Please login first");
         } else {
-          console.log(xhr.status + ":" + xhr.statusText);
-          showAlertDanger("Failed to receive success response, please try again later.");
+          showAlertCondition(xhr.status, data.Message);
         }
+      } else {
+        showAlertDanger("Failed to receive success response, please try again later.");
       }
     }
   });
@@ -204,35 +159,28 @@ function postLink(url, callback) {
         xhr.setRequestHeader("Authorization", "Bearer " + sessionToken);
       }
     },
-    statusCode: {
-      401: (data) => {
-        if (data != null && data != undefined &&
-          data.Header != null && data.Header != undefined &&
-          data.Header.Alert != null && data.Header.Alert != undefined &&
-          data.Header.Alert.Message != "") {
-          showAlertCondition(data.Header.Alert);
-        } else {
-          showAlertDanger("Please login first");
+    success: (data) => {
+      if (data != null && data != undefined) {
+        if (data.Message != "" && data.Message != null && data.Message != undefined) {
+          showAlertInfo(data.Message, true, 3500);
         }
-      },
-      200: (data) => {
-        if (data != null && data != undefined &&
-          data.Header != null && data.Header != undefined &&
-          data.Header.Alert != null && data.Header.Alert != undefined &&
-          data.Header.Alert.Message != "") {
-          showAlertCondition(data.Header.Alert);
-        } 
         if (callback != null && callback != undefined) {
           callback(data.Data);
         }
-      },
-    },
-    error: (xhr, status, error) => {
-      if (xhr.status != 401) {
-        console.log(xhr.status + ":" + xhr.statusText);
-        showAlertDanger("Failed to receive success response, please try again later.");
       }
     },
+    error: (xhr) => {
+      var data = xhr.responseJSON;
+      if (data != "" && data != undefined && data != null) {
+        if (xhr.status == 401) {
+          showAlertDanger("Please login first");
+        } else {
+          showAlertCondition(xhr.status, data.Message);
+        }
+      } else {
+        showAlertDanger("Failed to receive success response, please try again later.");
+      }
+    }
   });
 }
 
@@ -314,18 +262,14 @@ function showAlertInfo(message, autohide, delay) {
   })
 }
 
-function showAlertCondition(alert) {
-  if (alert != "" && alert != undefined && alert != null) {
-    if (alert.IsDanger) {
-      showAlertDanger(alert.Message, false, 0);
-    } else if (alert.IsWarning) {
-      showAlertWarning(alert.Message, true, 3500);
-    } else if (alert.IsSuccess) {
-      showAlertSuccess(alert.Message, true, 3500);
-    } else if (alert.IsInfo) {
-      showAlertInfo(alert.Message, true, 3500);
-    } else if (alert.Message != "") {
-      console.log("Unknown alert", alert, false, 0);
+function showAlertCondition(statusCode, message) {
+  if (message != "" && message != null && message != undefined) {
+    if (statusCode == 200) {
+      showAlertInfo(message, true, 3500)
+    } else if (statusCode == 400) {
+      showAlertWarning(message, true, 3500)
+    } else {
+      showAlertDanger(message, false, 0);
     }
   }
 }
