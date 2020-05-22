@@ -212,9 +212,8 @@ func getPopular(apps []*AppCategory) *AppCategory {
 	sort.Slice(popular.AppCards, func(i, j int) bool {
 		if popular.AppCards[i].AmountUsed != popular.AppCards[j].AmountUsed {
 			return popular.AppCards[i].AmountUsed > popular.AppCards[j].AmountUsed
-		} else {
-			return popular.AppCards[i].Title > popular.AppCards[j].Title
 		}
+		return popular.AppCards[i].Title > popular.AppCards[j].Title
 	})
 
 	return popular
