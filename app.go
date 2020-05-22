@@ -253,6 +253,10 @@ func SetupRouter() *gin.Engine {
 	router.Use(gin.Recovery())
 	router.SetHTMLTemplate(getTemplateRenderer())
 
+	router.NoRoute(func(c *gin.Context) {
+		c.Redirect(http.StatusTemporaryRedirect, "/")
+	})
+
 	router.Static(fmt.Sprintf("/assets/%s", data.Config.ResourceVersion), "assets/")
 	router.Static(fmt.Sprintf("/vendor/%s", data.Config.ResourceVersion), "node_modules/")
 	router.StaticFile("/favicon.ico", "assets/img/favicon.ico")
