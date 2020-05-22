@@ -22,6 +22,11 @@ func TestEncode(t *testing.T) {
 		},
 		{
 			RequestString: testStr,
+			Type:          "Binary",
+			Action:        "encode",
+		},
+		{
+			RequestString: testStr,
 			Type:          "URL",
 			Action:        "encode",
 		},
@@ -47,6 +52,11 @@ func TestDecode(t *testing.T) {
 		{
 			RequestString: "aHR0cHM6Ly9lbmNvZGluZyB0ZXN0",
 			Type:          "Base64",
+			Action:        "decode",
+		},
+		{
+			RequestString: "1101000 1110100 1110100 1110000 1110011 111010 101111 101111 1100101 1101110 1100011 1101111 1100100 1101001 1101110 1100111 100000 1110100 1100101 1110011 1110100",
+			Type:          "Binary",
 			Action:        "decode",
 		},
 		{

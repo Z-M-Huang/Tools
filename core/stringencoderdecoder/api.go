@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/Z-M-Huang/Tools/core"
@@ -60,6 +61,25 @@ func encodeDecode(request *Request) (int, *data.APIResponse) {
 					return http.StatusBadRequest, response
 				}
 				result = append(result, string(unescaped))
+			}
+		}
+	case "Binary":
+		if request.Action == "encode" {
+			for _, line := range lines {
+				temp := ""
+				for _, c := range line {
+					temp += fmt.Sprintf("%b ", c)
+				}
+				result = append(result, temp)
+			}
+		} else {
+			for _, line := range lines {
+				b := make([]byte, 0)
+				for _, s := range strings.Fields(line) {
+					n, _ := strconv.ParseUint(s, 2, 8)
+					b = append(b, byte(n))
+				}
+				result = append(result, string(b))
 			}
 		}
 	case "URL":
