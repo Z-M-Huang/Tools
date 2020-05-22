@@ -1,4 +1,4 @@
-package account
+package application
 
 import (
 	"html/template"
@@ -6,13 +6,11 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/db"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/alicebob/miniredis"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestMain(m *testing.M) {
@@ -50,7 +48,6 @@ func setup() {
 
 	db.InitDB()
 	db.InitRedis()
-	InitGoogleOauth()
 }
 
 func teardown() {
@@ -91,27 +88,4 @@ func getAlltemplates(inputPath string) []string {
 		return nil
 	})
 	return ret
-}
-
-func TestIsTokenValid(t *testing.T) {
-	tokenStr, expiresAt, err := generateJWTToken("Test", "test@example.com", "testUser", "https://localhost/imageURL")
-
-	assert.Empty(t, err)
-	assert.True(t, expiresAt.After(time.Now()))
-	assert.NotEmpty(t, tokenStr)
-
-	claim, err := isTokenValid(tokenStr)
-
-	assert.Empty(t, err)
-	assert.NotEmpty(t, claim)
-	assert.NotEmpty(t, claim.Id)
-}
-
-func TestIsTokenValidFail(t *testing.T) {
-	tokenStr := "123"
-
-	claim, err := isTokenValid(tokenStr)
-
-	assert.NotEmpty(t, err)
-	assert.Empty(t, claim)
 }

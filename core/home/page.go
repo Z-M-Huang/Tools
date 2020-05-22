@@ -1,6 +1,8 @@
 package home
 
 import (
+	"net/http"
+
 	"github.com/Z-M-Huang/Tools/core"
 	"github.com/Z-M-Huang/Tools/core/account"
 	"github.com/Z-M-Huang/Tools/core/application"
@@ -31,5 +33,5 @@ func (Page) Home(c *gin.Context) {
 
 	response.Header.Title = "Fun Apps"
 	response.Header.Description = "Fun apps, fun personal small projects, and just for fun."
-	c.HTML(200, "homepage.gohtml", response)
+	c.HTML(http.StatusOK, "homepage.gohtml", response)
 }

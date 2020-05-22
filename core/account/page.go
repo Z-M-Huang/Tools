@@ -2,6 +2,7 @@ package account
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/Z-M-Huang/Tools/core"
 	"github.com/Z-M-Huang/Tools/data"
@@ -20,7 +21,7 @@ func (Page) Signup(c *gin.Context) {
 		response := core.GetResponseInContext(c.Keys)
 		response.Header.Title = "Signup - Fun Apps"
 		response.Header.Description = "Signup - create an account"
-		c.HTML(200, "signup.gohtml", response)
+		c.HTML(http.StatusOK, "signup.gohtml", response)
 	} else {
 		c.Redirect(http.StatusTemporaryRedirect, "/")
 	}
@@ -42,7 +43,7 @@ func (Page) Login(c *gin.Context) {
 				Message:  "Please login first.",
 			})
 		}
-		c.HTML(200, "login.gohtml", response)
+		c.HTML(http.StatusOK, "login.gohtml", response)
 	}
 }
 
@@ -59,16 +60,15 @@ func (Page) Account(c *gin.Context) {
 		err := user.Find()
 		if err != nil {
 			utils.Logger.Error(err.Error())
-			response.SetAlert(&data.AlertData{
-				IsDanger: true,
-				Message:  "Um... Your data got eaten by the cyber space... Would you like to try again?",
-			})
+			//User unknown and remove token
+			core.SetCookie(c, utils.SessionCookieKey, "", time.Now().AddDate(-10, 1, 1), true)
+			c.Redirect(http.StatusTemporaryRedirect, "/login?redirect=/account")
 		} else {
 			response.Data = PageData{
 				HasPassword: user.Password != "",
 			}
 		}
-		c.HTML(200, "account.gohtml", response)
+		c.HTML(http.StatusOK, "account.gohtml", response)
 	} else {
 		c.Redirect(http.StatusTemporaryRedirect, "/login?redirect=/account")
 	}
