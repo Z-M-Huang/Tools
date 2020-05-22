@@ -79,12 +79,12 @@ func GetAppList() []*AppCategory {
 		appList = append(appList, getAnalyticTools(), getFormatTools(), getGeneratorTools(),
 			getLookupTools(), getWebUtils())
 		loadAppCardsUsage(appList)
+		appList = append([]*AppCategory{getPopular(appList)}, appList...)
 		err = db.RedisSetBytes(utils.RedisAppListKey, appList, 24*time.Hour)
 		if err != nil {
 			utils.Logger.Error(err.Error())
 		}
 		categories = appList
-		categories = append([]*AppCategory{getPopular(categories)}, categories...)
 	}
 	return categories
 }
@@ -93,18 +93,16 @@ func GetAppList() []*AppCategory {
 func ReloadAppList() {
 	utils.Logger.Info("Reload AppList...")
 	var categories []*AppCategory
-	err := db.RedisGet(utils.RedisAppListKey, &categories)
+	err := db.RedisDelete(utils.RedisAppListKey)
 	if err != nil {
 		utils.Logger.Error(err.Error())
 	}
-	if categories == nil || len(categories) == 0 {
-		var appList []*AppCategory
-		appList = append(appList, getAnalyticTools(), getFormatTools(), getGeneratorTools(),
-			getLookupTools(), getWebUtils())
-		categories = appList
-		categories = append([]*AppCategory{getPopular(categories)}, categories...)
-	}
-	loadAppCardsUsage(categories)
+	var appList []*AppCategory
+	appList = append(appList, getAnalyticTools(), getFormatTools(), getGeneratorTools(),
+		getLookupTools(), getWebUtils())
+	loadAppCardsUsage(appList)
+	appList = append([]*AppCategory{getPopular(appList)}, appList...)
+	categories = appList
 	err = db.RedisSetBytes(utils.RedisAppListKey, categories, 24*time.Hour)
 	if err != nil {
 		utils.Logger.Error(err.Error())
@@ -212,7 +210,11 @@ func getPopular(apps []*AppCategory) *AppCategory {
 	}
 
 	sort.Slice(popular.AppCards, func(i, j int) bool {
-		return popular.AppCards[i].AmountUsed > popular.AppCards[j].AmountLiked
+		if popular.AppCards[i].AmountUsed != popular.AppCards[j].AmountUsed {
+			return popular.AppCards[i].AmountUsed > popular.AppCards[j].AmountUsed
+		} else {
+			return popular.AppCards[i].Title > popular.AppCards[j].Title
+		}
 	})
 
 	return popular
