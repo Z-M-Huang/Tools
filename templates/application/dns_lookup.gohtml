@@ -34,7 +34,7 @@
 </table>
 
 <script>
-  bindForm("dnsLookupForm", "/api/dns-lookup/lookup", (d) => {
+  bindForm("dnsLookupForm", "/api/dns-lookup/lookup", true, (d) => {
     if (d != null && d != undefined) {
       var table = $("table tbody");
       table.html("");

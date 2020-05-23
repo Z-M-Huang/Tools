@@ -43,7 +43,7 @@
 </div>
 
 <script>
-  bindForm("updatePassword", "/api/account/update/password", (d) => {
+  bindForm("updatePassword", "/api/account/update/password", false, (d) => {
     $("#currentPassword").val("");
     $("#password").val("");
     $("#confirmPassword").val("");

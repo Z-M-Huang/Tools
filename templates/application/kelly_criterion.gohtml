@@ -113,7 +113,7 @@
       }
     }
   });
-  bindForm("kellyForm", "/api/kelly-criterion/simulate", (d) => {
+  bindForm("kellyForm", "/api/kelly-criterion/simulate", true, (d) => {
     if (d == null || d == undefined) {
       return;
     }
