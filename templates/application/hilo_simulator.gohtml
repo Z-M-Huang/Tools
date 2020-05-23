@@ -240,7 +240,7 @@
       }
     }
   });
-  bindForm("hiLoSimulatorForm", "/api/hilo-simulator/simulate", (d) => {
+  bindForm("hiLoSimulatorForm", "/api/hilo-simulator/simulate", true, (d) => {
     if (d == null || d == undefined) {
       return
     }

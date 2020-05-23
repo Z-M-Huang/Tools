@@ -47,7 +47,7 @@
 </div>
 
 <script>
-  bindForm("createAccountForm", "/api/signup", (d) => {
+  bindForm("createAccountForm", "/api/signup", false, (d) => {
     showAlertSuccess("Your account is created. Page will be redirected to home page in 3 seconds...", true, 2000);
     window.setTimeout(() => {
       document.location.href = "/"

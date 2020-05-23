@@ -44,7 +44,7 @@
 </div>
 
 <script>
-  bindForm("signInForm", "/api/login", (d) => {
+  bindForm("signInForm", "/api/login", false, (d) => {
     if (d != null && d != undefined) {
       if (d != "") {
         document.location.href = d;

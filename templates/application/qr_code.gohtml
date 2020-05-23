@@ -74,7 +74,7 @@
 </form>
 
 <script>
-  bindFormWithFile("qrCodeForm", "/api/qr-code/create", (d) => {
+  bindFormWithFile("qrCodeForm", "/api/qr-code/create", true, (d) => {
     if (d != undefined && d != null) {
       $("#resultImg").attr("src", "data:image/png;base64, " + d)
     }

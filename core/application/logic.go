@@ -165,7 +165,7 @@ func getGeneratorTools() *AppCategory {
 		Category: "Generator",
 	}
 
-	encoderDecoder := newAppCart("qr-code", "qr_code.gohtml", "", "fas fa-qrcode", "/app/qr-code", "QR Code", "Generate QR Code with logo and background image.")
+	encoderDecoder := newAppCart("qr-code", "qr_code.gohtml", "", "fas fa-qrcode", "/app/qr-code", "QR Code", "Generate QR Code with animated logo and background image.")
 	tools.AppCards = append(tools.AppCards, encoderDecoder)
 
 	sortAppCardSlice(tools.AppCards)

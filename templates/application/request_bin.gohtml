@@ -88,7 +88,7 @@
   </div>
 </form>
 <script>
-  bindForm("createBinForm", "/api/request-bin/create", (d) => {
+  bindForm("createBinForm", "/api/request-bin/create", true, (d) => {
     if (d != null && d != undefined) {
       if (d.VerificationKey.length != "") {
         document.cookie = "request_bin_verification_key=" + d.VerificationKey;

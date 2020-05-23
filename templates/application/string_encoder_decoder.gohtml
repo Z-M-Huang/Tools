@@ -36,7 +36,7 @@
 </form>
 
 <script>
-  bindForm("encodeDecodeForm", "/api/string/encodedecode", (d) => {
+  bindForm("encodeDecodeForm", "/api/string/encodedecode", false, (d) => {
     if (d != null && d != undefined) {
       var txtArea = $("#encodeDecodeResult");
       txtArea.val("");

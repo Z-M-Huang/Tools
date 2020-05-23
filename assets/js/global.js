@@ -37,45 +37,75 @@ function likeOnClick(name) {
 /*******************************************************
  *                    Ajax Section
  *******************************************************/
-function bindForm(id, url, callback) {
+function bindForm(id, url, showSpinner, callback) {
   id = "#" + id;
   var form = $(id);
+  var oldTexts = [];
+  var submitButtons = $("button[type=submit]", form);
+  if (showSpinner) {
+    for (var i = 0; i < submitButtons.length; i++) {
+      oldTexts.push(submitButtons[i].innerHTML);
+    }
+  }
   form.on("submit", (e) => {
+    if (showSpinner) {
+      submitButtons.attr('disabled','disabled');
+      submitButtons.html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>Loading...');
+    }
     e.preventDefault();
     $.ajax({
       type: "POST",
       url: url,
-      data: form.serialize(),
-      success: (data) => {
-        if (data != null && data != undefined) {
-          if (data.Message != "" && data.Message != null && data.Message != undefined) {
-            showAlertInfo(data.Message, true, 3500);
-          }
-          if (callback != null && callback != undefined) {
-            callback(data.Data);
-          }
+      data: form.serialize()
+    })
+    .done((data) => {
+      if (data != null && data != undefined) {
+        if (data.Message != "" && data.Message != null && data.Message != undefined) {
+          showAlertInfo(data.Message, true, 3500);
         }
-      },
-      error: (xhr) => {
-        var data = xhr.responseJSON;
-        if (data != "" && data != undefined && data != null) {
-          if (xhr.status == 401) {
-            showAlertDanger("Please login first");
-          } else {
-            showAlertCondition(xhr.status, data.Message);
-          }
+        if (callback != null && callback != undefined) {
+          callback(data.Data);
+        }
+      }
+    })
+    .fail((xhr) => {
+      var data = xhr.responseJSON;
+      if (data != "" && data != undefined && data != null) {
+        if (xhr.status == 401) {
+          showAlertDanger("Please login first");
         } else {
-          showAlertDanger("Failed to receive success response, please try again later.");
+          showAlertCondition(xhr.status, data.Message);
+        }
+      } else {
+        showAlertDanger("Failed to receive success response, please try again later.");
+      }
+    })
+    .always(() => {
+      if (showSpinner) {
+        submitButtons.removeAttr('disabled');
+        for (var i = 0; i < submitButtons.length; i++) {
+          submitButtons[i].innerHTML = oldTexts[i];
         }
       }
     });
   });
 }
 
-function bindFormWithFile(id, url, callback) {
+function bindFormWithFile(id, url, showSpinner, callback) {
   id = "#" + id;
   var form = $(id);
+  var oldTexts = [];
+  var submitButtons = $("button[type=submit]", form);
+  if (showSpinner) {
+    for (var i = 0; i < submitButtons.length; i++) {
+      oldTexts.push(submitButtons[i].innerHTML);
+    }
+  }
   form.on("submit", (e) => {
+    if (showSpinner) {
+      submitButtons.attr('disabled','disabled');
+      submitButtons.html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>Loading...');
+    }
     e.preventDefault();
     var formData = new FormData(form[0]);
     $.ajax({
@@ -85,27 +115,35 @@ function bindFormWithFile(id, url, callback) {
       data: formData,
       processData: false,
       contentType: false,
-      cache: false,
-      success: (data) => {
-        if (data != null && data != undefined) {
-          if (data.Message != "" && data.Message != null && data.Message != undefined) {
-            showAlertInfo(data.Message, true, 3500);
-          }
-          if (callback != null && callback != undefined) {
-            callback(data.Data);
-          }
+      cache: false
+    })    
+    .done((data) => {
+      if (data != null && data != undefined) {
+        if (data.Message != "" && data.Message != null && data.Message != undefined) {
+          showAlertInfo(data.Message, true, 3500);
         }
-      },
-      error: (xhr) => {
-        var data = xhr.responseJSON;
-        if (data != "" && data != undefined && data != null) {
-          if (xhr.status == 401) {
-            showAlertDanger("Please login first");
-          } else {
-            showAlertCondition(xhr.status, data.Message);
-          }
+        if (callback != null && callback != undefined) {
+          callback(data.Data);
+        }
+      }
+    })
+    .fail((xhr) => {
+      var data = xhr.responseJSON;
+      if (data != "" && data != undefined && data != null) {
+        if (xhr.status == 401) {
+          showAlertDanger("Please login first");
         } else {
-          showAlertDanger("Failed to receive success response, please try again later.");
+          showAlertCondition(xhr.status, data.Message);
+        }
+      } else {
+        showAlertDanger("Failed to receive success response, please try again later.");
+      }
+    })
+    .always(() => {
+      if (showSpinner) {
+        submitButtons.removeAttr('disabled');
+        for (var i = 0; i < submitButtons.length; i++) {
+          submitButtons[i].innerHTML = oldTexts[i];
         }
       }
     });
@@ -118,28 +156,28 @@ function postJSONData(url, data, callback) {
     url: url,
     data: JSON.stringify(data),
     dataType: "json",
-    contentType: "application/json",
-    success: (data) => {
-      if (data != null && data != undefined) {
-        if (data.Message != "" && data.Message != null && data.Message != undefined) {
-          showAlertInfo(data.Message, true, 3500);
-        }
-        if (callback != null && callback != undefined) {
-          callback(data.Data);
-        }
+    contentType: "application/json"
+  })
+  .done((data) => {
+    if (data != null && data != undefined) {
+      if (data.Message != "" && data.Message != null && data.Message != undefined) {
+        showAlertInfo(data.Message, true, 3500);
       }
-    },
-    error: (xhr) => {
-      var data = xhr.responseJSON;
-      if (data != "" && data != undefined && data != null) {
-        if (xhr.status == 401) {
-          showAlertDanger("Please login first");
-        } else {
-          showAlertCondition(xhr.status, data.Message);
-        }
+      if (callback != null && callback != undefined) {
+        callback(data.Data);
+      }
+    }
+  })
+  .fail((xhr) => {
+    var data = xhr.responseJSON;
+    if (data != "" && data != undefined && data != null) {
+      if (xhr.status == 401) {
+        showAlertDanger("Please login first");
       } else {
-        showAlertDanger("Failed to receive success response, please try again later.");
+        showAlertCondition(xhr.status, data.Message);
       }
+    } else {
+      showAlertDanger("Failed to receive success response, please try again later.");
     }
   });
 }
@@ -158,28 +196,28 @@ function postLink(url, callback) {
       ) {
         xhr.setRequestHeader("Authorization", "Bearer " + sessionToken);
       }
-    },
-    success: (data) => {
-      if (data != null && data != undefined) {
-        if (data.Message != "" && data.Message != null && data.Message != undefined) {
-          showAlertInfo(data.Message, true, 3500);
-        }
-        if (callback != null && callback != undefined) {
-          callback(data.Data);
-        }
+    }
+  })
+  .done((data) => {
+    if (data != null && data != undefined) {
+      if (data.Message != "" && data.Message != null && data.Message != undefined) {
+        showAlertInfo(data.Message, true, 3500);
       }
-    },
-    error: (xhr) => {
-      var data = xhr.responseJSON;
-      if (data != "" && data != undefined && data != null) {
-        if (xhr.status == 401) {
-          showAlertDanger("Please login first");
-        } else {
-          showAlertCondition(xhr.status, data.Message);
-        }
+      if (callback != null && callback != undefined) {
+        callback(data.Data);
+      }
+    }
+  })
+  .fail((xhr) => {
+    var data = xhr.responseJSON;
+    if (data != "" && data != undefined && data != null) {
+      if (xhr.status == 401) {
+        showAlertDanger("Please login first");
       } else {
-        showAlertDanger("Failed to receive success response, please try again later.");
+        showAlertCondition(xhr.status, data.Message);
       }
+    } else {
+      showAlertDanger("Failed to receive success response, please try again later.");
     }
   });
 }
