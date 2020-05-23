@@ -78,8 +78,8 @@ func RedisGetInt(key string) (int64, error) {
 
 //RedisExist check key exists
 func RedisExist(key string) bool {
-	err := redisClient.Exists(key).Err()
-	if err != nil {
+	i, err := redisClient.Exists(key).Result()
+	if err != nil || i < 1 {
 		return false
 	}
 	return true

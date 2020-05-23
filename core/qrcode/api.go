@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"image/gif"
 	"net/http"
 	"strconv"
 	"time"
@@ -23,7 +24,7 @@ type API struct{}
 
 //CreateQRCode /api/qr-code/create
 func (API) CreateQRCode(c *gin.Context) {
-	response := core.GetResponseInContext(c.Keys)
+	response := &data.APIResponse{}
 	c.Request.ParseMultipartForm(1024)
 	request := &Request{
 		Content:         c.Request.PostFormValue("content"),
@@ -34,36 +35,24 @@ func (API) CreateQRCode(c *gin.Context) {
 	var err error
 	request.Size, err = strconv.Atoi(c.Request.PostFormValue("size"))
 	if err != nil {
-		response.SetAlert(&data.AlertData{
-			IsWarning: true,
-			Message:   "Invalid request.",
-		})
-		core.WriteResponse(c, 400, response)
+		response.Message = "Invalid Request."
+		core.WriteResponse(c, http.StatusBadRequest, response)
 		return
 	}
 
 	if len(request.Content) < 1 {
-		response.SetAlert(&data.AlertData{
-			IsWarning: true,
-			Message:   "Invalid request.",
-		})
-		core.WriteResponse(c, 400, response)
+		response.Message = "Invalid Request."
+		core.WriteResponse(c, http.StatusBadRequest, response)
 		return
 	}
 
 	if request.Size > 1024 {
-		response.SetAlert(&data.AlertData{
-			IsWarning: true,
-			Message:   "Invalid request. The size is too big.",
-		})
-		core.WriteResponse(c, 400, response)
+		response.Message = "Invalid Request. The size is too big."
+		core.WriteResponse(c, http.StatusBadRequest, response)
 		return
 	} else if request.Size < 0 {
-		response.SetAlert(&data.AlertData{
-			IsWarning: true,
-			Message:   "Invalid request. The size cannot be negative",
-		})
-		core.WriteResponse(c, 400, response)
+		response.Message = "Invalid Request. The size cannot be negative."
+		core.WriteResponse(c, http.StatusBadRequest, response)
 		return
 	}
 
@@ -78,11 +67,8 @@ func (API) CreateQRCode(c *gin.Context) {
 	case "H":
 		level = qrcode.Highest
 	default:
-		response.SetAlert(&data.AlertData{
-			IsDanger: true,
-			Message:  "Invalid request. Invalid Level.",
-		})
-		core.WriteResponse(c, 400, response)
+		response.Message = "Invalid Request. Invalid Level."
+		core.WriteResponse(c, http.StatusBadRequest, response)
 		return
 	}
 
@@ -90,11 +76,8 @@ func (API) CreateQRCode(c *gin.Context) {
 	if request.BackgroundColor != "" {
 		backgroundColor, err = parseHexColorFast(request.BackgroundColor)
 		if err != nil {
-			response.SetAlert(&data.AlertData{
-				IsWarning: true,
-				Message:   "Background Color: " + err.Error(),
-			})
-			core.WriteResponse(c, 400, response)
+			response.Message = "Background Color: " + err.Error()
+			core.WriteResponse(c, http.StatusBadRequest, response)
 			return
 		}
 	}
@@ -103,11 +86,8 @@ func (API) CreateQRCode(c *gin.Context) {
 	if request.ForegroundColor != "" {
 		foregroundColor, err = parseHexColorFast(request.ForegroundColor)
 		if err != nil {
-			response.SetAlert(&data.AlertData{
-				IsWarning: true,
-				Message:   "Foreground Color: " + err.Error(),
-			})
-			core.WriteResponse(c, 400, response)
+			response.Message = "Foreground Color: " + err.Error()
+			core.WriteResponse(c, http.StatusBadRequest, response)
 			return
 		}
 	}
@@ -117,11 +97,19 @@ func (API) CreateQRCode(c *gin.Context) {
 	if err == nil {
 		logo, _, err = image.Decode(logoFile)
 		if err != nil {
-			response.SetAlert(&data.AlertData{
-				IsWarning: true,
-				Message:   "Failed to get logo image",
-			})
-			core.WriteResponse(c, 400, response)
+			response.Message = "Failed to get logo image."
+			core.WriteResponse(c, http.StatusBadRequest, response)
+			return
+		}
+	}
+
+	var logoGifImage *gif.GIF
+	logoGifFile, _, err := c.Request.FormFile("logoGifImage")
+	if err == nil {
+		logoGifImage, err = gif.DecodeAll(logoGifFile)
+		if err != nil {
+			response.Message = "Failed to get logo gif image."
+			core.WriteResponse(c, http.StatusBadRequest, response)
 			return
 		}
 	}
@@ -131,29 +119,21 @@ func (API) CreateQRCode(c *gin.Context) {
 	if err == nil {
 		backgroundImage, _, err = image.Decode(backgroundImageFile)
 		if err != nil {
-			response.SetAlert(&data.AlertData{
-				IsWarning: true,
-				Message:   "Failed to get background image",
-			})
-			core.WriteResponse(c, 400, response)
+			response.Message = "Failed to get background image."
+			core.WriteResponse(c, http.StatusBadRequest, response)
 			return
 		}
 	}
 
 	q, err := qrcode.New(request.Content, level)
 	if err != nil {
-		utils.Logger.Error(err.Error())
-		response.SetAlert(&data.AlertData{
-			IsDanger: true,
-			Message:  "Internal Error",
-		})
+		response.Message = "Internal Error"
 		core.WriteResponse(c, http.StatusInternalServerError, response)
 		return
 	}
 
 	q.BackgroundColor = backgroundColor
 	q.ForegroundColor = foregroundColor
-	q.LogoImage = logo
 	q.BackgroundImage = backgroundImage
 
 	redisKey := getRedisKey(c.ClientIP())
@@ -162,35 +142,33 @@ func (API) CreateQRCode(c *gin.Context) {
 	} else {
 		val, err := db.RedisDecr(redisKey)
 		if err != nil {
-			response.SetAlert(&data.AlertData{
-				IsDanger: true,
-				Message:  "Internal Error",
-			})
+			response.Message = "Internal Error"
 			core.WriteResponse(c, http.StatusInternalServerError, response)
 			return
 		} else if val < 0 {
-			response.SetAlert(&data.AlertData{
-				IsWarning: true,
-				Message:   "Too many requests today. Please come back tomorrow.",
-			})
+			response.Message = "Too many requests today. Please come back tomorrow."
 			core.WriteResponse(c, http.StatusTooManyRequests, response)
 			return
 		}
 	}
 
-	imageBytes, err := q.PNG(request.Size)
+	var imageBytes []byte
+	if logo != nil {
+		imageBytes, err = q.PNGWithLogo(request.Size, logo)
+	} else if logoGifImage != nil {
+		imageBytes, err = q.GIFLogo(request.Size, logoGifImage)
+	} else {
+		imageBytes, err = q.PNG(request.Size)
+	}
 	if err != nil {
 		utils.Logger.Error(err.Error())
-		response.SetAlert(&data.AlertData{
-			IsDanger: true,
-			Message:  "Internal Error",
-		})
+		response.Message = "Internal Error"
 		core.WriteResponse(c, http.StatusInternalServerError, response)
 		return
 	}
 
 	response.Data = base64.StdEncoding.EncodeToString(imageBytes)
-	core.WriteResponse(c, 200, response)
+	core.WriteResponse(c, http.StatusOK, response)
 }
 
 func getRedisKey(ip string) string {

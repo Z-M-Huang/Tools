@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	cloud.google.com/go v0.57.0 // indirect
-	github.com/Z-M-Huang/go-qrcode v1.0.0
+	github.com/Z-M-Huang/go-qrcode v1.1.0
 	github.com/Z-M-Huang/hilosimulator v0.0.0-20200510183812-072168b1d6fe
 	github.com/Z-M-Huang/kelly-criterion v0.0.0-20200509173924-78264e8a8100
 	github.com/alicebob/gopher-json v0.0.0-20200520072559-a9ecdc9d1d3a // indirect
@@ -35,7 +35,7 @@ require (
 	golang.org/x/mod v0.3.0 // indirect
 	golang.org/x/net v0.0.0-20200520182314-0ba52f642ac2 // indirect
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
-	golang.org/x/tools v0.0.0-20200520220537-cf2d1e09c845 // indirect
+	golang.org/x/tools v0.0.0-20200522201501-cb1345f3a375 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	honnef.co/go/tools v0.0.1-2020.1.4 // indirect
 )
