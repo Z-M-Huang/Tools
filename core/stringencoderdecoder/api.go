@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/Z-M-Huang/Tools/core"
 	"github.com/Z-M-Huang/Tools/data"
@@ -68,7 +69,11 @@ func encodeDecode(request *Request) (int, *data.APIResponse) {
 			for _, line := range lines {
 				temp := ""
 				for _, c := range line {
-					temp += fmt.Sprintf("%b ", c)
+					bArr := make([]byte, utf8.RuneLen(c))
+					utf8.EncodeRune(bArr, c)
+					for _, b := range bArr {
+						temp += fmt.Sprintf("%.8b ", b)
+					}
 				}
 				result = append(result, temp)
 			}
@@ -76,7 +81,7 @@ func encodeDecode(request *Request) (int, *data.APIResponse) {
 			for _, line := range lines {
 				b := make([]byte, 0)
 				for _, s := range strings.Fields(line) {
-					n, _ := strconv.ParseUint(s, 2, 8)
+					n, _ := strconv.ParseUint(s, 2, len(s))
 					b = append(b, byte(n))
 				}
 				result = append(result, string(b))

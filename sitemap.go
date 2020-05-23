@@ -52,7 +52,9 @@ func getPageSiteMap(loc string) stm.URL {
 //GetRobotsTxt get robots.txt content
 func GetRobotsTxt() []string {
 	content := []string{"User-agent: *",
-		"Disallow: /api/*"}
+		"Disallow: /api/*",
+		"Disallow: /login",
+		"Disallow: /signup"}
 
 	sitemapURL := ""
 	if data.Config.HTTPS {
