@@ -10,5 +10,6 @@ type Request struct {
 	BackgroundColor string                `json:"backColor" xml:"backColor" form:"backColor"`
 	ForegroundColor string                `json:"foreColor" xml:"foreColor" form:"foreColor"`
 	LogoImage       *multipart.FileHeader `json:"logoImage" xml:"logoImage" form:"logoImage"`
+	LogoGifImage    *multipart.FileHeader `json:"logoGifImage" xml:"logoGifImage" form:"logoGifImage"`
 	BackgroundImage *multipart.FileHeader `json:"backgroundImage" xml:"backgroundImage" form:"backgroundImage"`
 }

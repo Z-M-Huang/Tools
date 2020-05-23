@@ -28,6 +28,8 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/Z-M-Huang/go-qrcode v1.0.0 h1:7l0svOeKlSArH56cW3ymHkKUrgBy2NuVf+obrYQZdrg=
 github.com/Z-M-Huang/go-qrcode v1.0.0/go.mod h1:jq9bWbIpG30cz0lSkPLDevbRbYtr5DqAALYRGWmSaa8=
+github.com/Z-M-Huang/go-qrcode v1.1.0 h1:Dd2SsMltBtCbglIc5v298fx+uVxJMD/t5QxWxwnxOMM=
+github.com/Z-M-Huang/go-qrcode v1.1.0/go.mod h1:jq9bWbIpG30cz0lSkPLDevbRbYtr5DqAALYRGWmSaa8=
 github.com/Z-M-Huang/hilosimulator v0.0.0-20200510183812-072168b1d6fe h1:NoiQ5aUtVujhggLTZ2/N77tQsG/RXoEKjDdQPW5Cy0M=
 github.com/Z-M-Huang/hilosimulator v0.0.0-20200510183812-072168b1d6fe/go.mod h1:vAIPA4VfZX58KNpr93mjIl8jtNLtUqBxJ2g0wl1JLtI=
 github.com/Z-M-Huang/kelly-criterion v0.0.0-20200509173924-78264e8a8100 h1:7fcQlhfIDSXrRPMlwkJSCwGfvXfzl5R5VbXB3IkTWno=
@@ -387,6 +389,8 @@ golang.org/x/tools v0.0.0-20200224181240-023911ca70b2/go.mod h1:TB2adYChydJhpapK
 golang.org/x/tools v0.0.0-20200501065659-ab2804fb9c9d/go.mod h1:EkVYQZoAsY45+roYkvgYkIh4xh/qjgUK9TdY2XT94GE=
 golang.org/x/tools v0.0.0-20200520220537-cf2d1e09c845 h1:F4gQH8TKyCccYDuNHX5TfZwiM8QWnPbSPUFE96qvGbs=
 golang.org/x/tools v0.0.0-20200520220537-cf2d1e09c845/go.mod h1:EkVYQZoAsY45+roYkvgYkIh4xh/qjgUK9TdY2XT94GE=
+golang.org/x/tools v0.0.0-20200522201501-cb1345f3a375 h1:SjQ2+AKWgZLc1xej6WSzL+Dfs5Uyd5xcZH1mGC411IA=
+golang.org/x/tools v0.0.0-20200522201501-cb1345f3a375/go.mod h1:EkVYQZoAsY45+roYkvgYkIh4xh/qjgUK9TdY2XT94GE=
 golang.org/x/xerrors v0.0.0-20190717185122-a985d3407aa7 h1:9zdDQZ7Thm29KFXgAX/+yaf3eVbP7djjWp/dXAppNCc=
 golang.org/x/xerrors v0.0.0-20190717185122-a985d3407aa7/go.mod h1:I/5z698sn9Ka8TeJc9MKroUUfqBBauWjQqLJ2OPfmY0=
 golang.org/x/xerrors v0.0.0-20191011141410-1b5146add898/go.mod h1:I/5z698sn9Ka8TeJc9MKroUUfqBBauWjQqLJ2OPfmY0=
