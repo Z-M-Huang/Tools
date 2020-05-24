@@ -79,6 +79,8 @@ func loadAppSpecificData(c *gin.Context, appName string) interface{} {
 	switch appName {
 	case "request-bin":
 		return requestbin.LoadRequestBinData(c)
+	case "port-checker":
+		return c.ClientIP()
 	}
 	return nil
 }

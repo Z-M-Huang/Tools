@@ -16,6 +16,7 @@ import (
 	"github.com/Z-M-Huang/Tools/core/hilosimulator"
 	"github.com/Z-M-Huang/Tools/core/home"
 	"github.com/Z-M-Huang/Tools/core/kellycriterion"
+	"github.com/Z-M-Huang/Tools/core/portchecker"
 	"github.com/Z-M-Huang/Tools/core/qrcode"
 	"github.com/Z-M-Huang/Tools/core/requestbin"
 	"github.com/Z-M-Huang/Tools/core/stringencoderdecoder"
@@ -300,6 +301,7 @@ func SetupRouter() *gin.Engine {
 	qrcodeAPI := &qrcode.API{}
 	requestBinAPI := &requestbin.API{}
 	stringencoderdecoderAPI := &stringencoderdecoder.API{}
+	portCheckerAPI := &portchecker.API{}
 
 	pageNoAuth.GET("/", homePage.Home)
 	pageNoAuth.GET("/signup", accountPage.Signup)
@@ -323,9 +325,10 @@ func SetupRouter() *gin.Engine {
 	apiNoAuth.POST("/hilo-simulator/simulate", hilosimulatorAPI.HILOSimulate)
 	apiNoAuth.POST("/hilo-simulator/verify", hilosimulatorAPI.HILOVerify)
 	apiNoAuth.POST("/dns-lookup/lookup", dnslookupAPI.DNSLookup)
+	apiNoAuth.POST("/portchecker/check", portCheckerAPI.Check)
 	apiNoAuth.POST("/qr-code/create", qrcodeAPI.CreateQRCode)
-	apiNoAuth.POST("/string/encodedecode", stringencoderdecoderAPI.EncodeDecode)
 	apiNoAuth.POST("/request-bin/create", requestBinAPI.CreateRequestBin)
+	apiNoAuth.POST("/string/encodedecode", stringencoderdecoderAPI.EncodeDecode)
 	apiAuthRequired.POST("/app/:name/like", applicationAPI.Like)
 	apiAuthRequired.POST("/app/:name/dislike", applicationAPI.Dislike)
 
