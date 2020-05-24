@@ -38,7 +38,7 @@ func testClaimHandler() gin.HandlerFunc {
 			Password:        "abcdef123456",
 			ConfirmPassword: "abcdef123456",
 		}
-		signUp(request)
+		SignUp(request)
 
 		c.Set(utils.ResponseCtxKey, &data.PageResponse{
 			Header: &data.HeaderData{

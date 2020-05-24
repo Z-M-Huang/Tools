@@ -26,6 +26,7 @@ func testHandler() gin.HandlerFunc {
 				},
 			},
 		})
+		c.Next()
 	}
 }
 
@@ -40,10 +41,6 @@ func TestRenderApplicationPage(t *testing.T) {
 			page := &Page{}
 			r.GET("/app/:name", testHandler(), page.RenderApplicationPage)
 			c.Request, _ = http.NewRequest("GET", "/app/"+app.Name, nil)
-			c.Request.AddCookie(&http.Cookie{
-				Name:  utils.UsedTokenKey,
-				Value: "",
-			})
 			r.ServeHTTP(w, c.Request)
 			assert.Equal(t, http.StatusOK, w.Code)
 		}
@@ -61,10 +58,6 @@ func TestRenderApplicationPageWithCookie(t *testing.T) {
 			page := &Page{}
 			r.GET("/app/:name", testHandler(), page.RenderApplicationPage)
 			c.Request, _ = http.NewRequest("GET", "/app/"+app.Name, nil)
-			c.Request.AddCookie(&http.Cookie{
-				Name:  utils.UsedTokenKey,
-				Value: "WyJIaUxvIFNpbXVsYXRvciIsIkVuY29kZXIgRGVjb2RlciIsIlFSIENvZGUiLCJETlMgTG9va3VwIiwiUmVxdWVzdCBCaW4iLCJLZWxseSBDcml0ZXJpb24iXQ%3D%3D",
-			})
 			r.ServeHTTP(w, c.Request)
 			assert.Equal(t, http.StatusOK, w.Code)
 		}
@@ -82,10 +75,6 @@ func TestRenderApplicationPageWithInvalidCookie(t *testing.T) {
 			page := &Page{}
 			r.GET("/app/:name", testHandler(), page.RenderApplicationPage)
 			c.Request, _ = http.NewRequest("GET", "/app/"+app.Name, nil)
-			c.Request.AddCookie(&http.Cookie{
-				Name:  utils.UsedTokenKey,
-				Value: "a",
-			})
 			r.ServeHTTP(w, c.Request)
 			assert.Equal(t, http.StatusOK, w.Code)
 		}

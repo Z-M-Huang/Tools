@@ -7,34 +7,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetApplicationUsed(t *testing.T) {
-	result, err := GetApplicationUsed("WyJIaUxvIFNpbXVsYXRvciIsIkVuY29kZXIgRGVjb2RlciIsIlFSIENvZGUiLCJETlMgTG9va3VwIiwiUmVxdWVzdCBCaW4iLCJLZWxseSBDcml0ZXJpb24iXQ%3D%3D")
-
-	assert.Empty(t, err)
-	assert.NotEmpty(t, result)
-
-	result, err = GetApplicationUsed("")
-	assert.Empty(t, err)
-	assert.Empty(t, result)
-}
-
-func TestGetApplicationUsedFailed(t *testing.T) {
-	//url fail
-	result, err := GetApplicationUsed("%")
-	assert.Empty(t, result)
-	assert.NotEmpty(t, err.Error())
-
-	//base64 fail
-	result, err = GetApplicationUsed("a")
-	assert.Empty(t, result)
-	assert.NotEmpty(t, err.Error())
-
-	//json fail
-	result, err = GetApplicationUsed("e2ExMjN9")
-	assert.Empty(t, result)
-	assert.NotEmpty(t, err.Error())
-}
-
 func TestGetApplicationsByName(t *testing.T) {
 	ret := GetApplicationsByName("dns-lookup")
 	assert.NotEmpty(t, ret)

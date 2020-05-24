@@ -1,9 +1,6 @@
 package application
 
 import (
-	"encoding/base64"
-	"encoding/json"
-	"net/url"
 	"sort"
 	"strings"
 	"time"
@@ -12,30 +9,6 @@ import (
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/jinzhu/gorm"
 )
-
-//GetApplicationUsed saved in cookie
-func GetApplicationUsed(cookieVal string) ([]string, error) {
-	var usedApps []string
-
-	if cookieVal == "" {
-		return usedApps, nil
-	}
-
-	queryDecoded, err := url.QueryUnescape(cookieVal)
-	if err != nil {
-		return nil, err
-	}
-
-	decoded, err := base64.StdEncoding.DecodeString(queryDecoded)
-	if err != nil {
-		return nil, err
-	}
-	err = json.Unmarshal(decoded, &usedApps)
-	if err != nil {
-		return nil, err
-	}
-	return usedApps, nil
-}
 
 //GetApplicationsByName get application by name
 func GetApplicationsByName(name string) *AppCard {
@@ -194,7 +167,7 @@ func getWebUtils() *AppCategory {
 	}
 
 	dnsLookup := newAppCart("request-bin", "request_bin.gohtml", "", "fas fa-receipt",
-		"/app/request-bin", "Request Bin", "Receive and visualize HTTP requests")
+		"/app/request-bin", "Request Bin", "Receive and visualize HTTP requests for any method.")
 	tools.AppCards = append(tools.AppCards, dnsLookup)
 
 	sortAppCardSlice(tools.AppCards)
