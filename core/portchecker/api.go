@@ -48,6 +48,14 @@ func (API) Check(c *gin.Context) {
 		return
 	}
 
+	request.Host = strings.TrimSpace(request.Host)
+	if strings.HasPrefix(request.Host, "192.168.") || request.Host == "127.0.0.1" ||
+		request.Host == "0.0.0.0" || request.Host == "localhost" {
+		response.Message = "Please don't do dirty things"
+		core.WriteResponse(c, http.StatusBadRequest, response)
+		return
+	}
+
 	request.PortType = strings.TrimSpace(strings.ToLower(request.PortType))
 
 	if request.PortType == "tcp" || request.PortType == "udp" {
