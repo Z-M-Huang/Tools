@@ -1,0 +1,52 @@
+{{template "header" .Header}}
+<h1>Port Checker</h1>
+
+<p class="text-info">Check host port if port is open</p>
+<p class="text-info">Please check <a href="https://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers">here</a> for a list of well-known ports</p>
+
+<div class="card mt-3 row">
+  <div class="card-body">
+    <form id="portCheckForm">
+      <div class="form-group row d-flex justify-content-center">
+        <label for="host" class="col-sm-1 col-form-label text-right" style="display: 1.5rem;">Host</label>
+        <div class="col-sm-3">
+          <input type="text" class="form-control" id="host" name="host"
+            aria-describedby="hostHelp" value="{{.Data}}">
+        </div>
+        <label for="port" class="col-sm-1 col-form-label text-right" style="display: 1.5rem;">Port</label>
+        <div class="col-sm-1">
+          <input type="text" class="form-control" id="port" name="port"
+            aria-describedby="portHelp" value="80">
+        </div>
+        <label for="type" class="col-sm-1 col-form-label text-right" style="display: 1.5rem;">Proto</label>
+        <select class="form-control col-sm-1" id="type" name="type">
+          <option value="tcp">TCP</option>
+          <option value="udp">UDP</option>
+        </select>
+        <div class="col-sm-2 offset-sm-1 justify-content-center">
+          <button type="submit" class="btn btn-primary btn-lg">Check</button>
+        </div>
+      </div>
+    </form>
+    <div class="row mt-3 hiddenDiv text-center" id="openDiv" style="display: none;">
+      <h1 class="col-sm-6 offset-sm-3 text-success">Port is opened</h1>
+    </div>
+    <div class="row mt-3 hiddenDiv text-center" id="closeDiv" style="display: none;">
+      <h1 class="col-sm-6 offset-sm-3 text-danger">Port is closed</h1>
+    </div>
+  </div>
+</div>
+
+<script>
+  bindForm("portCheckForm", "/api/portchecker/check", true, (d) => {
+    $(".hiddenDiv").hide();
+    if (d != null && d != undefined) {
+      if (d) {
+        $("#openDiv").slideToggle(500);
+      } else {
+        $("#closeDiv").slideToggle(500);
+      }
+    }
+  })
+</script>
+{{template "footer"}}
