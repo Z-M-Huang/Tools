@@ -25,7 +25,7 @@ func (API) Like(c *gin.Context) {
 	if name == "" {
 		response.SetAlert(&data.AlertData{
 			IsDanger: true,
-			Message:  "User not found",
+			Message:  "Application not found",
 		})
 		core.WriteResponse(c, 400, response)
 		return
@@ -35,7 +35,7 @@ func (API) Like(c *gin.Context) {
 	if appCard == nil {
 		response.SetAlert(&data.AlertData{
 			IsDanger: true,
-			Message:  "User not found",
+			Message:  "Application not found",
 		})
 		core.WriteResponse(c, 400, response)
 		return
@@ -109,7 +109,7 @@ func (API) Dislike(c *gin.Context) {
 	if name == "" {
 		response.SetAlert(&data.AlertData{
 			IsDanger: true,
-			Message:  "User not found",
+			Message:  "Application not found",
 		})
 		core.WriteResponse(c, 400, response)
 		return
@@ -119,7 +119,7 @@ func (API) Dislike(c *gin.Context) {
 	if appCard == nil {
 		response.SetAlert(&data.AlertData{
 			IsDanger: true,
-			Message:  "User not found",
+			Message:  "Application not found",
 		})
 		core.WriteResponse(c, 400, response)
 		return

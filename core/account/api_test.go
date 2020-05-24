@@ -16,7 +16,7 @@ func TestSignupSuccess(t *testing.T) {
 		ConfirmPassword: "abcdef123456",
 	}
 
-	status, response, tokenStr, expiresAt := signUp(request)
+	status, response, tokenStr, expiresAt := SignUp(request)
 
 	assert.Empty(t, response.Message)
 	assert.NotEmpty(t, tokenStr)
@@ -57,7 +57,7 @@ func TestSignupFail(t *testing.T) {
 	}
 
 	for _, r := range requests {
-		status, response, tokenStr, expiresAt := signUp(r)
+		status, response, tokenStr, expiresAt := SignUp(r)
 		assert.Empty(t, tokenStr)
 		assert.NotEmpty(t, response.Message)
 		assert.NotEqual(t, http.StatusOK, status)
@@ -73,7 +73,7 @@ func TestLoginSuccess(t *testing.T) {
 		Password:        "abcdef123456",
 		ConfirmPassword: "abcdef123456",
 	}
-	signUp(signupRequest)
+	SignUp(signupRequest)
 	loginRequest := &LoginRequest{
 		Email:    signupRequest.Email,
 		Password: signupRequest.Password,
@@ -95,7 +95,7 @@ func TestLoginFail(t *testing.T) {
 		Password:        "abcdef123456",
 		ConfirmPassword: "abcdef123456",
 	}
-	signUp(signupRequest)
+	SignUp(signupRequest)
 	loginRequests := []*LoginRequest{
 		//UserNotFound
 		{
@@ -125,7 +125,7 @@ func TestUpdatePasswordSuccess(t *testing.T) {
 		Password:        "abcdef123456",
 		ConfirmPassword: "abcdef123456",
 	}
-	signUp(signupRequest)
+	SignUp(signupRequest)
 	request := &UpdatePasswordRequest{
 		CurrentPassword: signupRequest.Password,
 		Password:        "123456abcdef",
@@ -145,7 +145,7 @@ func TestUpdatePasswordFail(t *testing.T) {
 		Password:        "abcdef123456",
 		ConfirmPassword: "abcdef123456",
 	}
-	signUp(signupRequest)
+	SignUp(signupRequest)
 	requests := []*UpdatePasswordRequest{
 		//Request password doesn't match
 		{
