@@ -134,3 +134,25 @@ func TestCheckTooManyRequestsFail(t *testing.T) {
 	assert.Equal(t, http.StatusTooManyRequests, w.Code)
 	assert.NotEmpty(t, w.Body)
 }
+
+func TestDirtyThings(t *testing.T) {
+	list := []string{"192.168.0.0", "127.0.0.1", "0.0.0.0", "localhost"}
+	for _, i := range list {
+		db.RedisDelete("APP_PORT_CHECKER_")
+		w := httptest.NewRecorder()
+		gin.SetMode(gin.TestMode)
+		c, r := gin.CreateTestContext(w)
+
+		page := &API{}
+		r.POST("/api/portchecker/check", page.Check)
+		form := url.Values{}
+		form.Add("host", i)
+		form.Add("port", "80")
+		form.Add("type", "tcp")
+		c.Request, _ = http.NewRequest("POST", "/api/portchecker/check", bytes.NewBufferString(form.Encode()))
+		c.Request.Header.Add("content-type", "application/x-www-form-urlencoded")
+		r.ServeHTTP(w, c.Request)
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		assert.NotEmpty(t, w.Body)
+	}
+}
