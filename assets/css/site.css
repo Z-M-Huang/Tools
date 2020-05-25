@@ -32,6 +32,10 @@
   margin-right: 15px;
 }
 
+.vh-60 {
+  height: 60vh
+}
+
 @media (min-width: 992px) {
   .user-login-icon {
     margin-right: 5px;

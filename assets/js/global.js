@@ -15,6 +15,30 @@ function getCookieValue(name) {
   var parts = value.split("; " + name + "=");
   if (parts.length == 2) return parts.pop().split(";").shift();
 }
+
+function getLocation(host, callback) {
+  $.ajax({
+    type: "GET",
+    url: "http://ip-api.com/json/" + host
+  })
+  .done((d, status, jqXHR) => {
+    if (d != null && d != undefined) {
+      if (d.status == "success") {
+        callback(d);
+      } else {
+        showAlertWarning("failed to get geo location for host: " + host, true, 3500);
+      }
+    }
+  })
+  .fail((xhr) => {
+    if (xhr.status == 429 || xhr.status == 403) {
+      showAlertDanger("too many requests. Please take a break.");
+    } else {
+      showAlertDanger("failed to get current geo location for host: " + host);
+    }
+  })
+}
+
 /*******************************************************
  *                    Like/Dislike Section
  *******************************************************/

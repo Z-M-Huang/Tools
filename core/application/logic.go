@@ -154,6 +154,10 @@ func getLookupTools() *AppCategory {
 		"/app/dns-lookup", "DNS Lookup", "Lookup given domain's DNS record (A, CNAME, PTR, NS, MX, TXT, and etc.")
 	tools.AppCards = append(tools.AppCards, dnsLookup)
 
+	ipLocation := newAppCart("ip-location", "ip_location.gohtml", "", "fas fa-map-marker-alt",
+		"/app/ip-location", "IP Location", "Locate IP address to a specific location, by IPv4, IPv6, or domain name.")
+	tools.AppCards = append(tools.AppCards, ipLocation)
+
 	portChecker := newAppCart("port-checker", "port_checker.gohtml", "", "fas fa-network-wired", "/app/port-checker", "Port Checker", "Check if host port is open for tcp or udp pconnections.")
 	tools.AppCards = append(tools.AppCards, portChecker)
 
