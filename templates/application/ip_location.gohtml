@@ -1,7 +1,7 @@
 {{template "header" .Header}}
 <h1>IP Geolocation Search</h1>
 
-<p class="text-info">Locate IP address to a specific location, by IPv4, IPv6, or domain name.</p>
+<p class="text-info">Locate IP address to a specific location, by IPv4, or IPv6.</p>
 <p class="text-warning">Rate limit: 45 requests per minute.</p>
 
 <div class="card mb-3">
@@ -12,7 +12,7 @@
           <div class="row">
             <label class="col-sm-2 text-right col-form-label">Host: </label>
             <div class="col-sm-6">
-              <input type="text" class="form-control" id="host" placeholder="IPv4, IPv6, or domain name">
+              <input type="text" class="form-control" id="host" placeholder="IPv4, or IPv6">
             </div>
             <button class="col-sm-2 offset-sm-2 btn btn-primary" type="submit">Lookup</button>
           </div>
@@ -39,12 +39,11 @@
   function reloadInfo(d) {
     var table = $("#infoTable");
     table.html("");
-    table.append('<tr><th>IP</th><td>' + d.query + '</td></tr>');
-    table.append('<tr><th>ISP</th><td>' + d.isp + '</td></tr>');
-    table.append('<tr><th>Country</th><td>' + d.country + '</td></tr>');
-    table.append('<tr><th>Region</th><td>' + d.regionName + '</td></tr>');
+    table.append('<tr><th>IP</th><td>' + d.ip + '</td></tr>');
+    table.append('<tr><th>Country</th><td>' + d.country_name + '</td></tr>');
+    table.append('<tr><th>Region</th><td>' + d.region + '</td></tr>');
     table.append('<tr><th>City</th><td>' + d.city + '</td></tr>');
-    table.append('<tr><th>Zip Code</th><td>' + d.zip + '</td></tr>');
+    table.append('<tr><th>Zip Code</th><td>' + d.postal + '</td></tr>');
     table.append('<tr><th>TimeZone</th><td>' + d.timezone + '</td></tr>');
   }
 
@@ -59,10 +58,10 @@
       showAlertWarning("host cannot be empty.", true, 3500);
     } else {
       getLocation(host, (d) => {
-        if (isNaN(d.lat) || isNaN(d.lon)) {
+        if (isNaN(d.latitude) || isNaN(d.longitude)) {
           showAlertWarning("failed to get geo location for ip: " + host);
         } else {
-          reloadMap(d.lat, d.lon);
+          reloadMap(d.latitude, d.longitude);
           reloadInfo(d);
         }
       })
@@ -70,10 +69,10 @@
   }
 
   getLocation("", (d) => {
-    if (isNaN(d.lat) || isNaN(d.lon)) {
+    if (isNaN(d.latitude) || isNaN(d.longitude)) {
       showAlertWarning("failed to get current geo location for current ip");
     } else {
-      reloadMap(d.lat, d.lon);
+      reloadMap(d.latitude, d.longitude);
       reloadInfo(d);
     }
   })

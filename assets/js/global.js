@@ -19,14 +19,14 @@ function getCookieValue(name) {
 function getLocation(host, callback) {
   $.ajax({
     type: "GET",
-    url: "http://ip-api.com/json/" + host
+    url: "https://ipapi.co/" + host + "/json/"
   })
   .done((d, status, jqXHR) => {
     if (d != null && d != undefined) {
-      if (d.status == "success") {
+      if (d.ip != null && d.ip != undefined) {
         callback(d);
       } else {
-        showAlertWarning("failed to get geo location for host: " + host, true, 3500);
+        showAlertWarning("failed to get geo location for host " + host, true, 3500);
       }
     }
   })
@@ -34,7 +34,7 @@ function getLocation(host, callback) {
     if (xhr.status == 429 || xhr.status == 403) {
       showAlertDanger("too many requests. Please take a break.");
     } else {
-      showAlertDanger("failed to get current geo location for host: " + host);
+      showAlertDanger("failed to get current geo location for host " + host);
     }
   })
 }
