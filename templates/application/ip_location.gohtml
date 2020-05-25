@@ -1,0 +1,81 @@
+{{template "header" .Header}}
+<h1>IP Geolocation Search</h1>
+
+<p class="text-info">Locate IP address to a specific location, by IPv4, IPv6, or domain name.</p>
+<p class="text-warning">Rate limit: 45 requests per minute.</p>
+
+<div class="card mb-3">
+  <div class="card-body">
+    <form onsubmit="formSubmit(); return false;">
+    <div class="row">
+        <div class="form-group col-sm-8 offset-sm-2">
+          <div class="row">
+            <label class="col-sm-2 text-right col-form-label">Host: </label>
+            <div class="col-sm-6">
+              <input type="text" class="form-control" id="host" placeholder="IPv4, IPv6, or domain name">
+            </div>
+            <button class="col-sm-2 offset-sm-2 btn btn-primary" type="submit">Lookup</button>
+          </div>
+        </div>
+    </div>
+  </form>
+  </div>
+</div>
+
+<div class="vh-60 card">
+  <div class="card-body">
+    <div class="row h-100">
+      <div class="col-sm-6">
+        <table id="infoTable" class="table table-hover">
+        </table>
+      </div>
+      <div class="col-sm-6" id="mapDiv">
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function reloadInfo(d) {
+    var table = $("#infoTable");
+    table.html("");
+    table.append('<tr><th>IP</th><td>' + d.query + '</td></tr>');
+    table.append('<tr><th>ISP</th><td>' + d.isp + '</td></tr>');
+    table.append('<tr><th>Country</th><td>' + d.country + '</td></tr>');
+    table.append('<tr><th>Region</th><td>' + d.regionName + '</td></tr>');
+    table.append('<tr><th>City</th><td>' + d.city + '</td></tr>');
+    table.append('<tr><th>Zip Code</th><td>' + d.zip + '</td></tr>');
+    table.append('<tr><th>TimeZone</th><td>' + d.timezone + '</td></tr>');
+  }
+
+  function reloadMap(lat, long) {
+    var map = $("#mapDiv");
+    map.html('<iframe width="100%" height="100%" frameborder="0" style="border:0" src="https://www.google.com/maps/embed/v1/view?key=AIzaSyD9Lv8AUsCVNDY2oniFkMK-5hyInXgQfuA&center=' + lat + ',' + long + '&zoom=8" allowfullscreen></iframe>');
+  }
+
+  function formSubmit() {
+    var host = $("#host").val().trim();
+    if (host == "") {
+      showAlertWarning("host cannot be empty.", true, 3500);
+    } else {
+      getLocation(host, (d) => {
+        if (isNaN(d.lat) || isNaN(d.lon)) {
+          showAlertWarning("failed to get geo location for ip: " + host);
+        } else {
+          reloadMap(d.lat, d.lon);
+          reloadInfo(d);
+        }
+      })
+    }
+  }
+
+  getLocation("", (d) => {
+    if (isNaN(d.lat) || isNaN(d.lon)) {
+      showAlertWarning("failed to get current geo location for current ip");
+    } else {
+      reloadMap(d.lat, d.lon);
+      reloadInfo(d);
+    }
+  })
+</script>
+{{template "footer"}}
