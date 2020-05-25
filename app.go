@@ -272,9 +272,9 @@ func SetupRouter() *gin.Engine {
 		router.StaticFile("robots.txt", "assets/robots.txt")
 
 		router.GET("/sitemap.xml", func(c *gin.Context) {
+			c.Header("Content-Type", "text/xml; charset=UTF-8")
 			c.Writer.Write(sm.XMLContent())
 			c.Writer.WriteHeader(http.StatusOK)
-			c.Writer.Header().Add("Content-Type", "text/xml; charset=UTF-8")
 		})
 		if !data.Config.IsDebug {
 			go func() {
