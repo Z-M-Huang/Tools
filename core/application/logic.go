@@ -161,6 +161,9 @@ func getLookupTools() *AppCategory {
 	portChecker := newAppCart("port-checker", "port_checker.gohtml", "", "fas fa-network-wired", "/app/port-checker", "Port Checker", "Check if host port is open for tcp or udp pconnections.")
 	tools.AppCards = append(tools.AppCards, portChecker)
 
+	vin := newAppCart("vin", "vin.gohtml", "", "fas fa-car", "/app/vin", "VIN # Search", "Search vehicle information by VIN number.")
+	tools.AppCards = append(tools.AppCards, vin)
+
 	sortAppCardSlice(tools.AppCards)
 	return tools
 }
