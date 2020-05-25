@@ -1,0 +1,235 @@
+{{template "header" .Header}}
+<h1>Vin number search</h1>
+
+<p class="text-info">Powered by National Highway Traffic Safety Administration</p>
+
+<div class="card mb-3">
+  <div class="card-body">
+    <form onsubmit="formSubmit(); return false;">
+    <div class="row">
+        <div class="form-group col-sm-8 offset-sm-2">
+          <div class="row">
+            <label class="col-sm-2 text-right col-form-label">Vin: </label>
+            <div class="col-sm-6">
+              <input type="text" class="form-control" id="vin" placeholder="1J4GL58123W459876">
+            </div>
+            <button class="col-sm-2 offset-sm-2 btn btn-primary" type="submit">Search</button>
+          </div>
+        </div>
+    </div>
+  </form>
+  </div>
+</div>
+
+<ul class="nav nav-tabs">
+  <li class="nav-item">    
+    <a class="nav-link active" data-toggle="tab" href="#overview">Overview</a>
+  </li>
+  <li>
+    <a class="nav-link" data-toggle="tab" href="#engine">Engine</a>
+  </li>
+  <li>
+    <a class="nav-link" data-toggle="tab" href="#exterior">Exterior</a>
+  </li>
+  <li>
+    <a class="nav-link" data-toggle="tab" href="#safety">Safety</a>
+  </li>
+
+</ul>
+<div id="resultDiv" class="tab-content">
+  <div class="tab-pane fade active show" id="overview">
+      <table class="table table-hover" id="overviewTable">
+
+      </table>
+  </div>
+  <div class="tab-pane fade" id="engine">
+      <table class="table table-hover" id="engineTable">
+
+      </table>
+  </div>
+  <div class="tab-pane fade" id="exterior">
+      <table class="table table-hover" id="exteriorTable">
+
+      </table>
+  </div>
+  <div class="tab-pane fade" id="safety">
+      <table class="table table-hover" id="safetyTable">
+
+      </table>
+  </div>
+</div>
+
+<script>
+  function formSubmit() {
+    var vin = $("#vin").val().trim();
+    var resultDiv = $("#resultDiv");
+    var overview = $("#overviewTable");
+    var engine = $("#engineTable");
+    var exterior = $("#exteriorTable");
+    var safety = $("#safetyTable");
+    if (vin.length != 17) {
+      showAlertWarning("Invalid VIN number", true, 3500);
+    } else {
+      $.get("https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/" + vin + "?format=json")
+      .done((d) => {
+        resultDiv.hide();
+        overview.html("");
+        engine.html("");
+        exterior.html("");
+        safety.html("");
+        $.each(d.Results, (i, v) => {
+          if (v.VariableId == 191 && v.Value[0] != "0") {
+            showAlertWarning(v.Value, true, 3500);
+            return;
+          }
+          if (v.VariableId != 142 && v.VariableId != 143 && v.VariableId != 144 && v.VariableId != 156 &&
+            v.VariableId != 157 && v.VariableId != 158 && v.VariableId != 191 && 
+            v.Value != null && v.Value != undefined && v.Value != "" && v.Value != "Not Applicable") {
+            switch(v.VariableId) {
+              case 1:
+              case 2:
+              case 15:
+              case 16:
+              case 23:
+              case 25:
+              case 26:
+              case 27:
+              case 29:
+              case 31:
+              case 33:
+              case 34:
+              case 36:
+              case 37:
+              case 38:
+              case 42:
+              case 52:
+              case 61:
+              case 75:
+              case 76:
+              case 77:
+              case 81:
+              case 82:
+              case 109:
+              case 110:
+              case 111:
+              case 112:
+              case 147:
+              case 148:
+              case 149:
+              case 150:
+              case 151:
+              case 152:
+              case 153:
+              case 154:
+              case 176:
+              case 177:
+              case 178:
+              case 179:
+              case 180:
+              case 3:
+              case 4:
+              case 41:
+              case 48:
+              case 49:
+              case 54:
+              case 57:
+              case 58:
+              case 59:
+              case 63:
+              case 72:
+              case 127:
+              case 128:
+              case 132:
+              case 133:
+              case 134:
+              case 137:
+              case 138:
+              case 145:
+              case 159:
+              case 10:
+              case 114:
+              case 136:
+              case 184:
+              case 185:
+              case 190:
+                overview.append("<tr><th>" + v.Variable + "</th><td>" + v.Value + "</td></tr>");
+                break;
+              case 9:
+              case 11:
+              case 12:
+              case 13:
+              case 17:
+              case 18:
+              case 21:
+              case 24:
+              case 62:
+              case 64:
+              case 66:
+              case 67:
+              case 71:
+              case 122:
+              case 125:
+              case 126:
+              case 129:
+              case 135:
+              case 139:
+              case 146:
+                engine.append("<tr><th>" + v.Variable + "</th><td>" + v.Value + "</td></tr>");
+                break;
+              case 5:
+              case 14:
+              case 40:
+              case 60:
+              case 115:
+              case 116:
+              case 117:
+              case 118:
+              case 155:
+              case 119:
+              case 120:
+                exterior.append("<tr><th>" + v.Variable + "</th><td>" + v.Value + "</td></tr>");
+                break;
+              case 78:
+              case 79:
+              case 121:
+              case 55:
+              case 56:
+              case 65:
+              case 69:
+              case 86:
+              case 87:
+              case 88:
+              case 99:
+              case 100:
+              case 101:
+              case 102:
+              case 103:
+              case 104:
+              case 105:
+              case 107:
+              case 168:
+              case 169:
+              case 170:
+              case 171:
+              case 172:
+              case 173:
+              case 174:
+              case 175:
+              case 181:
+              case 182:
+              case 183:
+              case 186:
+                safety.append("<tr><th>" + v.Variable + "</th><td>" + v.Value + "</td></tr>");
+                break;
+            }
+          }
+        })
+        resultDiv.slideToggle(500);
+      })
+      .fail(() => {
+        showAlertDanger("Service is not available", true, 3500);
+      })
+    }
+  }
+</script>
+{{template "footer"}}
