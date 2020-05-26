@@ -44,6 +44,7 @@ jobs:
   tweet:
     runs-on: ubuntu-latest
     name: Tweet
+    needs: deploy
     steps:
     - uses: actions/checkout@v2
     - name: Send Tweet
