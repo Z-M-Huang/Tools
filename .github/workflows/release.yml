@@ -47,7 +47,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Send Tweet
-      uses: Z-M-Huang/TweetOnAction@1
+      uses: Z-M-Huang/TweetOnAction@v1
       with:
         consumer_key: ${{ secrets.CONSUMER_KEY }}
         consumer_secret: ${{ secrets.CONSUMER_SECRET }}
