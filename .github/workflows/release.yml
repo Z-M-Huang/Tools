@@ -47,6 +47,10 @@ jobs:
     needs: deploy
     steps:
     - uses: actions/checkout@v2
+    - name: Get Commit Info
+      run: |
+        echo "::set-env name=head::$(git log -1 HEAD --pretty=format:%s)"
+        echo "::set-env name=body::$(git log -1 HEAD --pretty=format:%b)"
     - name: Send Tweet
       uses: Z-M-Huang/TweetOnAction@v1
       with:
@@ -54,6 +58,6 @@ jobs:
         consumer_secret: ${{ secrets.CONSUMER_SECRET }}
         access_token: ${{ secrets.ACCESS_TOKEN }}
         token_secret: ${{ secrets.TOKEN_SECRET }}
-        content: "https://tools.zh-code.com just released a new version.\nPlease check it out for the new features!\nGithub:https://github.com/Z-M-Huang/Tools"
+        content: "Github:https://github.com/Z-M-Huang/Tools just released a new version.\n\n${{ env.head }}\n${{ env.body }}\n\nPlease check it out for the new features!\nhttps://tools.zh-code.com"
     
           
