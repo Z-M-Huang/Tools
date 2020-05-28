@@ -32,6 +32,9 @@ services:
       - "ENABLE_SITEMAP=${ENABLE_SITEMAP}"
       - "HTTPS=${HTTPS}"
       - "GIN_MODE=${GIN_MODE}"
+      - "SMTP_SERVER=${SMTP_SERVER}"
+      - "EMAIL_ADDRESS=${EMAIL_ADDRESS}"
+      - "EMAIL_PASSWORD=${EMAIL_PASSWORD}"
       - "TZ=America/New_York"
     networks:
       - proxy

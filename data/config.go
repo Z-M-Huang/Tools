@@ -16,6 +16,7 @@ type Configuration struct {
 	DatabaseConfig    *DatabaseConfiguration
 	RedisConfig       *RedisConfiguration
 	GoogleOauthConfig *GoogleOauthConfiguration
+	EmailConfig       *EmailConfiguration
 
 	JwtKey          []byte
 	Host            string
@@ -43,6 +44,13 @@ type GoogleOauthConfiguration struct {
 type DatabaseConfiguration struct {
 	ConnectionString string
 	Driver           string
+}
+
+//EmailConfiguration email configuration for email sms
+type EmailConfiguration struct {
+	SMTPServer   string
+	EmailAddress string
+	Password     string
 }
 
 //LoadProductionConfig load config
@@ -89,6 +97,11 @@ func LoadProductionConfig() {
 			ClientID:     strings.TrimSpace(os.Getenv("GOOGLE_CLIENT_ID")),
 			ClientSecret: strings.TrimSpace(os.Getenv("GOOGLE_CLIENT_SECRET")),
 		},
+		EmailConfig: &EmailConfiguration{
+			SMTPServer:   strings.TrimSpace(os.Getenv("SMTP_SERVER")),
+			EmailAddress: strings.TrimSpace(os.Getenv("EMAIL_ADDRESS")),
+			Password:     strings.TrimSpace(os.Getenv("EMAIL_PASSWORD")),
+		},
 		JwtKey:          []byte(strings.TrimSpace(os.Getenv("JWT_KEY"))),
 		Host:            strings.TrimSuffix(strings.TrimSpace(os.Getenv("HOST")), "/"),
 		ResourceVersion: strings.TrimSpace(os.Getenv("RESOURCE_VERSION")),
@@ -107,5 +120,11 @@ func LoadProductionConfig() {
 		utils.Logger.Fatal("JWT_KEY cannot be empty")
 	} else if Config.Host == "" {
 		utils.Logger.Fatal("HOST cannot be empty")
+	} else if Config.EmailConfig.SMTPServer == "" {
+		utils.Logger.Error("SMTP_SERVER is empty. Some feature may not work...")
+	} else if Config.EmailConfig.EmailAddress == "" {
+		utils.Logger.Error("EMAIL_ADDRESS is empty. Some feature may not work...")
+	} else if Config.EmailConfig.Password == "" {
+		utils.Logger.Error("EMAIL_PASSWORD is empty. Some feature may not work...")
 	}
 }
