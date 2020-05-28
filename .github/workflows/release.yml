@@ -37,8 +37,11 @@ jobs:
         ENABLE_SITEMAP: ${{ secrets.ENABLE_SITEMAP }}
         HTTPS: ${{ secrets.HTTPS }}
         GIN_MODE: ${{ secrets.GIN_MODE }}
+        SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+        EMAIL_ADDRESS: ${{ secrets.EMAIL_ADDRESS }}
+        EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
       run: |
-        export DB_DRIVER GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET HOST JWT_KEY REDIS_ADDR CONNECTION_STRING ENABLE_SITEMAP HTTPS GIN_MODE
+        export DB_DRIVER GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET HOST JWT_KEY REDIS_ADDR CONNECTION_STRING ENABLE_SITEMAP HTTPS GIN_MODE SMTP_SERVER EMAIL_ADDRESS EMAIL_PASSWORD
         docker stack deploy -c docker-compose.yml --with-registry-auth Tools
 
   tweet:
