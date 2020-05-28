@@ -1,6 +1,6 @@
-package emailsms
+package emailmmssms
 
-//Request for /api/emailsms/send
+//Request for /api/email-mms-sms/send
 type Request struct {
 	ToNumber string `json:"toNumber" xml:"toNumber" form:"toNumber"`
 	Carrier  string `json:"carrier" xml:"carrier" form:"carrier"`

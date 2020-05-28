@@ -1,0 +1,68 @@
+{{template "header" .Header}}
+<h1>Free MMS/SMS over Email</h1>
+
+<p class="text-info">There is an awesome feature most of the mobile service providers support, which is you can send
+  email to phone numbers.</p>
+<p class="text-info">Receivers will see the email on their cellphone as message, and they wll be able to reply as well.
+</p>
+<p class="text-warning">Rate Limit: 5 messages per IP per minute, 2 messages per to number per minute.</p>
+<p>If you want to have no limit and cheap sms service, please check it out in RapidAPI.</p>
+<a href="https://rapidapi.com/JayemithLLC/api/quick-easy-sms" target="_blank">
+  <img src="https://storage.googleapis.com/code-snippets/connect-on-rapidapi-light.png" width="215"
+    alt="Connect on RapidAPI">
+</a>
+
+<div class="card col-sm-6 offset-sm-3 mt-3">
+  <div class="card-body">
+    <form id="sendMessageForm">
+      <div class="form-group row">
+        <label for="toNumber" class="col-sm-4 col-form-label">To Number:</label>
+        <input type="text" class="form-control col-sm-5" id="toNumber" name="toNumber" aria-describedby="toNumberHelp"
+          placeholder="1234567890">
+      </div>
+      <div class="form-group row">
+        <label for="carrier" class="col-sm-4 col-form-label ">Carrier:</label>
+        <select class="form-control col-sm-5" id="carrier" name="carrier">
+          <option value="AT&T">AT&T</option>
+          <option value="Boost Mobile">Boost Mobile</option>
+          <option value="C-Spire">C-Spire</option>
+          <option value="Consumer Cellular">Consumer Cellular</option>
+          <option value="Cricket">Cricket</option>
+          <option value="Google Fi">Google Fi</option>
+          <option value="Metro PCS">Metro PCS</option>
+          <option value="Mint Mobile">Mint Mobile</option>
+          <option value="Page Plus">Page Plus</option>
+          <option value="Red Pocket">Red Pocket</option>
+          <option value="Republic Wireless">Republic Wireless</option>
+          <option value="Simple Mobile">Simple Mobile</option>
+          <option value="Sprint">Sprint</option>
+          <option value="T-Mobile">T-Mobile</option>
+          <option value="Ting">Ting</option>
+          <option value="Tracfone">Tracfone</option>
+          <option value="U.S. Cellular">U.S. Cellular</option>
+          <option value="Verizon">Verizon</option>
+          <option value="Virgin Mobile">Virgin Mobile</option>
+          <option value="Xfinity">Xfinity</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="Subject">Subject</label>
+        <input type="text" class="form-control" id="subject" name="subject" placeholder="My first mms/sms from Email!">
+      </div>
+      <div class="form-group">
+        <label for="content">Content</label>
+        <textarea class="form-control" id="content" name="content" rows="3"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Send</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  bindForm("sendMessageForm", "/api/email-mms-sms/send", (d) => {
+    if (!isNaN(d) && d) {
+      showAlertSuccess("Message sent!");
+    }
+  })
+</script>
+{{template "footer"}}

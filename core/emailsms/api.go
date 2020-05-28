@@ -1,4 +1,4 @@
-package emailsms
+package emailmmssms
 
 import (
 	"crypto/tls"
@@ -8,9 +8,13 @@ import (
 	"net/http"
 	"net/mail"
 	"net/smtp"
+	"regexp"
+	"strings"
+	"time"
 
 	"github.com/Z-M-Huang/Tools/core"
 	"github.com/Z-M-Huang/Tools/data"
+	"github.com/Z-M-Huang/Tools/data/db"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/gin-gonic/gin"
 )
@@ -18,7 +22,10 @@ import (
 //API emailsms
 type API struct{}
 
-func sendEmail(toAddress, subject, content string) error {
+var phoneRe = regexp.MustCompile(`^\d{10}$`)
+var maxDailyEmailAmount int64 = 1500
+
+func sendEmail(toAddress, subject, content, ipAddress string) error {
 	from := mail.Address{
 		Name:    "",
 		Address: data.Config.EmailConfig.EmailAddress,
@@ -32,6 +39,7 @@ func sendEmail(toAddress, subject, content string) error {
 	headers["From"] = from.String()
 	headers["To"] = to.String()
 	headers["Subject"] = subject
+	headers["Client-IP"] = ipAddress
 
 	// Setup message
 	message := ""
@@ -106,7 +114,7 @@ func sendEmail(toAddress, subject, content string) error {
 	return nil
 }
 
-//Send /api/emailsms/send
+//Send /api/email-mms-sms/send
 func (API) Send(c *gin.Context) {
 	response := &data.APIResponse{}
 	request := &Request{}
@@ -116,6 +124,122 @@ func (API) Send(c *gin.Context) {
 		core.WriteResponse(c, http.StatusBadRequest, response)
 		return
 	}
+
+	if !db.RedisExist(getTotalEmailKey()) {
+		err = db.RedisSet(getTotalEmailKey(), 1, 24*time.Hour)
+		if err != nil {
+			utils.Logger.Error(err.Error())
+			response.Message = "InternalServer Error. Please try again later"
+			core.WriteResponse(c, http.StatusInternalServerError, response)
+			return
+		}
+	} else {
+		currentCount, err := db.RedisGetInt(getTotalEmailKey())
+		if err != nil {
+			utils.Logger.Error(err.Error())
+			response.Message = "InternalServer Error. Please try again later"
+			core.WriteResponse(c, http.StatusInternalServerError, response)
+			return
+		}
+		if currentCount >= maxDailyEmailAmount {
+			response.Message = "Server exceed usage limit. Please submit a ticket to report this issue."
+			core.WriteResponse(c, http.StatusInternalServerError, response)
+			return
+		}
+		db.RedisIncr(getTotalEmailKey())
+	}
+
+	request.Subject = strings.TrimSpace(request.Subject)
+	request.Content = strings.TrimSpace(request.Content)
+	request.ToNumber = strings.TrimSpace(request.ToNumber)
+	if !phoneRe.Match([]byte(request.ToNumber)) {
+		response.Message = "Bad Request. Only 10 digit US or Canada phone number supported."
+		core.WriteResponse(c, http.StatusBadRequest, response)
+	}
+
+	if request.Subject == "" && request.Content == "" {
+		response.Message = "Bad Request. Content unknown."
+		core.WriteResponse(c, http.StatusBadRequest, response)
+	}
+
+	carrier := getCarrierGateway(strings.TrimSpace(request.Carrier))
+	if carrier == "" {
+		response.Message = "Bad Request.Unknown Carrier"
+		core.WriteResponse(c, http.StatusBadRequest, response)
+		return
+	}
+
+	status, err := checkIPToNumberAllowed(c.ClientIP(), request.ToNumber)
+	if status != http.StatusOK || err != nil {
+		response.Message = err.Error()
+		core.WriteResponse(c, status, response)
+		return
+	}
+
+	err = sendEmail(fmt.Sprintf("%s%s", request.ToNumber, carrier), request.Subject, request.Content, c.ClientIP())
+	if err != nil {
+		response.Message = err.Error()
+		core.WriteResponse(c, http.StatusInternalServerError, response)
+		return
+	}
+	response.Data = true
+	core.WriteResponse(c, http.StatusOK, response)
+	return
+}
+
+func checkIPToNumberAllowed(ipAddress, toNumber string) (int, error) {
+	ipKey := getRedisIPKey(ipAddress)
+	toNumberKey := getRedisToNumberKey(toNumber)
+	if !db.RedisExist(ipKey) {
+		err := db.RedisSet(ipKey, 1, 1*time.Minute)
+		if err != nil {
+			utils.Logger.Error(err.Error())
+			return http.StatusInternalServerError, errors.New("InternalServer Error. Please try again later")
+		}
+	} else {
+		ipAmount, err := db.RedisGetInt(ipKey)
+		if err != nil {
+			return http.StatusInternalServerError, errors.New("InternalServer Error. Please try again later")
+		}
+		// 5 requests per IP
+		if ipAmount > 4 {
+			return http.StatusTooManyRequests, errors.New("Too many requests, 5 messages per IP per minute only")
+		} else {
+			db.RedisIncr(ipKey)
+		}
+	}
+
+	if !db.RedisExist(toNumberKey) {
+		err := db.RedisSet(toNumberKey, 1, 1*time.Minute)
+		if err != nil {
+			utils.Logger.Error(err.Error())
+			return http.StatusInternalServerError, errors.New("InternalServer Error. Please try again later")
+		}
+	} else {
+		toNumberAmount, err := db.RedisGetInt(toNumberKey)
+		if err != nil {
+			return http.StatusInternalServerError, errors.New("InternalServer Error. Please try again later")
+		}
+		if toNumberAmount > 1 {
+			return http.StatusTooManyRequests, errors.New("Too many requests to the specific number, 2 messages to specific phone number per minute only")
+		} else {
+			db.RedisIncr(toNumberKey)
+		}
+	}
+
+	return http.StatusOK, nil
+}
+
+func getRedisIPKey(ip string) string {
+	return fmt.Sprintf("APP_EMAIL_SMS_IP_%s", ip)
+}
+
+func getRedisToNumberKey(toNumber string) string {
+	return fmt.Sprintf("APP_EMAIL_SMS_TO_%s", toNumber)
+}
+
+func getTotalEmailKey() string {
+	return "APP_EMAIL_SMS_COUNTER"
 }
 
 func getCarrierGateway(carrier string) string {
