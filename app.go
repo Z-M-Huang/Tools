@@ -13,7 +13,7 @@ import (
 	"github.com/Z-M-Huang/Tools/core/account"
 	"github.com/Z-M-Huang/Tools/core/application"
 	"github.com/Z-M-Huang/Tools/core/dnslookup"
-	emailmmssms "github.com/Z-M-Huang/Tools/core/emailsms"
+	"github.com/Z-M-Huang/Tools/core/emailmmssms"
 	"github.com/Z-M-Huang/Tools/core/hilosimulator"
 	"github.com/Z-M-Huang/Tools/core/home"
 	"github.com/Z-M-Huang/Tools/core/kellycriterion"

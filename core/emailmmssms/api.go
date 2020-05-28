@@ -142,6 +142,7 @@ func (API) Send(c *gin.Context) {
 			return
 		}
 		if currentCount >= maxDailyEmailAmount {
+			utils.Logger.Info("Server exceed usage limit. Please submit a ticket to report this issue.")
 			response.Message = "Server exceed usage limit. Please submit a ticket to report this issue."
 			core.WriteResponse(c, http.StatusInternalServerError, response)
 			return
@@ -204,9 +205,8 @@ func checkIPToNumberAllowed(ipAddress, toNumber string) (int, error) {
 		// 5 requests per IP
 		if ipAmount > 4 {
 			return http.StatusTooManyRequests, errors.New("Too many requests, 5 messages per IP per minute only")
-		} else {
-			db.RedisIncr(ipKey)
 		}
+		db.RedisIncr(ipKey)
 	}
 
 	if !db.RedisExist(toNumberKey) {
@@ -222,9 +222,8 @@ func checkIPToNumberAllowed(ipAddress, toNumber string) (int, error) {
 		}
 		if toNumberAmount > 1 {
 			return http.StatusTooManyRequests, errors.New("Too many requests to the specific number, 2 messages to specific phone number per minute only")
-		} else {
-			db.RedisIncr(toNumberKey)
 		}
+		db.RedisIncr(toNumberKey)
 	}
 
 	return http.StatusOK, nil
