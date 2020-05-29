@@ -72,7 +72,17 @@ func verify(request *VerifyRequest) (int, *data.APIResponse) {
 	return http.StatusOK, response
 }
 
-//HILOSimulate /api/hilo-simulator/simulate
+// HILOSimulate /api/hilo-simulator/simulate
+// @Summary Simulate online Hi Low betting outcomes
+// @Description Simulate online hi/low betting website result(Provably fair only)."
+// @Tags Analytic
+// @Accept json
+// @Produce json,xml
+// @Param "" body SimulateRequest true "Request JSON"
+// @Success 200 {object} data.APIResponse
+// @Failure 400 {object} data.APIResponse
+// @Failure 503 {object} data.APIResponse
+// @Router /api/hilo-simulator/simulate [post]
 func (API) HILOSimulate(c *gin.Context) {
 	request := &SimulateRequest{}
 	err := c.ShouldBind(&request)
@@ -89,7 +99,16 @@ func (API) HILOSimulate(c *gin.Context) {
 	core.WriteResponse(c, status, response)
 }
 
-//HILOVerify /api/hilo-simulator/verify
+// HILOVerify /api/hilo-simulator/verify
+// @Summary Verify roll provably fair
+// @Description Verify roll provably fair by seeds and roll number."
+// @Tags Analytic
+// @Accept json
+// @Produce json,xml
+// @Param "" body VerifyRequest true "Request JSON"
+// @Success 200 {object} data.APIResponse
+// @Failure 400 {object} data.APIResponse
+// @Router /api/hilo-simulator/verify [post]
 func (API) HILOVerify(c *gin.Context) {
 	request := &VerifyRequest{}
 	err := c.ShouldBind(&request)

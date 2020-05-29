@@ -49,7 +49,16 @@ func create(private bool) *BinData {
 	return binData
 }
 
-//CreateRequestBin /api/request-bin/Create
+// CreateRequestBin /api/request-bin/Create
+// @Summary Receive and visualize HTTP requests for any method.
+// @Description Receive and visualize HTTP requests for any method.
+// @Tags Web-Utils
+// @Accept json
+// @Produce json,xml
+// @Param "" body CreateBinRequest true "Request JSON"
+// @Success 200 {object} data.APIResponse
+// @Failure 400 {object} data.APIResponse
+// @Router /api/request-bin/Create [post]
 func (API) CreateRequestBin(c *gin.Context) {
 	response := &data.APIResponse{}
 	request := &CreateBinRequest{}
@@ -76,7 +85,17 @@ func (API) CreateRequestBin(c *gin.Context) {
 	core.WriteResponse(c, 200, response)
 }
 
-//RequestIn /api/request-bin/receive/:id
+// RequestIn /api/request-bin/receive/:id
+// @Summary Take any request for request-bin
+// @Description Take any request for request-bin
+// @Tags Web-Utils
+// @Accept json,xml
+// @Produce json,xml
+// @Param "" body object true "Any kind of request"
+// @Param id path int true "id from create request"
+// @Success 200 {object} data.APIResponse
+// @Failure 400 {object} data.APIResponse
+// @Router /api/request-bin/receive/:id [post]
 func (API) RequestIn(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {

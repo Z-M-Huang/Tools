@@ -112,7 +112,16 @@ func encodeDecode(request *Request) (int, *data.APIResponse) {
 	return http.StatusOK, response
 }
 
-//EncodeDecode /api/string/encodedecode
+// EncodeDecode /api/string/encodedecode
+// @Summary Convert string encoding based on request
+// @Description Convert string encoding based on request
+// @Tags Formatter
+// @Accept json
+// @Produce json,xml
+// @Param "" body Request true "Request JSON"
+// @Success 200 {object} data.APIResponse
+// @Failure 400 {object} data.APIResponse
+// @Router /api/string/encodedecode [post]
 func (API) EncodeDecode(c *gin.Context) {
 	response := &data.APIResponse{}
 	request := &Request{}

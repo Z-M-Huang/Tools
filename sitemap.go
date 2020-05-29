@@ -28,6 +28,7 @@ func BuildSitemap() *stm.Sitemap {
 	sm.Add(getPageSiteMap("/"))
 	sm.Add(getPageSiteMap("/login"))
 	sm.Add(getPageSiteMap("/signup"))
+	sm.Add(getPageSiteMap("/index.html"))
 
 	for _, category := range application.GetAppList() {
 		for _, app := range category.AppCards {
@@ -54,7 +55,8 @@ func GetRobotsTxt() []string {
 	content := []string{"User-agent: *",
 		"Disallow: /api/*",
 		"Disallow: /login",
-		"Disallow: /signup"}
+		"Disallow: /signup",
+		"Disallow: /idex.html"}
 
 	sitemapURL := ""
 	if data.Config.HTTPS {

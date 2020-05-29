@@ -14,6 +14,7 @@ COPY . .
 
 # Build the Go app
 RUN go build -o tools .
+RUN swag init
 
 # Expose port 8080 to the outside world
 EXPOSE 80
