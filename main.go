@@ -356,7 +356,6 @@ func SetupRouter() *gin.Engine {
 // @license.url https://github.com/Z-M-Huang/Tools/blob/master/LICENSE
 
 // @host tools.zh-code.com
-// @BasePath /api
 func main() {
 	data.LoadProductionConfig()
 	db.InitDB()
