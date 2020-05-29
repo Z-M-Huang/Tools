@@ -33,6 +33,7 @@ services:
       - "HTTPS=${HTTPS}"
       - "GIN_MODE=${GIN_MODE}"
       - "SMTP_SERVER=${SMTP_SERVER}"
+      - "IMAP_SERVER=${IMAP_SERVER}"
       - "EMAIL_ADDRESS=${EMAIL_ADDRESS}"
       - "EMAIL_PASSWORD=${EMAIL_PASSWORD}"
       - "TZ=America/New_York"

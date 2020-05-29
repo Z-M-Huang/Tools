@@ -4,9 +4,10 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"net"
 	"net/http"
-	"net/mail"
 	"net/smtp"
 	"regexp"
 	"strings"
@@ -16,6 +17,10 @@ import (
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/db"
 	"github.com/Z-M-Huang/Tools/utils"
+	"github.com/emersion/go-imap"
+	idle "github.com/emersion/go-imap-idle"
+	imapClient "github.com/emersion/go-imap/client"
+	"github.com/emersion/go-message/mail"
 	"github.com/gin-gonic/gin"
 )
 
@@ -24,6 +29,8 @@ type API struct{}
 
 var phoneRe = regexp.MustCompile(`^\d{10}$`)
 var maxDailyEmailAmount int64 = 1500
+
+const redisLockKey string = "LOCK_EMAIL_MMS_SMS"
 
 func sendEmail(toAddress, subject, content, ipAddress string) error {
 	from := mail.Address{
@@ -188,6 +195,144 @@ func (API) Send(c *gin.Context) {
 	return
 }
 
+//StartListeningToEmails imap client listening for new emails
+func (API) StartListeningToEmails() {
+	if data.Config.EmailConfig.IMAPServer == "" {
+		return
+	}
+
+	lock := db.RedisLock(redisLockKey, 1*time.Second)
+	if lock != nil {
+		c, err := imapClient.DialTLS(data.Config.EmailConfig.IMAPServer, nil)
+		if err != nil {
+			utils.Logger.Error(err.Error())
+			return
+		}
+		utils.Logger.Info("IMAP connected")
+
+		if err := c.Login(data.Config.EmailConfig.EmailAddress, data.Config.EmailConfig.Password); err != nil {
+			utils.Logger.Error(err.Error())
+			return
+		}
+		utils.Logger.Info("IMAP Logged in")
+
+		//Search for unseen emails first
+		_, err = c.Select("INBOX", false)
+		if err != nil {
+			utils.Logger.Fatal(err.Error())
+			return
+		}
+
+		criteria := imap.NewSearchCriteria()
+		criteria.WithoutFlags = []string{imap.SeenFlag}
+		ids, err := c.Search(criteria)
+		if err != nil {
+			utils.Logger.Fatal(err.Error())
+			return
+		}
+
+		messages := make(chan *imap.Message, 10)
+		done := make(chan error, 1)
+
+		//Load not seen messages
+		if len(ids) > 0 {
+			seqset := new(imap.SeqSet)
+			seqset.AddNum(ids...)
+			section := &imap.BodySectionName{}
+			go func() {
+				done <- c.Fetch(seqset, []imap.FetchItem{imap.FetchEnvelope, imap.FetchBody, section.FetchItem()}, messages)
+			}()
+
+			for msg := range messages {
+				loadReplyToRedis(msg)
+			}
+		}
+
+		idleClient := idle.NewClient(c)
+
+		updates := make(chan imapClient.Update)
+		c.Updates = updates
+		// Start idling
+		go func() {
+			done <- idleClient.IdleWithFallback(nil, 0)
+		}()
+
+		// Listen for updates
+		for {
+			select {
+			case update := <-updates:
+				switch update.(type) {
+				case *imapClient.MailboxUpdate:
+					msg := update.(*imapClient.MailboxUpdate)
+					uid := msg.Mailbox.Messages
+					seqset := new(imap.SeqSet)
+					seqset.AddRange(uid, uid)
+					section := &imap.BodySectionName{}
+					go func() {
+						done <- c.Fetch(seqset, []imap.FetchItem{imap.FetchEnvelope, imap.FetchBody, section.FetchItem()}, messages)
+					}()
+					for msg := range messages {
+						loadReplyToRedis(msg)
+					}
+				default:
+				}
+			case err := <-done:
+				if err != nil {
+					utils.Logger.Fatal(err.Error())
+				}
+				utils.Logger.Fatal("Not idling anymore")
+				return
+			}
+		}
+	}
+}
+
+func loadReplyToRedis(msg *imap.Message) {
+	r := msg.GetBody(&imap.BodySectionName{})
+	mr, _ := mail.CreateReader(r)
+	for {
+		//Only search for address contains +
+		if strings.Contains(msg.Envelope.To[0].Address(), "+") {
+			p, err := mr.NextPart()
+			if err == io.EOF {
+				break
+			} else if err != nil {
+				utils.Logger.Error(err.Error())
+			}
+
+			switch p.Header.(type) {
+			case *mail.InlineHeader:
+				if strings.Contains(p.Header.Get("Content-Type"), "text/plain") {
+					b, _ := ioutil.ReadAll(p.Body)
+					var histories []*MessageHistory
+					key := getReplyMessageKeyByEmail(msg.Envelope.To[0].Address())
+					if !db.RedisExist(key) {
+						histories = append(histories, &MessageHistory{
+							DateReceived: msg.Envelope.Date,
+							Content:      string(b),
+						})
+						db.RedisSet(key, histories, 24*time.Hour)
+					} else {
+						err = db.RedisGet(key, histories)
+						if err != nil {
+							utils.Logger.Error(err.Error())
+							continue
+						}
+						histories = append(histories, &MessageHistory{
+							DateReceived: msg.Envelope.Date,
+							Content:      string(b),
+						})
+						db.RedisSet(key, histories, 24*time.Hour)
+					}
+					utils.Logger.Sugar().Infof("Received Email MMS/SMS reply from %s", msg.Envelope.To[0].Address)
+				}
+			case *mail.AttachmentHeader:
+				// This is an attachment do nothing
+			}
+		}
+	}
+}
+
 func checkIPToNumberAllowed(ipAddress, toNumber string) (int, error) {
 	ipKey := getRedisIPKey(ipAddress)
 	toNumberKey := getRedisToNumberKey(toNumber)
@@ -239,6 +384,14 @@ func getRedisToNumberKey(toNumber string) string {
 
 func getTotalEmailKey() string {
 	return "APP_EMAIL_SMS_COUNTER"
+}
+
+func getReplyMessageKeyByID(id string) string {
+	return "APP_EMAIL_SMS_REPLY_" + strings.Replace(data.Config.EmailConfig.EmailAddress, "@", fmt.Sprintf("+%s@", id), 1)
+}
+
+func getReplyMessageKeyByEmail(email string) string {
+	return fmt.Sprintf("APP_EMAIL_SMS_REPLY_%s", email)
 }
 
 func getCarrierGateway(carrier string) string {

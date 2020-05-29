@@ -305,6 +305,8 @@ func SetupRouter() *gin.Engine {
 	portCheckerAPI := &portchecker.API{}
 	emailmmssmsAPI := &emailmmssms.API{}
 
+	go emailmmssmsAPI.StartListeningToEmails()
+
 	pageNoAuth.GET("/", homePage.Home)
 	pageNoAuth.GET("/signup", accountPage.Signup)
 	pageNoAuth.GET("/login", accountPage.Login)

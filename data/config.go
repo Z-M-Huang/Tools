@@ -49,6 +49,7 @@ type DatabaseConfiguration struct {
 //EmailConfiguration email configuration for email sms
 type EmailConfiguration struct {
 	SMTPServer   string
+	IMAPServer   string
 	EmailAddress string
 	Password     string
 }
@@ -99,6 +100,7 @@ func LoadProductionConfig() {
 		},
 		EmailConfig: &EmailConfiguration{
 			SMTPServer:   strings.TrimSpace(os.Getenv("SMTP_SERVER")),
+			IMAPServer:   strings.TrimSpace(os.Getenv("IMAP_SERVER")),
 			EmailAddress: strings.TrimSpace(os.Getenv("EMAIL_ADDRESS")),
 			Password:     strings.TrimSpace(os.Getenv("EMAIL_PASSWORD")),
 		},
@@ -120,11 +122,15 @@ func LoadProductionConfig() {
 		utils.Logger.Fatal("JWT_KEY cannot be empty")
 	} else if Config.Host == "" {
 		utils.Logger.Fatal("HOST cannot be empty")
-	} else if Config.EmailConfig.SMTPServer == "" {
+	}
+
+	if Config.EmailConfig.SMTPServer == "" {
 		utils.Logger.Error("SMTP_SERVER is empty. Some feature may not work...")
 	} else if Config.EmailConfig.EmailAddress == "" {
 		utils.Logger.Error("EMAIL_ADDRESS is empty. Some feature may not work...")
 	} else if Config.EmailConfig.Password == "" {
 		utils.Logger.Error("EMAIL_PASSWORD is empty. Some feature may not work...")
+	} else if Config.EmailConfig.IMAPServer == "" {
+		utils.Logger.Error("IMAP_SERVER is empty. Some feature may not work...")
 	}
 }

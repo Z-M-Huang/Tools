@@ -9,10 +9,12 @@ import (
 
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/utils"
-	"github.com/go-redis/redis"
+	"github.com/bsm/redislock"
+	"github.com/go-redis/redis/v7"
 )
 
 var redisClient *redis.Client
+var locker *redislock.Client
 
 //InitRedis init Redis
 func InitRedis() {
@@ -25,6 +27,8 @@ func InitRedis() {
 	if err != nil {
 		utils.Logger.Fatal("failed to connect to Redis")
 	}
+
+	locker = redislock.New(redisClient)
 }
 
 //RedisGet get value
@@ -138,4 +142,16 @@ func RedisDecr(key string) (int64, error) {
 		return 0, fmt.Errorf("Failed to decr %s", key)
 	}
 	return result, nil
+}
+
+//RedisLock lock in redis
+func RedisLock(key string, duration time.Duration) *redislock.Lock {
+	lock, err := locker.Obtain(key, duration, nil)
+	if err == redislock.ErrNotObtained {
+		return nil
+	} else if err != nil {
+		utils.Logger.Error(err.Error())
+		return nil
+	}
+	return lock
 }
