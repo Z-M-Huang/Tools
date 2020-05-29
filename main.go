@@ -352,7 +352,7 @@ func SetupRouter() *gin.Engine {
 // @contact.name Z-M-Huang
 // @contact.url https://tools.zh-code.com/
 
-// @license.name MIT
+// @license.name GPL-3.0
 // @license.url https://github.com/Z-M-Huang/Tools/blob/master/LICENSE
 
 // @host tools.zh-code.com
