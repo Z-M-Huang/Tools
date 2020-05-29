@@ -30,7 +30,16 @@ func simualte(request *Request) (int, *data.APIResponse) {
 	return http.StatusOK, response
 }
 
-//Simulate /api/kelly-criterion/simulate
+// Simulate /api/kelly-criterion/simulate
+// @Summary Simulator for Kelly criterion.
+// @Description Simulator for Kelly criterion. Kelly Criterion is a formula for sizing bets or investments from which the investor expects a positive return.
+// @Tags Analytic
+// @Accept json
+// @Produce json,xml
+// @Param "" body Request true "Request JSON"
+// @Success 200 {object} data.APIResponse
+// @Failure 400 {object} data.APIResponse
+// @Router /api/kelly-criterion/simulate [post]
 func (API) Simulate(c *gin.Context) {
 	request := &Request{}
 	err := c.ShouldBind(&request)

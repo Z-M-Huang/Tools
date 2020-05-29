@@ -22,7 +22,25 @@ import (
 //API qrcode
 type API struct{}
 
-//CreateQRCode /api/qr-code/create
+// CreateQRCode /api/qr-code/create
+// @Summary Generate QR Code with animated logo and background image.
+// @Description Generate QR Code with animated logo and background image.
+// @Tags Generator
+// @Accept mpfd
+// @Produce json,xml
+// @Param content body string true "Content in QRCode"
+// @Param level body string true "Level L|M|Q|H"
+// @Param size body int true "Size of the image"
+// @Param backColor body string false "Hex color"
+// @Param foreColor body string false "Hex color"
+// @Param logoImage formData file false "Logo image file"
+// @Param logoGifImage formData file false "Logo gif image file"
+// @Param backgroundImage formData file false "Background image file"
+// @Success 200 {object} data.APIResponse
+// @Failure 400 {object} data.APIResponse
+// @Failure 429 {object} data.APIResponse
+// @Failure 500 {object} data.APIResponse
+// @Router /api/qr-code/create [post]
 func (API) CreateQRCode(c *gin.Context) {
 	response := &data.APIResponse{}
 	c.Request.ParseMultipartForm(1024)

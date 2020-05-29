@@ -31,7 +31,17 @@ func checkPort(host, port, portType string) bool {
 	return false
 }
 
-//Check /api/portchecker/check
+// Check /api/portchecker/check
+// @Summary Check if host port is open for tcp or udp pconnections.
+// @Description Check if host port is open for tcp or udp pconnections.
+// @Tags Lookup
+// @Accept json
+// @Produce json,xml
+// @Param "" body Request true "Request JSON"
+// @Success 200 {object} data.APIResponse
+// @Failure 400 {object} data.APIResponse
+// @Failure 429 {object} data.APIResponse
+// @Router /api/portchecker/check [post]
 func (API) Check(c *gin.Context) {
 	response := &data.APIResponse{}
 	request := &Request{}

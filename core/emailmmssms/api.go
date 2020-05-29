@@ -114,7 +114,18 @@ func sendEmail(toAddress, subject, content, ipAddress string) error {
 	return nil
 }
 
-//Send /api/email-mms-sms/send
+// Send /api/email-mms-sms/send
+// @Summary Send email to phone number
+// @Description Send free MMS/SMS to phone number online.
+// @Tags MMS-SMS
+// @Accept json
+// @Produce json,xml
+// @Param "" body Request true "Request JSON"
+// @Success 200 {object} data.APIResponse
+// @Failure 400 {object} data.APIResponse
+// @Failure 429 {object} data.APIResponse
+// @Failure 503 {object} data.APIResponse
+// @Router /api/email-mms-sms/send [post]
 func (API) Send(c *gin.Context) {
 	response := &data.APIResponse{}
 	request := &Request{}

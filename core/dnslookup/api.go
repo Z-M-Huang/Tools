@@ -65,9 +65,7 @@ func lookup(request *Request) (int, *data.APIResponse) {
 		utils.Logger.Error(err.Error())
 		response.Message = "Failed to lookup CNAME records"
 	} else {
-		for _, cname := range cnames {
-			result.CNAME = append(result.CNAME, string(cname))
-		}
+		result.CNAME = append(result.CNAME, cnames)
 	}
 
 	nses, err := net.LookupNS(uri.Hostname())
@@ -103,7 +101,17 @@ func lookup(request *Request) (int, *data.APIResponse) {
 	return http.StatusOK, response
 }
 
-//DNSLookup look up dns
+// DNSLookup godoc
+// @Summary DNS Lookup
+// @Description Lookup given domain's DNS record (A, CNAME, PTR, NS, MX, TXT, and etc.
+// @Tags Lookup
+// @Accept json,mpfd,x-www-form-urlencoded
+// @Produce json,xml
+// @Param "" body Request true "Request JSON"
+// @Success 200 {object} data.APIResponse
+// @Failure 400 {object} data.APIResponse
+// @Failure 503 {object} data.APIResponse
+// @Router /api/dns-lookup/lookup [post]
 func (API) DNSLookup(c *gin.Context) {
 	request := &Request{}
 
