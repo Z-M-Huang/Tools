@@ -59,7 +59,7 @@
 </div>
 
 <script>
-  bindForm("sendMessageForm", "/api/email-mms-sms/send", (d) => {
+  bindForm("sendMessageForm", "/api/email-mms-sms/send", true, (d) => {
     if (!isNaN(d) && d) {
       showAlertSuccess("Message sent!");
     }
