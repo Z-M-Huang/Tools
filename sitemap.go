@@ -31,8 +31,10 @@ func BuildSitemap() *stm.Sitemap {
 	sm.Add(getPageSiteMap("/swagger/index.html"))
 
 	for _, category := range application.GetAppList() {
-		for _, app := range category.AppCards {
-			sm.Add(getPageSiteMap(app.Link))
+		if category.Category != "Popular" {
+			for _, app := range category.AppCards {
+				sm.Add(getPageSiteMap(app.Link))
+			}
 		}
 	}
 
