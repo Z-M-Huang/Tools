@@ -49,8 +49,8 @@ func GetAppList() []*AppCategory {
 	}
 	if categories == nil || len(categories) == 0 {
 		var appList []*AppCategory
-		appList = append(appList, getAnalyticTools(), getCommunicationTools(), getFormatTools(), getGeneratorTools(),
-			getLookupTools(), getWebUtils())
+		appList = append(appList, getAnalyticTools(), getCommunicationTools(), getCovidTools(),
+			getFormatTools(), getGeneratorTools(), getLookupTools(), getWebUtils())
 		loadAppCardsUsage(appList)
 		appList = append([]*AppCategory{getPopular(appList)}, appList...)
 		err = db.RedisSetBytes(utils.RedisAppListKey, appList, 24*time.Hour)
@@ -71,8 +71,8 @@ func ReloadAppList() {
 		utils.Logger.Error(err.Error())
 	}
 	var appList []*AppCategory
-	appList = append(appList, getAnalyticTools(), getCommunicationTools(), getFormatTools(), getGeneratorTools(),
-		getLookupTools(), getWebUtils())
+	appList = append(appList, getAnalyticTools(), getCommunicationTools(), getCovidTools(),
+		getFormatTools(), getGeneratorTools(), getLookupTools(), getWebUtils())
 	loadAppCardsUsage(appList)
 	appList = append([]*AppCategory{getPopular(appList)}, appList...)
 	categories = appList
@@ -127,6 +127,19 @@ func getCommunicationTools() *AppCategory {
 
 	encoderDecoder := newAppCart("email-mms-sms", "email_mms_sms.gohtml", "", "fas fa-comments",
 		"/app/email-mms-sms", "Free MMS/SMS", "Send free MMS/SMS to phone number online.")
+	tools.AppCards = append(tools.AppCards, encoderDecoder)
+
+	sortAppCardSlice(tools.AppCards)
+	return tools
+}
+
+func getCovidTools() *AppCategory {
+	tools := &AppCategory{
+		Category: "Covid 19",
+	}
+
+	encoderDecoder := newAppCart("covid-19-testing-locations", "covid_testing.gohtml", "", "fas fa-map-marker-alt",
+		"/app/covid-19-testing-locations", "Testing Locations", "Find COVID 19 testing locations near my current location.")
 	tools.AppCards = append(tools.AppCards, encoderDecoder)
 
 	sortAppCardSlice(tools.AppCards)
