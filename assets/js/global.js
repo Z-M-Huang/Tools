@@ -365,10 +365,6 @@ function copyValueOnClick(ele) {
   }
 }
 
-function onClickRedirect(url) {
-  window.location.href = url
-}
-
 function onChangeFileInput(ele) {
   var fileName = $(ele).val();
   $(ele).next('.custom-file-label').html(fileName);
