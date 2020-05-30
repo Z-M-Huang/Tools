@@ -1,7 +1,7 @@
 {{define "app_card"}}
 <div class="card-container col-md-3 hover-105">
   <div class="card">
-    <div class="card-body hover-pointer" onclick="onClickRedirect('{{.Link}}')">
+    <a class="card-body app-card" href="{{.Link}}">
       <div class="row">
         {{if ne .ImageURL ""}}
         <img src="{{.ImageURL}}" class="col-sm-2" />
@@ -14,7 +14,7 @@
           {{end}}
       </div>
       <p class="card-text ellipsis-2">{{.Description}}</p>
-    </div>
+    </a>
     <div class="card-footer">
       <div class="row">
         <div class="col">
