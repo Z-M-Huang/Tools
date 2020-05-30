@@ -32,6 +32,10 @@
   margin-right: 15px;
 }
 
+.app-card {
+  text-decoration: none !important;
+}
+
 .vh-60 {
   height: 60vh
 }
