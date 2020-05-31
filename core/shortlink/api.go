@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/Z-M-Huang/Tools/core"
 	"github.com/Z-M-Huang/Tools/core/account"
@@ -24,13 +25,14 @@ type API struct{}
 
 // Get /api/shortlink/get
 // @Summary Get short link
-// @Description Get short link
+// @Description Get short link. Rate limit: 1,000 per hour
 // @Tags Short-link
 // @Accept json
 // @Produce json,xml
 // @Param "" body Request true "Request JSON"
 // @Success 200 {object} data.APIResponse
 // @Failure 400 {object} data.APIResponse
+// @Failure 429 {object} data.APIResponse
 // @Failure 500 {object} data.APIResponse
 // @Router /api/shortlink/get [post]
 func (API) Get(c *gin.Context) {
@@ -52,6 +54,24 @@ func (API) Get(c *gin.Context) {
 		return
 	}
 
+	ipKey := getIPKey(c.ClientIP())
+	if !db.RedisExist(ipKey) {
+		db.RedisSet(ipKey, 1, 1*time.Hour)
+	} else {
+		counter, err := db.RedisGetInt(ipKey)
+		if err != nil {
+			response.Message = "InternalServer Error. Please try again..."
+			core.WriteResponse(c, http.StatusInternalServerError, response)
+			return
+		}
+		if counter > 1000 {
+			response.Message = "Too many requests. Rate limit is 1000 per hour."
+			core.WriteResponse(c, http.StatusTooManyRequests, response)
+			return
+		}
+		db.RedisIncr(ipKey)
+	}
+
 	shortLink := &db.ShortLink{
 		Link: &request.URL,
 	}
@@ -65,7 +85,7 @@ func (API) Get(c *gin.Context) {
 		if err != nil {
 			utils.Logger.Error(err.Error())
 		} else {
-			shortLink.User = user
+			shortLink.UserID = user.ID
 		}
 	}
 
@@ -78,26 +98,26 @@ func (API) Get(c *gin.Context) {
 
 	host := ""
 	if data.Config.HTTPS {
-		host = "https://"
+		host = "https://" + data.Config.Host
 	} else {
-		host = "http://"
+		host = "http://" + data.Config.Host
 	}
 	response.Data = fmt.Sprintf("%s/s/%d", host, shortLink.ID)
 	core.WriteResponse(c, http.StatusOK, response)
 }
 
-// RedirectShortLInk /s/:id
+// RedirectShortLink /s/:id
 // @Summary Redrect to short link
 // @Description Redrect to short link
 // @Tags Short-link
 // @Accept json
 // @Produce json,xml
-// @Param "" body Request true "Request JSON"
+// @Param id path int true "Short Link ID"
 // @Success 200 {object} data.APIResponse
 // @Failure 400 {object} data.APIResponse
 // @Failure 500 {object} data.APIResponse
-// @Router /s/:id [post]
-func (API) RedirectShortLInk(c *gin.Context) {
+// @Router /s/{id} [post]
+func (API) RedirectShortLink(c *gin.Context) {
 	response := &data.APIResponse{}
 	idStr := c.Param("id")
 	if idStr == "" {
@@ -131,4 +151,8 @@ func (API) RedirectShortLInk(c *gin.Context) {
 	shortlink.Save()
 
 	c.Redirect(http.StatusPermanentRedirect, *shortlink.Link)
+}
+
+func getIPKey(ip string) string {
+	return fmt.Sprintf("APP_SHORT_LINK_IP_%s", ip)
 }

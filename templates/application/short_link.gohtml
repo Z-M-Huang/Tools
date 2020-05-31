@@ -1,0 +1,43 @@
+{{template "header" .Header}}
+<h1>Short Link Generator</h1>
+
+<p class="text-info">Generate short link from long links. </p>
+<p class="text-warning">Generate new link rate limit: 1,000 per hour</p>
+
+<div class="row card mt-3">
+  <div class="card-body">
+    <form id="shortLinkForm">
+      <div class="form-group row d-flex justify-content-center">
+        <label for="url" class="col-sm-3 col-form-label text-right" style="display: 1.5rem;">URL:</label>
+        <div class="col-sm-9">
+          <input type="text" class="form-control col-sm-10" id="url" name="url" aria-describedby="urlHelp">
+        </div>
+      </div>
+      <div class="row d-flex justify-content-center">
+        <button type="submit" class="btn btn-primary btn-lg">Generate</button>
+      </div>
+    </form>
+  </div>
+</div>
+<div class="row card mt-3" style="display: none;">
+  <div class="card-body">
+    <h4 class="card-title">Generated Short Link:</h4>
+    <div class="row">
+      <input class="form-control col-sm-6 offset-sm-3" id="shortlink" onclick="copyValueOnClick(this)" readonly>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+  var s = $("#shortlink");
+
+  bindForm("shortLinkForm", "/api/shortlink/get", true, (d) => {
+    if (d != null && d != undefined && d != "") {
+      s.val(d);
+      s.html(d);
+      s.parent().parent().parent().show();
+    }
+  })
+</script>
+{{template "footer"}}

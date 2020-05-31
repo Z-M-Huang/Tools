@@ -360,6 +360,8 @@ function copyValueOnClick(ele) {
             showAlertWarning("Failed to copy text.", true, 3000);
           }
         );
+      } else {
+        showAlertDanger("Clipboard permission is denied. Please allow to copy to clipboard.", true, 3500);
       }
     });
   }

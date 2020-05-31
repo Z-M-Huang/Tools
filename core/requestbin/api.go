@@ -95,7 +95,7 @@ func (API) CreateRequestBin(c *gin.Context) {
 // @Param id path int true "id from create request"
 // @Success 200 {object} data.APIResponse
 // @Failure 400 {object} data.APIResponse
-// @Router /api/request-bin/receive/:id [post]
+// @Router /api/request-bin/receive/{id} [post]
 func (API) RequestIn(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {

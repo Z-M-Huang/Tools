@@ -7,9 +7,9 @@ import (
 //ShortLink database entity
 type ShortLink struct {
 	gorm.Model
-	Link  *string `gorm:"not null"`
-	Usage uint64  `gorm:"not null;default:0"`
-	User  *User
+	Link   *string `gorm:"not null"`
+	Usage  uint64  `gorm:"not null;default:0"`
+	UserID uint
 }
 
 //Find populate current object

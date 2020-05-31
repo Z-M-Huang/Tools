@@ -13,7 +13,7 @@ type User struct {
 	Email      string `gorm:"primary_key;unique"`
 	GoogleID   string
 	LikedApps  pq.StringArray `gorm:"type:text[]"`
-	ShortLinks []*ShortLink
+	ShortLinks []ShortLink
 }
 
 //Find populate current object
