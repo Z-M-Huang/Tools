@@ -32,7 +32,7 @@ func RedisGet(key string, out interface{}) error {
 	val, err := redisClient.Get(key).Result()
 	if err == redis.Nil {
 		out = nil
-		return nil
+		return errors.New("Not found")
 	} else if err != nil {
 		utils.Logger.Error(err.Error())
 		return errors.New("Internal Error")
@@ -49,7 +49,7 @@ func RedisGet(key string, out interface{}) error {
 func RedisGetString(key string) (string, error) {
 	val, err := redisClient.Get(key).Result()
 	if err == redis.Nil {
-		return "", nil
+		return "", errors.New("Not found")
 	} else if err != nil {
 		utils.Logger.Error(err.Error())
 		return "", errors.New("Internal Error")
@@ -87,7 +87,7 @@ func RedisExist(key string) bool {
 
 //RedisDelete delete key
 func RedisDelete(key string) error {
-	err := redisClient.Exists(key).Err()
+	err := redisClient.Del(key).Err()
 	if err != nil {
 		utils.Logger.Error(err.Error())
 		return fmt.Errorf("Failed to delete %s in Redis", key)

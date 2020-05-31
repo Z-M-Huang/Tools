@@ -24,7 +24,7 @@ func InitDB() {
 	migrate()
 }
 func migrate() {
-	dbContext.AutoMigrate(&User{}, &Application{})
+	dbContext.AutoMigrate(&User{}, &Application{}, &ShortLink{})
 }
 
 //DoTransaction do transaction

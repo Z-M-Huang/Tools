@@ -20,6 +20,7 @@ import (
 	"github.com/Z-M-Huang/Tools/core/portchecker"
 	"github.com/Z-M-Huang/Tools/core/qrcode"
 	"github.com/Z-M-Huang/Tools/core/requestbin"
+	"github.com/Z-M-Huang/Tools/core/shortlink"
 	"github.com/Z-M-Huang/Tools/core/stringencoderdecoder"
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/db"
@@ -310,6 +311,7 @@ func SetupRouter() *gin.Engine {
 	stringencoderdecoderAPI := &stringencoderdecoder.API{}
 	portCheckerAPI := &portchecker.API{}
 	emailmmssmsAPI := &emailmmssms.API{}
+	shortLinkAPI := &shortlink.API{}
 
 	pageNoAuth.GET("/", homePage.Home)
 	pageNoAuth.GET("/signup", accountPage.Signup)
@@ -338,6 +340,8 @@ func SetupRouter() *gin.Engine {
 	apiNoAuth.POST("/qr-code/create", qrcodeAPI.CreateQRCode)
 	apiNoAuth.POST("/request-bin/create", requestBinAPI.CreateRequestBin)
 	apiNoAuth.POST("/string/encodedecode", stringencoderdecoderAPI.EncodeDecode)
+	apiNoAuth.POST("/shortlink/get", shortLinkAPI.Get)
+	router.Any("/s/:id", shortLinkAPI.RedirectShortLink)
 	apiAuthRequired.POST("/app/:name/like", applicationAPI.Like)
 	apiAuthRequired.POST("/app/:name/dislike", applicationAPI.Dislike)
 
