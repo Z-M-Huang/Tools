@@ -31,10 +31,37 @@ function getLocation(host, callback) {
     }
   })
   .fail((xhr) => {
+    if (host == "") {
+      getClientIP(callback);
+    } else {
+      if (xhr.status == 429 || xhr.status == 403) {
+        showAlertDanger("too many requests. Please take a break.");
+      } else {
+        showAlertDanger("failed to get geo location for host " + host);
+      }
+    }
+  })
+}
+
+function getClientIP(callback) {
+  $.ajax({
+    type: "GET",
+    url: "/api/ip-location/get"
+  })
+  .done((d, status, jqXHR) => {
+    if (d != null && d != undefined) {
+      if (d.ip != null && d.ip != undefined) {
+        callback(d);
+      } else {
+        showAlertWarning("failed to get current geo location", true, 3500);
+      }
+    }
+  })
+  .fail((xhr) => {
     if (xhr.status == 429 || xhr.status == 403) {
       showAlertDanger("too many requests. Please take a break.");
     } else {
-      showAlertDanger("failed to get current geo location for host " + host);
+      showAlertDanger("failed to get current geo location");
     }
   })
 }

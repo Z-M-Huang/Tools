@@ -16,6 +16,7 @@ import (
 	"github.com/Z-M-Huang/Tools/core/emailmmssms"
 	"github.com/Z-M-Huang/Tools/core/hilosimulator"
 	"github.com/Z-M-Huang/Tools/core/home"
+	"github.com/Z-M-Huang/Tools/core/iplocation"
 	"github.com/Z-M-Huang/Tools/core/kellycriterion"
 	"github.com/Z-M-Huang/Tools/core/portchecker"
 	"github.com/Z-M-Huang/Tools/core/qrcode"
@@ -312,6 +313,7 @@ func SetupRouter() *gin.Engine {
 	portCheckerAPI := &portchecker.API{}
 	emailmmssmsAPI := &emailmmssms.API{}
 	shortLinkAPI := &shortlink.API{}
+	iplocationAPI := &iplocation.API{}
 
 	pageNoAuth.GET("/", homePage.Home)
 	pageNoAuth.GET("/signup", accountPage.Signup)
@@ -341,6 +343,7 @@ func SetupRouter() *gin.Engine {
 	apiNoAuth.POST("/request-bin/create", requestBinAPI.CreateRequestBin)
 	apiNoAuth.POST("/string/encodedecode", stringencoderdecoderAPI.EncodeDecode)
 	apiNoAuth.POST("/shortlink/get", shortLinkAPI.Get)
+	apiNoAuth.GET("/ip-location/get", iplocationAPI.Get)
 	router.Any("/s/:id", shortLinkAPI.RedirectShortLink)
 	apiAuthRequired.POST("/app/:name/like", applicationAPI.Like)
 	apiAuthRequired.POST("/app/:name/dislike", applicationAPI.Dislike)
