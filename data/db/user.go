@@ -8,11 +8,12 @@ import (
 //User database entity
 type User struct {
 	gorm.Model
-	Username  string `gorm:"unique_index"`
-	Password  string
-	Email     string `gorm:"primary_key;unique"`
-	GoogleID  string
-	LikedApps pq.StringArray `gorm:"type:text[]"`
+	Username   string `gorm:"unique_index"`
+	Password   string
+	Email      string `gorm:"primary_key;unique"`
+	GoogleID   string
+	LikedApps  pq.StringArray `gorm:"type:text[]"`
+	ShortLinks []*ShortLink
 }
 
 //Find populate current object
