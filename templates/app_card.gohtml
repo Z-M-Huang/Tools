@@ -7,7 +7,7 @@
         <img src="{{.ImageURL}}" class="col-sm-2" />
         <h5 class="card-title col-sm-10">{{.Title}}</h5>
         {{else if ne .FontsAwesomeTag ""}}
-        <h2 class="col-sm-2"><i class="{{.FontsAwesomeTag}}"></i></h2>
+        <h4 class="col-sm-2"><i class="{{.FontsAwesomeTag}}"></i></h2>
         <h5 class="card-title col-sm-10 text-truncate">{{.Title}}</h5>
         {{else}}
         <h4>{{.Title}}</h3>
