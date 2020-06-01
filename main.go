@@ -338,6 +338,7 @@ func SetupRouter() *gin.Engine {
 	apiNoAuth.POST("/hilo-simulator/verify", hilosimulatorAPI.HILOVerify)
 	apiNoAuth.POST("/dns-lookup/lookup", dnslookupAPI.DNSLookup)
 	apiNoAuth.POST("/email-mms-sms/send", emailmmssmsAPI.Send)
+	apiNoAuth.POST("/email-mms-sms/lookup", emailmmssmsAPI.Lookup)
 	apiNoAuth.POST("/portchecker/check", portCheckerAPI.Check)
 	apiNoAuth.POST("/qr-code/create", qrcodeAPI.CreateQRCode)
 	apiNoAuth.POST("/request-bin/create", requestBinAPI.CreateRequestBin)

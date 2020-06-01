@@ -249,6 +249,7 @@ func (API) Lookup(c *gin.Context) {
 
 	res, err := client.Do(req)
 	if err != nil {
+		utils.Logger.Error(err.Error())
 		response.Message = "Service Unavailable"
 		core.WriteResponse(c, http.StatusServiceUnavailable, response)
 		return
@@ -259,6 +260,7 @@ func (API) Lookup(c *gin.Context) {
 
 	err = json.Unmarshal(body, &lookupResponse)
 	if err != nil {
+		utils.Logger.Error(err.Error())
 		response.Message = "InternalServer Error"
 		core.WriteResponse(c, http.StatusInternalServerError, response)
 		return
