@@ -1,0 +1,11 @@
+{{define "alert_message"}}
+<div class="position-sticky w-100 d-flex flex-column p-4" aria-live="polite" aria-atomic="true">
+  <!-- Position it -->
+  <div class="position-fixed mr-3 mt-3" style="top: 0; right: 0;" id="toasts">
+
+  </div>
+</div>
+<script>
+  showAlertCondition({{.}});
+</script>
+{{end}}
