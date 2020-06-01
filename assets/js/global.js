@@ -427,3 +427,19 @@ window.alertColors = {
   success: "#28a745",
   info: "#17a2b8"
 }
+
+/*******************************************************
+ *                    Bootstrap
+ *******************************************************/
+//Show page alert
+if (alert != null && alert != undefined) {
+  if (alert.IsInfo) {
+    showAlertInfo(d.Message, true, 3500);
+  } else if (alert.IsSuccess) {
+    showAlertSuccess(d.Message, true, 3500);
+  } else if (alert.IsWarning) {
+    showAlertWarning(d.Message, true, 3500);
+  } else if (alert.IsDanger) {
+    showAlertDanger(alert.Message, true, 3500);
+  }
+}
