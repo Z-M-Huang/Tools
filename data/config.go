@@ -130,4 +130,8 @@ func LoadProductionConfig() {
 	} else if Config.EmailConfig.Password == "" {
 		utils.Logger.Error("EMAIL_PASSWORD is empty. Some feature may not work...")
 	}
+
+	if Config.RapidAPIKey == "" {
+		utils.Logger.Error("RAPIDAPI_KEY is empty. Some feature may not work...")
+	}
 }

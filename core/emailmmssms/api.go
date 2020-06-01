@@ -225,6 +225,11 @@ func (API) Lookup(c *gin.Context) {
 	response := &data.APIResponse{}
 	request := &LookupRequest{}
 	lookupResponse := &LookupResponse{}
+	if data.Config.RapidAPIKey == "" {
+		response.Message = "Service is not correctly setup"
+		core.WriteResponse(c, http.StatusInternalServerError, response)
+		return
+	}
 	err := c.ShouldBind(&request)
 	if err != nil {
 		response.Message = "Bad Request"
