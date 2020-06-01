@@ -1,9 +1,12 @@
 package emailmmssms
 
 import (
+	"bytes"
 	"crypto/tls"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"net/mail"
@@ -24,6 +27,13 @@ type API struct{}
 
 var phoneRe = regexp.MustCompile(`^\d{10}$`)
 var maxDailyEmailAmount int64 = 1500
+
+var client *http.Client
+
+func init() {
+	client = &http.Client{}
+	client.Timeout = 2 * time.Second
+}
 
 func sendEmail(toAddress, subject, content, ipAddress string) error {
 	from := mail.Address{
@@ -197,6 +207,64 @@ func (API) Send(c *gin.Context) {
 	response.Data = true
 	core.WriteResponse(c, http.StatusOK, response)
 	return
+}
+
+// Lookup /api/email-mms-sms/lookup
+// @Summary Phone number lookup
+// @Description Phone number lookup
+// @Tags MMS-SMS
+// @Accept json
+// @Produce json,xml
+// @Param "" body LookupRequest true "Request JSON"
+// @Success 200 {object} data.APIResponse
+// @Failure 400 {object} data.APIResponse
+// @Failure 500 {object} data.APIResponse
+// @Failure 503 {object} data.APIResponse
+// @Router /api/email-mms-sms/lookup [post]
+func (API) Lookup(c *gin.Context) {
+	response := &data.APIResponse{}
+	request := &LookupRequest{}
+	lookupResponse := &LookupResponse{}
+	err := c.ShouldBind(&request)
+	if err != nil {
+		response.Message = "Bad Request"
+		core.WriteResponse(c, http.StatusBadRequest, response)
+		return
+	}
+
+	reqBytes, err := json.Marshal(request)
+	if err != nil {
+		response.Message = "Bad Request"
+		core.WriteResponse(c, http.StatusBadRequest, response)
+		return
+	}
+	url := "https://f-sm-jorquera-phone-insights-v1.p.rapidapi.com/parse"
+
+	req, _ := http.NewRequest("POST", url, bytes.NewReader(reqBytes))
+
+	req.Header.Add("x-rapidapi-host", "f-sm-jorquera-phone-insights-v1.p.rapidapi.com")
+	req.Header.Add("x-rapidapi-key", data.Config.RapidAPIKey)
+	req.Header.Add("content-type", "application/json")
+	req.Header.Add("accept", "application/json")
+
+	res, err := client.Do(req)
+	if err != nil {
+		response.Message = "Service Unavailable"
+		core.WriteResponse(c, http.StatusServiceUnavailable, response)
+		return
+	}
+
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+
+	err = json.Unmarshal(body, &lookupResponse)
+	if err != nil {
+		response.Message = "InternalServer Error"
+		core.WriteResponse(c, http.StatusInternalServerError, response)
+		return
+	}
+	response.Data = lookupResponse
+	core.WriteResponse(c, http.StatusOK, response)
 }
 
 func checkIPToNumberAllowed(ipAddress, toNumber string) (int, error) {

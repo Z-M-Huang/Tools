@@ -18,6 +18,8 @@ type Configuration struct {
 	GoogleOauthConfig *GoogleOauthConfiguration
 	EmailConfig       *EmailConfiguration
 
+	RapidAPIKey string
+
 	JwtKey          []byte
 	Host            string
 	ResourceVersion string
@@ -102,6 +104,7 @@ func LoadProductionConfig() {
 			EmailAddress: strings.TrimSpace(os.Getenv("EMAIL_ADDRESS")),
 			Password:     strings.TrimSpace(os.Getenv("EMAIL_PASSWORD")),
 		},
+		RapidAPIKey:     strings.TrimSpace(os.Getenv("RAPIDAPI_KEY")),
 		JwtKey:          []byte(strings.TrimSpace(os.Getenv("JWT_KEY"))),
 		Host:            strings.TrimSuffix(strings.TrimSpace(os.Getenv("HOST")), "/"),
 		ResourceVersion: strings.TrimSpace(os.Getenv("RESOURCE_VERSION")),
