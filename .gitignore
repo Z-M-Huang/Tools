@@ -20,3 +20,4 @@ node_modules
 *.db
 robots.txt
 __debug_bin
+coverage.txt
