@@ -1,39 +1,16 @@
 package requestbin
 
 import (
-	"os"
+	"bytes"
+	"net/http"
+	"net/http/httptest"
+	"net/url"
 	"testing"
 
 	"github.com/Z-M-Huang/Tools/data"
-	"github.com/Z-M-Huang/Tools/data/db"
-	"github.com/alicebob/miniredis"
+	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
-
-func TestMain(m *testing.M) {
-	setup()
-	ret := m.Run()
-	os.Exit(ret)
-}
-
-func setup() {
-	mr, err := miniredis.Run()
-	if err != nil {
-		panic(err)
-	}
-
-	data.Config = &data.Configuration{
-		DatabaseConfig: &data.DatabaseConfiguration{
-			ConnectionString: "./test.db",
-			Driver:           "sqlite3",
-		},
-		RedisConfig: &data.RedisConfiguration{
-			Addr: mr.Addr(),
-		},
-		Host: "localhost",
-	}
-	db.InitRedis()
-}
 
 func TestCreate(t *testing.T) {
 	bin := create(false)
@@ -51,6 +28,32 @@ func TestCreate(t *testing.T) {
 	assert.NotEmpty(t, privateBin.VerificationKey)
 }
 
+func TestCreateRequestBin(t *testing.T) {
+	w := httptest.NewRecorder()
+	gin.SetMode(gin.TestMode)
+	c, r := gin.CreateTestContext(w)
+
+	api := &API{}
+	r.POST("/request-bin/create", api.CreateRequestBin)
+	form := url.Values{}
+	form.Add("isPrivate", "true")
+	c.Request, _ = http.NewRequest("POST", "/request-bin/create", bytes.NewBufferString(form.Encode()))
+	c.Request.Header.Add("content-type", "application/x-www-form-urlencoded")
+	r.ServeHTTP(w, c.Request)
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestCreateRequestBinFail(t *testing.T) {
+	w := httptest.NewRecorder()
+	gin.SetMode(gin.TestMode)
+	c, r := gin.CreateTestContext(w)
+	api := &API{}
+	r.POST("/request-bin/create", api.CreateRequestBin)
+	c.Request, _ = http.NewRequest("POST", "/request-bin/create", nil)
+	r.ServeHTTP(w, c.Request)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
 func TestGetRequestBinHistory(t *testing.T) {
 	binData := create(false)
 
@@ -61,4 +64,50 @@ func TestGetRequestBinHistory(t *testing.T) {
 func TestGetRequestBinHistoryFail(t *testing.T) {
 	redisBinData := GetRequestBinHistory("123456")
 	assert.Empty(t, redisBinData)
+}
+
+func TestRequestIn(t *testing.T) {
+	bin := create(false)
+	methods := []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodOptions, http.MethodPatch}
+	for _, m := range methods {
+		w := httptest.NewRecorder()
+		gin.SetMode(gin.TestMode)
+		c, r := gin.CreateTestContext(w)
+		api := &API{}
+		form := url.Values{}
+		form.Add("test", "test")
+		r.Any("/api/request-bin/receive/:id", api.RequestIn)
+		c.Request, _ = http.NewRequest(m, "/api/request-bin/receive/"+bin.ID, bytes.NewBufferString(form.Encode()))
+		c.Request.Header.Add("content-type", "application/x-www-form-urlencoded")
+		r.ServeHTTP(w, c.Request)
+		assert.Equal(t, http.StatusOK, w.Code, m)
+	}
+}
+
+func TestRequestInFailNoID(t *testing.T) {
+	w := httptest.NewRecorder()
+	gin.SetMode(gin.TestMode)
+	c, r := gin.CreateTestContext(w)
+	api := &API{}
+	form := url.Values{}
+	form.Add("test", "test")
+	r.Any("/api/request-bin/receive/:id", api.RequestIn)
+	c.Request, _ = http.NewRequest("POST", "/api/request-bin/receive/", bytes.NewBufferString(form.Encode()))
+	c.Request.Header.Add("content-type", "application/x-www-form-urlencoded")
+	r.ServeHTTP(w, c.Request)
+	assert.Equal(t, http.StatusNotFound, w.Code)
+}
+
+func TestRequestInFailNotFoundID(t *testing.T) {
+	w := httptest.NewRecorder()
+	gin.SetMode(gin.TestMode)
+	c, r := gin.CreateTestContext(w)
+	api := &API{}
+	form := url.Values{}
+	form.Add("test", "test")
+	r.Any("/api/request-bin/receive/:id", api.RequestIn)
+	c.Request, _ = http.NewRequest("POST", "/api/request-bin/receive/123", bytes.NewBufferString(form.Encode()))
+	c.Request.Header.Add("content-type", "application/x-www-form-urlencoded")
+	r.ServeHTTP(w, c.Request)
+	assert.Equal(t, http.StatusNotFound, w.Code)
 }
