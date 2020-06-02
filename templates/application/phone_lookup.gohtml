@@ -52,7 +52,7 @@ Please enter phone numebr as E164 format. For example, +11234567890, where +1 re
       table.append('<tr><th>Carrier</th><td>' + d.carrier + '</td></tr>');
       table.append('<tr><th>E164 Formatted</th><td>' + d.phone_number_e164 + '</td></tr>');
       var map = $("#mapDiv");
-      map.html('<iframe width="100%" height="100%" frameborder="0" style="border:0" src="https://www.google.com/maps/embed/v1/view?key=AIzaSyD9Lv8AUsCVNDY2oniFkMK-5hyInXgQfuA&center=' + d.location_latitude + ',' + d.location_longitude + '&zoom=8" allowfullscreen></iframe>');
+      map.html('<iframe width="100%" height="100%" frameborder="0" style="border:0" src="https://www.google.com/maps/embed/v1/view?key=AIzaSyD9Lv8AUsCVNDY2oniFkMK-5hyInXgQfuA&center=' + d.location_latitude + ',' + d.location_longitude + '&zoom=6" allowfullscreen></iframe>');
       $("#resultDiv").show();
     }
   })

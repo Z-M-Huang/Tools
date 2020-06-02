@@ -1,7 +1,7 @@
 # Tools
 Tools for fun
 
-![Docker Release CI](https://github.com/Z-M-Huang/Tools/workflows/Docker%20Release%20CI/badge.svg)[![Build Status](https://travis-ci.org/Z-M-Huang/Tools.svg?branch=master)](https://travis-ci.org/Z-M-Huang/Tools)
+![Docker Release CI](https://github.com/Z-M-Huang/Tools/workflows/Docker%20Release%20CI/badge.svg)[![Build Status](https://travis-ci.org/Z-M-Huang/Tools.svg?branch=master)](https://travis-ci.org/Z-M-Huang/Tools)[![codecov](https://codecov.io/gh/Z-M-Huang/Tools/branch/master/graph/badge.svg)](https://codecov.io/gh/Z-M-Huang/Tools)
 
 [Fun Apps](https://tools.zh-code.com)
 
