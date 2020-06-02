@@ -259,8 +259,12 @@ func (API) Lookup(c *gin.Context) {
 		core.WriteResponse(c, http.StatusServiceUnavailable, response)
 		return
 	}
-
 	defer res.Body.Close()
+	if res.StatusCode != http.StatusOK {
+		response.Message = "InternalServer Error"
+		core.WriteResponse(c, http.StatusInternalServerError, response)
+		return
+	}
 	body, err := ioutil.ReadAll(res.Body)
 
 	err = json.Unmarshal(body, &lookupResponse)

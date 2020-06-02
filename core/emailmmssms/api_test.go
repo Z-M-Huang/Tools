@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/data/db"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -143,4 +144,42 @@ func TestUnknownCarrier(t *testing.T) {
 	c.Request.Header.Add("content-type", "application/x-www-form-urlencoded")
 	r.ServeHTTP(w, c.Request)
 	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func TestGetCarrier(t *testing.T) {
+	carriers := []string{"AT&T", "T-Mobile", "Verizon", "Sprint", "Xfinity", "Virgin Mobile", "Tracfone", "Simple Mobile", "Mint Mobile", "Red Pocket", "Page Plus", "Metro PCS", "Boost Mobile", "Cricket", "Republic Wireless", "Google Fi", "U.S. Cellular", "Ting", "Consumer Cellular", "C-Spire"}
+	for _, c := range carriers {
+		assert.NotEmpty(t, getCarrierGateway(c))
+	}
+}
+
+func TestLookupNoConfig(t *testing.T) {
+	w := httptest.NewRecorder()
+	gin.SetMode(gin.TestMode)
+	c, r := gin.CreateTestContext(w)
+
+	api := &API{}
+	r.POST("/api/email-mms-sms/lookup", api.Lookup)
+	form := url.Values{}
+	form.Add("phone_number", "+11234567890")
+	c.Request, _ = http.NewRequest("POST", "/api/email-mms-sms/lookup", bytes.NewBufferString(form.Encode()))
+	c.Request.Header.Add("content-type", "application/x-www-form-urlencoded")
+	r.ServeHTTP(w, c.Request)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+}
+
+func TestLookupInvalidAPIKey(t *testing.T) {
+	data.Config.RapidAPIKey = "abcd"
+	w := httptest.NewRecorder()
+	gin.SetMode(gin.TestMode)
+	c, r := gin.CreateTestContext(w)
+
+	api := &API{}
+	r.POST("/api/email-mms-sms/lookup", api.Lookup)
+	form := url.Values{}
+	form.Add("phone_number", "+11234567890")
+	c.Request, _ = http.NewRequest("POST", "/api/email-mms-sms/lookup", bytes.NewBufferString(form.Encode()))
+	c.Request.Header.Add("content-type", "application/x-www-form-urlencoded")
+	r.ServeHTTP(w, c.Request)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
