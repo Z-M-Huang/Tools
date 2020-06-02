@@ -10,13 +10,16 @@ Please add environment variables to have this repo run properly.
 ```
 "env": {
   "DEBUG": "1",
+  "RESOURCE_VERSION": "1",
   "HOST": "localhsot",
   "JWT_KEY": "aLNDHKx6NftYrKsPs4GAdQc3ugCjrLbh",
   "GOOGLE_CLIENT_ID": "not empty sample string",
   "GOOGLE_CLIENT_SECRET": "not empty sample string",
   "REDIS_ADDR": "ip:port",
   "CONNECTION_STRING": "./db.db",
-  "DB_DRIVER": "sqlite3"
+  "DB_DRIVER": "sqlite3",
+  "ENABLE_SITEMAP": true,
+  "SITEMAP_HTTPS": false
 }
 ```
 Some variables cannot be empty but set a random string would help you start faster. Also, JWT_KEY can be random string for you to start. And I hope you change it.
