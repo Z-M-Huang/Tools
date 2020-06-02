@@ -1,9 +1,11 @@
 language: go
+sudo: false
 
 go:
  - 1.14
+ - tip
 
- before_install:
+before_install:
   - go get -t -v ./...
 
 script:
