@@ -210,9 +210,13 @@ func getWebUtils() *AppCategory {
 		Category: "Web Utils",
 	}
 
-	dnsLookup := newAppCart("request-bin", "request_bin.gohtml", "", "fas fa-receipt",
+	requestBin := newAppCart("request-bin", "request_bin.gohtml", "", "fas fa-receipt",
 		"/app/request-bin", "Request Bin", "Receive and visualize HTTP requests for any method.")
-	tools.AppCards = append(tools.AppCards, dnsLookup)
+	tools.AppCards = append(tools.AppCards, requestBin)
+
+	webEditor := newAppCart("web-editor", "web_editor.gohtml", "", "fas fa-file",
+		"/app/web-editor", "Web Editor", "Online free document editor. Powered by editor.js")
+	tools.AppCards = append(tools.AppCards, webEditor)
 
 	sortAppCardSlice(tools.AppCards)
 	return tools
