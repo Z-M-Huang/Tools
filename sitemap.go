@@ -26,8 +26,6 @@ func BuildSitemap() *stm.Sitemap {
 	sm.Create()
 
 	sm.Add(getPageSiteMap("/"))
-	sm.Add(getPageSiteMap("/login"))
-	sm.Add(getPageSiteMap("/signup"))
 	sm.Add(getPageSiteMap("/swagger/index.html"))
 
 	for _, category := range application.GetAppList() {
