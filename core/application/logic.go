@@ -179,6 +179,10 @@ func getLookupTools() *AppCategory {
 		Category: "Lookup",
 	}
 
+	daysLived := newAppCart("days-lived", "days_lived.gohtml", "", "fas fa-calendar-alt",
+		"/app/days-lived", "Days Lived", "Do you want to know how many days have you lived so far? Let's find it out.")
+	tools.AppCards = append(tools.AppCards, daysLived)
+
 	dnsLookup := newAppCart("dns-lookup", "dns_lookup.gohtml", "", "fas fa-receipt",
 		"/app/dns-lookup", "DNS Lookup", "Lookup given domain's DNS record (A, CNAME, PTR, NS, MX, TXT, and etc.")
 	tools.AppCards = append(tools.AppCards, dnsLookup)

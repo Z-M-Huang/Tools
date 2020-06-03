@@ -1,0 +1,54 @@
+{{template "header" .Header}}
+<h1>How many days have you lived?</h1>
+<p class="text-info">Let's find out!</p>
+
+<div class="card row">
+  <div class="card-body">
+    <div class="form-group row d-flex justify-content-around">
+      <div class="row">
+        <label class="col-sm-6 col-form-label text-right">Month:</label>
+        <input type="number" class="form-control col-sm-6" id="month" max="12" min="1" step="1" value="1" />
+      </div>
+      <div class="row">
+        <label class="col-sm-6 col-form-label text-right">Day:</label>
+        <input type="number" class="form-control col-sm-6" id="day" max="31" min="1" step="1" value="1" />
+      </div>      
+      <div class="row">
+        <label class="col-sm-6 col-form-label text-right">Year:</label>
+        <input type="number" class="form-control col-sm-6" id="year" max="2099" min="1970" step="1" value="1990" />
+      </div>
+      <div class="row">
+        <button class="btn btn-primary" onclick="calculate(); return false;">Find out now!</button>
+      </div>
+    </div>
+    <div class="row d-flex justify-content-center" id="resultDiv" style="display: none;"></div>
+  </div>
+</div>
+
+<script>
+  var resultDiv = $("#resultDiv")  
+  var oneDay = 1000 * 60 * 60 * 24 
+  function calculate() {
+    resultDiv.hide();
+    var month = $("#month").val() - 1;
+    var day = $("#day").val();
+    var year = $("#year").val();
+    var d = new Date(year, month, day);
+    var today = new Date();
+    var diff = today.getTime() - d.getTime();
+    var days = Math.round(diff / oneDay);
+    if (diff < 0) {
+      resultDiv.html("<h3 class=\"text-success\">Hello time traveller! You will be born in next  <b>" + (days * -1) + "</b>  days!</h3>")
+    } else if (diff == 0) {
+      resultDiv.html("<h3 class=\"text-success\">Happy birthday!</h3>")
+    } else {
+      if (days == 1) {
+        resultDiv.html("<h3 class=\"text-success\">Today is the first day you've been around!</h3>")
+      } else {
+        resultDiv.html("<h3 class=\"text-success\">You've lived for  <b>" + days + "</b>  days!</h3>")
+      }
+    }
+    resultDiv.slideToggle();
+  }
+</script>
+{{template "footer"}}
