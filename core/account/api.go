@@ -31,8 +31,8 @@ var googleOauthConfig *oauth2.Config
 func InitGoogleOauth() {
 	googleOauthConfig = &oauth2.Config{
 		RedirectURL:  fmt.Sprintf("https://%s/google_oauth", data.Config.Host),
-		ClientID:     data.Config.GoogleOauthConfig.ClientID,
-		ClientSecret: data.Config.GoogleOauthConfig.ClientSecret,
+		ClientID:     data.GoogleOauthConfig.ClientID,
+		ClientSecret: data.GoogleOauthConfig.ClientSecret,
 		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"},
 		Endpoint:     google.Endpoint,
 	}

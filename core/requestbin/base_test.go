@@ -22,14 +22,14 @@ func setup() {
 	}
 
 	data.Config = &data.Configuration{
-		DatabaseConfig: &data.DatabaseConfiguration{
-			ConnectionString: "./test.db",
-			Driver:           "sqlite3",
-		},
-		RedisConfig: &data.RedisConfiguration{
-			Addr: mr.Addr(),
-		},
 		Host: "localhost",
+	}
+	data.DatabaseConfig = &data.DatabaseConfiguration{
+		ConnectionString: "./test.db",
+		Driver:           "sqlite3",
+	}
+	data.RedisConfig = &data.RedisConfiguration{
+		Addr: mr.Addr(),
 	}
 	db.InitRedis()
 }

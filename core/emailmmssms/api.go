@@ -38,7 +38,7 @@ func init() {
 func sendEmail(toAddress, subject, content, ipAddress string) error {
 	from := mail.Address{
 		Name:    "",
-		Address: data.Config.EmailConfig.EmailAddress,
+		Address: data.EmailConfig.EmailAddress,
 	}
 	to := mail.Address{
 		Name:    "",
@@ -59,9 +59,9 @@ func sendEmail(toAddress, subject, content, ipAddress string) error {
 	message += "\r\n" + content
 
 	//smtp.gmail.com:465
-	host, _, _ := net.SplitHostPort(data.Config.EmailConfig.SMTPServer)
+	host, _, _ := net.SplitHostPort(data.EmailConfig.SMTPServer)
 
-	auth := smtp.PlainAuth("", data.Config.EmailConfig.EmailAddress, data.Config.EmailConfig.Password, host)
+	auth := smtp.PlainAuth("", data.EmailConfig.EmailAddress, data.EmailConfig.Password, host)
 
 	// TLS config
 	tlsconfig := &tls.Config{
@@ -72,7 +72,7 @@ func sendEmail(toAddress, subject, content, ipAddress string) error {
 	// Here is the key, you need to call tls.Dial instead of smtp.Dial
 	// for smtp servers running on 465 that require an ssl connection
 	// from the very beginning (no starttls)
-	conn, err := tls.Dial("tcp", data.Config.EmailConfig.SMTPServer, tlsconfig)
+	conn, err := tls.Dial("tcp", data.EmailConfig.SMTPServer, tlsconfig)
 	if err != nil {
 		utils.Logger.Error(err.Error())
 		return errors.New("Failed to connect to email server")
