@@ -17,7 +17,7 @@ var dbContext *gorm.DB
 //InitDB init db
 func InitDB() {
 	var err error
-	dbContext, err = gorm.Open(data.Config.DatabaseConfig.Driver, data.Config.DatabaseConfig.ConnectionString)
+	dbContext, err = gorm.Open(data.DatabaseConfig.Driver, data.DatabaseConfig.ConnectionString)
 	if err != nil {
 		utils.Logger.Sugar().Fatalf("failed to open database %s", err.Error())
 	}

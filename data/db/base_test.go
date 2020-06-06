@@ -22,16 +22,14 @@ func setup() {
 		panic(err)
 	}
 
-	data.Config = &data.Configuration{
-		DatabaseConfig: &data.DatabaseConfiguration{
-			ConnectionString: "./test.db",
-			Driver:           "sqlite3",
-		},
-		RedisConfig: &data.RedisConfiguration{
-			Addr: mr.Addr(),
-		},
+	data.Config = &data.Configuration{}
+	data.DatabaseConfig = &data.DatabaseConfiguration{
+		ConnectionString: "./test.db",
+		Driver:           "sqlite3",
 	}
-
+	data.RedisConfig = &data.RedisConfiguration{
+		Addr: mr.Addr(),
+	}
 	InitDB()
 	InitRedis()
 }
@@ -41,7 +39,7 @@ func teardown() {
 	if err != nil {
 		utils.Logger.Error(err.Error())
 	} else {
-		err = os.Remove(data.Config.DatabaseConfig.ConnectionString)
+		err = os.Remove(data.DatabaseConfig.ConnectionString)
 		if err != nil {
 			utils.Logger.Error(err.Error())
 		}

@@ -27,23 +27,23 @@ func setup() {
 	}
 
 	data.Config = &data.Configuration{
-		DatabaseConfig: &data.DatabaseConfiguration{
-			ConnectionString: "./test.db",
-			Driver:           "sqlite3",
-		},
-		RedisConfig: &data.RedisConfiguration{
-			Addr: mr.Addr(),
-		},
-		GoogleOauthConfig: &data.GoogleOauthConfiguration{
-			ClientID:     "testClientID",
-			ClientSecret: "testClientSecret",
-		},
 		JwtKey:          []byte("CBYtDWTfRU5Pv7yULj46vm8ueZG7hbnq"),
 		Host:            "localhost",
 		ResourceVersion: "1",
 		IsDebug:         true,
 		HTTPS:           false,
 		EnableSitemap:   true,
+	}
+	data.DatabaseConfig = &data.DatabaseConfiguration{
+		ConnectionString: "./test.db",
+		Driver:           "sqlite3",
+	}
+	data.RedisConfig = &data.RedisConfiguration{
+		Addr: mr.Addr(),
+	}
+	data.GoogleOauthConfig = &data.GoogleOauthConfiguration{
+		ClientID:     "testClientID",
+		ClientSecret: "testClientSecret",
 	}
 
 	db.InitDB()
@@ -55,7 +55,7 @@ func teardown() {
 	if err != nil {
 		utils.Logger.Error(err.Error())
 	} else {
-		err = os.Remove(data.Config.DatabaseConfig.ConnectionString)
+		err = os.Remove(data.DatabaseConfig.ConnectionString)
 		if err != nil {
 			utils.Logger.Error(err.Error())
 		}
