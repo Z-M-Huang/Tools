@@ -1,0 +1,18 @@
+{{template "header" .Header}}
+  {{if .Data}}
+    {{$length := add (len .Data) -1}}
+    {{range $cardIndex, $card := .Data}}
+      {{if eq (mod $cardIndex 4) 0}}
+        <div class="row">
+      {{end}}
+      
+      {{template "app_card" $card}}
+
+      {{if or (eq (mod $cardIndex 4) 3) (eq $cardIndex $length)}}
+        </div>
+      {{end}}
+    {{end}}
+  {{else}}
+    <h2>No result found</h2>
+  {{end}}
+{{template "footer"}}

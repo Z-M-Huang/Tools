@@ -110,3 +110,52 @@ func TestRenderApplicationPageWithInvalidApp(t *testing.T) {
 	r.ServeHTTP(w, c.Request)
 	assert.Equal(t, http.StatusNotFound, w.Code)
 }
+
+func TestSearchApps(t *testing.T) {
+	LoadSearchMappings()
+	for _, category := range GetAppList() {
+		for _, app := range category.AppCards {
+			w := httptest.NewRecorder()
+			gin.SetMode(gin.TestMode)
+			c, r := gin.CreateTestContext(w)
+			r.SetHTMLTemplate(loadTemplateRenderer())
+
+			page := &Page{}
+			r.GET("/search", testHandler(), page.SearchApps)
+			c.Request, _ = http.NewRequest("GET", "/search?keywords="+app.Name, nil)
+			r.ServeHTTP(w, c.Request)
+			assert.Equal(t, http.StatusOK, w.Code)
+		}
+	}
+}
+
+func TestNoBleve(t *testing.T) {
+	searchIndex = nil
+	for _, category := range GetAppList() {
+		for _, app := range category.AppCards {
+			w := httptest.NewRecorder()
+			gin.SetMode(gin.TestMode)
+			c, r := gin.CreateTestContext(w)
+			r.SetHTMLTemplate(loadTemplateRenderer())
+
+			page := &Page{}
+			r.GET("/search", testHandler(), page.SearchApps)
+			c.Request, _ = http.NewRequest("GET", "/search?keywords="+app.Name, nil)
+			r.ServeHTTP(w, c.Request)
+			assert.Equal(t, http.StatusInternalServerError, w.Code)
+		}
+	}
+}
+
+func TestNoSearchQuery(t *testing.T) {
+	w := httptest.NewRecorder()
+	gin.SetMode(gin.TestMode)
+	c, r := gin.CreateTestContext(w)
+	r.SetHTMLTemplate(loadTemplateRenderer())
+
+	page := &Page{}
+	r.GET("/search", testHandler(), page.SearchApps)
+	c.Request, _ = http.NewRequest("GET", "/search", nil)
+	r.ServeHTTP(w, c.Request)
+	assert.Equal(t, http.StatusTemporaryRedirect, w.Code)
+}

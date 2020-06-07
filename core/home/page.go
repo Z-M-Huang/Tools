@@ -23,7 +23,7 @@ func (Page) Home(c *gin.Context) {
 		}
 		err := user.Find()
 		if err == nil && len(user.LikedApps) > 0 {
-			response.Data = application.GetApplicationWithLiked(user)
+			response.Data = application.GetAppListWithLiked(user)
 		}
 	}
 
