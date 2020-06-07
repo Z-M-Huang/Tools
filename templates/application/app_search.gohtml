@@ -1,5 +1,4 @@
 {{template "header" .Header}}
-<div class="row">
   {{if .Data}}
     {{$length := add (len .Data) -1}}
     {{range $cardIndex, $card := .Data}}
@@ -16,5 +15,4 @@
   {{else}}
     <h2>No result found</h2>
   {{end}}
-</div>
 {{template "footer"}}
