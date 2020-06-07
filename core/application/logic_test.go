@@ -18,8 +18,8 @@ func TestGetApplicationsByName(t *testing.T) {
 func TestGetApplicationWithLiked(t *testing.T) {
 	user := &db.User{}
 	user.LikedApps = []string{"DNS Lookup"}
-	assert.NotEmpty(t, GetApplicationWithLiked(user))
-	assert.Empty(t, GetApplicationWithLiked(nil))
+	assert.NotEmpty(t, GetAppListWithLiked(user))
+	assert.Empty(t, GetAppListWithLiked(nil))
 }
 
 func TestReloadAppList(t *testing.T) {

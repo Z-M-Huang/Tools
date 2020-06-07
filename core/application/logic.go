@@ -28,8 +28,8 @@ func GetApplicationsByName(name string) *AppCard {
 	return nil
 }
 
-//GetApplicationsByNames get application by names
-func GetApplicationsByNames(name []string) []*AppCard {
+//GetAppListByNames get application by names
+func GetAppListByNames(name []string) []*AppCard {
 	cards := []*AppCard{}
 	for _, category := range GetAppListWithoutPopular() {
 		for _, app := range category.AppCards {
@@ -43,8 +43,41 @@ func GetApplicationsByNames(name []string) []*AppCard {
 	return cards
 }
 
-//GetApplicationWithLiked get application with liked populated
-func GetApplicationWithLiked(user *db.User) []*AppCategory {
+//GetAppListByNamesWithLikes get application by names
+func GetAppListByNamesWithLikes(user *db.User, name []string) []*AppCard {
+	cards := []*AppCard{}
+	for _, category := range GetAppListWithLikedWithoutPopular(user) {
+		for _, app := range category.AppCards {
+			for _, n := range name {
+				if app.Name == n {
+					cards = append(cards, app)
+				}
+			}
+		}
+	}
+	return cards
+}
+
+//GetAppListWithLiked get application with liked populated
+func GetAppListWithLiked(user *db.User) []*AppCategory {
+	if user != nil && len(user.LikedApps) > 0 {
+		appList := GetAppList()
+		for _, category := range appList {
+			for _, app := range category.AppCards {
+				for _, likedApp := range user.LikedApps {
+					if app.Title == likedApp {
+						app.Liked = true
+					}
+				}
+			}
+		}
+		return appList
+	}
+	return nil
+}
+
+//GetAppListWithLikedWithoutPopular get application with liked populated
+func GetAppListWithLikedWithoutPopular(user *db.User) []*AppCategory {
 	if user != nil && len(user.LikedApps) > 0 {
 		appList := GetAppListWithoutPopular()
 		for _, category := range appList {

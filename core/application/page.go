@@ -4,8 +4,10 @@ import (
 	"net/http"
 
 	"github.com/Z-M-Huang/Tools/core"
+	"github.com/Z-M-Huang/Tools/core/account"
 	"github.com/Z-M-Huang/Tools/core/requestbin"
 	"github.com/Z-M-Huang/Tools/data"
+	"github.com/Z-M-Huang/Tools/data/db"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/blevesearch/bleve"
 	"github.com/gin-gonic/gin"
@@ -45,6 +47,7 @@ func (Page) RenderApplicationPage(c *gin.Context) {
 //SearchApps search apps in search bar
 func (Page) SearchApps(c *gin.Context) {
 	response := c.Keys[utils.ResponseCtxKey].(*data.PageResponse)
+	claim := account.GetClaimInContext(c.Keys)
 	keys := c.Query("keywords")
 	if keys == "" {
 		c.Redirect(http.StatusTemporaryRedirect, "/")
@@ -69,7 +72,17 @@ func (Page) SearchApps(c *gin.Context) {
 	for _, h := range searchResult.Hits {
 		names = append(names, h.ID)
 	}
-	response.Data = GetApplicationsByNames(names)
+	if !(claim == nil) {
+		user := &db.User{
+			Email: claim.Id,
+		}
+		err := user.Find()
+		if err == nil && len(user.LikedApps) > 0 {
+			response.Data = GetAppListByNamesWithLikes(user, names)
+		}
+	} else {
+		response.Data = GetAppListByNames(names)
+	}
 	response.Header.Title = "Search - Fun Apps"
 	response.Header.Description = "Fun apps, fun personal small projects, and just for fun."
 	c.HTML(http.StatusOK, "app_search.gohtml", response)

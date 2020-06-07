@@ -119,18 +119,7 @@ function bindForm(id, url, showSpinner, callback) {
         }
       }
     })
-    .fail((xhr) => {
-      var data = xhr.responseJSON;
-      if (data != "" && data != undefined && data != null) {
-        if (xhr.status == 401) {
-          showAlertDanger("Please login first");
-        } else {
-          showAlertCondition(xhr.status, data.Message);
-        }
-      } else {
-        showAlertDanger("Failed to receive success response, please try again later.");
-      }
-    })
+    .fail((xhr) => ajaxFail(xhr))
     .always(() => {
       if (showSpinner) {
         submitButtons.removeAttr('disabled');
@@ -178,18 +167,7 @@ function bindFormWithFile(id, url, showSpinner, callback) {
         }
       }
     })
-    .fail((xhr) => {
-      var data = xhr.responseJSON;
-      if (data != "" && data != undefined && data != null) {
-        if (xhr.status == 401) {
-          showAlertDanger("Please login first");
-        } else {
-          showAlertCondition(xhr.status, data.Message);
-        }
-      } else {
-        showAlertDanger("Failed to receive success response, please try again later.");
-      }
-    })
+    .fail((xhr) => ajaxFail(xhr))
     .always(() => {
       if (showSpinner) {
         submitButtons.removeAttr('disabled');
@@ -219,18 +197,7 @@ function postJSONData(url, data, callback) {
       }
     }
   })
-  .fail((xhr) => {
-    var data = xhr.responseJSON;
-    if (data != "" && data != undefined && data != null) {
-      if (xhr.status == 401) {
-        showAlertDanger("Please login first");
-      } else {
-        showAlertCondition(xhr.status, data.Message);
-      }
-    } else {
-      showAlertDanger("Failed to receive success response, please try again later.");
-    }
-  });
+  .fail((xhr) => ajaxFail(xhr));
 }
 
 function postLink(url, callback) {
@@ -259,18 +226,22 @@ function postLink(url, callback) {
       }
     }
   })
-  .fail((xhr) => {
+  .fail((xhr) => ajaxFail(xhr));
+}
+
+function ajaxFail(xhr) {
+  if (xhr.status == 401) {
+    showAlertDanger("Please login first");
+  } else {
     var data = xhr.responseJSON;
     if (data != "" && data != undefined && data != null) {
-      if (xhr.status == 401) {
-        showAlertDanger("Please login first");
-      } else {
         showAlertCondition(xhr.status, data.Message);
-      }
     } else {
-      showAlertDanger("Failed to receive success response, please try again later.");
+      showAlertDanger(
+        "Failed to receive success response, please try again later."
+      );
     }
-  });
+  }
 }
 
 /*******************************************************
