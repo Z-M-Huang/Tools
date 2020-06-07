@@ -9,11 +9,9 @@ import (
 	"github.com/Z-M-Huang/Tools/data/db"
 	"github.com/Z-M-Huang/Tools/utils"
 	"github.com/blevesearch/bleve"
-	"github.com/blevesearch/bleve/mapping"
 	"github.com/jinzhu/gorm"
 )
 
-var searchMapping *mapping.IndexMappingImpl
 var searchIndex bleve.Index
 
 //GetApplicationsByName get application by name
@@ -28,8 +26,8 @@ func GetApplicationsByName(name string) *AppCard {
 	return nil
 }
 
-//GetAppListByNames get application by names
-func GetAppListByNames(name []string) []*AppCard {
+//SearchAppListByNames get application by names
+func SearchAppListByNames(name []string) []*AppCard {
 	cards := []*AppCard{}
 	for _, category := range GetAppListWithoutPopular() {
 		for _, app := range category.AppCards {
@@ -43,8 +41,8 @@ func GetAppListByNames(name []string) []*AppCard {
 	return cards
 }
 
-//GetAppListByNamesWithLikes get application by names
-func GetAppListByNamesWithLikes(user *db.User, name []string) []*AppCard {
+//SearchAppListByNamesWithLikes get application by names
+func SearchAppListByNamesWithLikes(user *db.User, name []string) []*AppCard {
 	cards := []*AppCard{}
 	for _, category := range GetAppListWithLikedWithoutPopular(user) {
 		for _, app := range category.AppCards {
@@ -142,12 +140,12 @@ func GetAppListWithoutPopular() []*AppCategory {
 
 //LoadSearchMappings load application search index
 func LoadSearchMappings() {
-	if searchMapping == nil {
+	if searchIndex == nil {
 		err := os.RemoveAll("./app")
 		if err != nil {
 			utils.Logger.Fatal(err.Error())
 		}
-		searchMapping = bleve.NewIndexMapping()
+		searchMapping := bleve.NewIndexMapping()
 		searchIndex, err = bleve.New("app", searchMapping)
 		if err != nil {
 			utils.Logger.Fatal(err.Error())

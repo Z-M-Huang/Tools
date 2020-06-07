@@ -15,6 +15,25 @@ func TestGetApplicationsByName(t *testing.T) {
 	assert.Nil(t, ret)
 }
 
+func TestSearchAppListByNames(t *testing.T) {
+	ret := SearchAppListByNames([]string{"dns-lookup", "kelly-criterion"})
+	assert.NotEmpty(t, ret)
+
+	ret = SearchAppListByNames([]string{"asdfasdfasdf"})
+	assert.Empty(t, ret)
+}
+
+func TestSearchAppListByNamesWithLikes(t *testing.T) {
+	likedApps := []string{"dns-lookup", "kelly-criterion"}
+	user := &db.User{}
+	user.LikedApps = []string{"DNS Lookup", "Kelly Criterion"}
+	ret := SearchAppListByNamesWithLikes(user, likedApps)
+	assert.NotEmpty(t, ret)
+
+	ret = SearchAppListByNamesWithLikes(user, []string{"asdfasdfasdf"})
+	assert.Empty(t, ret)
+}
+
 func TestGetApplicationWithLiked(t *testing.T) {
 	user := &db.User{}
 	user.LikedApps = []string{"DNS Lookup"}
@@ -24,6 +43,10 @@ func TestGetApplicationWithLiked(t *testing.T) {
 
 func TestReloadAppList(t *testing.T) {
 	ReloadAppList()
+}
+
+func TestLoadSearchMappings(t *testing.T) {
+	LoadSearchMappings()
 }
 
 func TestAddApplicationUsage(t *testing.T) {

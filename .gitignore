@@ -23,4 +23,5 @@ __debug_bin
 coverage.txt
 
 # bleve
-app/*
+index_meta.json
+store

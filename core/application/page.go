@@ -53,7 +53,7 @@ func (Page) SearchApps(c *gin.Context) {
 		c.Redirect(http.StatusTemporaryRedirect, "/")
 		return
 	}
-	if searchMapping == nil {
+	if searchIndex == nil {
 		core.WriteUnexpectedError(c, response)
 		return
 	}
@@ -78,10 +78,10 @@ func (Page) SearchApps(c *gin.Context) {
 		}
 		err := user.Find()
 		if err == nil && len(user.LikedApps) > 0 {
-			response.Data = GetAppListByNamesWithLikes(user, names)
+			response.Data = SearchAppListByNamesWithLikes(user, names)
 		}
 	} else {
-		response.Data = GetAppListByNames(names)
+		response.Data = SearchAppListByNames(names)
 	}
 	response.Header.Title = "Search - Fun Apps"
 	response.Header.Description = "Fun apps, fun personal small projects, and just for fun."
