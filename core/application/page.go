@@ -3,9 +3,11 @@ package application
 import (
 	"net/http"
 
+	"github.com/Z-M-Huang/Tools/core"
 	"github.com/Z-M-Huang/Tools/core/requestbin"
 	"github.com/Z-M-Huang/Tools/data"
 	"github.com/Z-M-Huang/Tools/utils"
+	"github.com/blevesearch/bleve"
 	"github.com/gin-gonic/gin"
 )
 
@@ -38,6 +40,39 @@ func (Page) RenderApplicationPage(c *gin.Context) {
 	}
 
 	c.HTML(http.StatusOK, appCard.TemplateName, response)
+}
+
+//SearchApps search apps in search bar
+func (Page) SearchApps(c *gin.Context) {
+	response := c.Keys[utils.ResponseCtxKey].(*data.PageResponse)
+	keys := c.Query("keywords")
+	if keys == "" {
+		c.Redirect(http.StatusTemporaryRedirect, "/")
+		return
+	}
+	if searchMapping == nil {
+		core.WriteUnexpectedError(c, response)
+		return
+	}
+	query := bleve.NewQueryStringQuery(keys)
+	searchRequest := bleve.NewSearchRequest(query)
+	searchResult, err := searchIndex.Search(searchRequest)
+	if err != nil {
+		core.WriteUnexpectedError(c, response)
+		return
+	}
+	if len(searchResult.Hits) < 1 {
+		c.HTML(http.StatusOK, "app_search.gohtml", response)
+		return
+	}
+	var names []string
+	for _, h := range searchResult.Hits {
+		names = append(names, h.ID)
+	}
+	response.Data = GetApplicationsByNames(names)
+	response.Header.Title = "Search - Fun Apps"
+	response.Header.Description = "Fun apps, fun personal small projects, and just for fun."
+	c.HTML(http.StatusOK, "app_search.gohtml", response)
 }
 
 func loadAppSpecificData(c *gin.Context, appName string) interface{} {

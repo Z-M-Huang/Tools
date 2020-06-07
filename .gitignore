@@ -21,3 +21,6 @@ node_modules
 robots.txt
 __debug_bin
 coverage.txt
+
+# bleve
+app/*

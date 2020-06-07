@@ -20,3 +20,10 @@ type AppCard struct {
 	Liked           bool
 	AmountLiked     uint64
 }
+
+//SearchItem in bleve
+type SearchItem struct {
+	Name        string
+	Title       string
+	Description string
+}

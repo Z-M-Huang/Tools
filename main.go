@@ -316,6 +316,7 @@ func SetupRouter() *gin.Engine {
 	iplocationAPI := &iplocation.API{}
 
 	pageNoAuth.GET("/", homePage.Home)
+	pageNoAuth.GET("/search", applicationPage.SearchApps)
 	pageNoAuth.GET("/signup", accountPage.Signup)
 	pageNoAuth.GET("/login", accountPage.Login)
 	pageAuthRequired.GET("/account", accountPage.Account)
@@ -370,6 +371,7 @@ func main() {
 	db.InitRedis()
 	account.InitGoogleOauth()
 	db.RedisDelete(utils.RedisAppListKey)
-	go application.ReloadAppList()
+	application.ReloadAppList()
+	application.LoadSearchMappings()
 	utils.Logger.Fatal(http.ListenAndServe(":80", SetupRouter()).Error())
 }

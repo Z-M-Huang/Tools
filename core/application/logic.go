@@ -1,18 +1,24 @@
 package application
 
 import (
+	"os"
 	"sort"
 	"strings"
 	"time"
 
 	"github.com/Z-M-Huang/Tools/data/db"
 	"github.com/Z-M-Huang/Tools/utils"
+	"github.com/blevesearch/bleve"
+	"github.com/blevesearch/bleve/mapping"
 	"github.com/jinzhu/gorm"
 )
 
+var searchMapping *mapping.IndexMappingImpl
+var searchIndex bleve.Index
+
 //GetApplicationsByName get application by name
 func GetApplicationsByName(name string) *AppCard {
-	for _, category := range GetAppList() {
+	for _, category := range GetAppListWithoutPopular() {
 		for _, app := range category.AppCards {
 			if app.Name == name {
 				return app
@@ -22,10 +28,25 @@ func GetApplicationsByName(name string) *AppCard {
 	return nil
 }
 
+//GetApplicationsByNames get application by names
+func GetApplicationsByNames(name []string) []*AppCard {
+	cards := []*AppCard{}
+	for _, category := range GetAppListWithoutPopular() {
+		for _, app := range category.AppCards {
+			for _, n := range name {
+				if app.Name == n {
+					cards = append(cards, app)
+				}
+			}
+		}
+	}
+	return cards
+}
+
 //GetApplicationWithLiked get application with liked populated
 func GetApplicationWithLiked(user *db.User) []*AppCategory {
 	if user != nil && len(user.LikedApps) > 0 {
-		appList := GetAppList()
+		appList := GetAppListWithoutPopular()
 		for _, category := range appList {
 			for _, app := range category.AppCards {
 				for _, likedApp := range user.LikedApps {
@@ -60,6 +81,54 @@ func GetAppList() []*AppCategory {
 		categories = appList
 	}
 	return categories
+}
+
+//GetAppListWithoutPopular this is mostly for search
+func GetAppListWithoutPopular() []*AppCategory {
+	var categories []*AppCategory
+	err := db.RedisGet(utils.RedisAppListKey, &categories)
+	if err != nil {
+		utils.Logger.Error(err.Error())
+	}
+	if categories == nil || len(categories) == 0 {
+		var noPopularAppList []*AppCategory
+		noPopularAppList = append(noPopularAppList, getAnalyticTools(), getCommunicationTools(), getCovidTools(),
+			getFormatTools(), getGeneratorTools(), getLookupTools(), getWebUtils())
+		loadAppCardsUsage(noPopularAppList)
+		appList := append([]*AppCategory{getPopular(noPopularAppList)}, noPopularAppList...)
+		err = db.RedisSetBytes(utils.RedisAppListKey, appList, 24*time.Hour)
+		if err != nil {
+			utils.Logger.Error(err.Error())
+		}
+		categories = appList
+	} else {
+		categories = categories[1:]
+	}
+	return categories
+}
+
+//LoadSearchMappings load application search index
+func LoadSearchMappings() {
+	if searchMapping == nil {
+		err := os.RemoveAll("./app")
+		if err != nil {
+			utils.Logger.Fatal(err.Error())
+		}
+		searchMapping = bleve.NewIndexMapping()
+		searchIndex, err = bleve.New("app", searchMapping)
+		if err != nil {
+			utils.Logger.Fatal(err.Error())
+		}
+		for _, category := range GetAppListWithoutPopular() {
+			for _, app := range category.AppCards {
+				searchIndex.Index(app.Name, SearchItem{
+					Name:        app.Name,
+					Title:       app.Title,
+					Description: app.Description,
+				})
+			}
+		}
+	}
 }
 
 //ReloadAppList reload app list
