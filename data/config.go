@@ -59,6 +59,7 @@ type EmailConfiguration struct {
 
 //BitcoinRPCConfiguration bitcoin rpc configuration
 type BitcoinRPCConfiguration struct {
+	Host     string `env:"BITCOIN_RPC_HOST"`
 	User     string `env:"BITCOIN_RPC_USER"`
 	Password string `env:"BITCOIN_RPC_PASSWORD"`
 }
