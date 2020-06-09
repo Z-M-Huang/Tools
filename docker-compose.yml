@@ -36,6 +36,8 @@ services:
       - "SMTP_SERVER=${SMTP_SERVER}"
       - "EMAIL_ADDRESS=${EMAIL_ADDRESS}"
       - "EMAIL_PASSWORD=${EMAIL_PASSWORD}"
+      - "BITCOIN_RPC_USER=${BITCOIN_RPC_USER}"
+      - "BITCOIN_RPC_PASSWORD=${BITCOIN_RPC_PASSWORD}"
       - "TZ=America/New_York"
     networks:
       - proxy

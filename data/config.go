@@ -15,6 +15,7 @@ var (
 	RedisConfig       *RedisConfiguration
 	GoogleOauthConfig *GoogleOauthConfiguration
 	EmailConfig       *EmailConfiguration
+	BitcoinRPCConfig  *BitcoinRPCConfiguration
 )
 
 //Configuration app configuration
@@ -56,6 +57,12 @@ type EmailConfiguration struct {
 	Password     string `env:"EMAIL_PASSWORD"`
 }
 
+//BitcoinRPCConfiguration bitcoin rpc configuration
+type BitcoinRPCConfiguration struct {
+	User     string `env:"BITCOIN_RPC_USER"`
+	Password string `env:"BITCOIN_RPC_PASSWORD"`
+}
+
 //LoadProductionConfig load config
 func LoadProductionConfig() {
 	Config = &Configuration{}
@@ -75,6 +82,10 @@ func LoadProductionConfig() {
 		utils.Logger.Fatal(err.Error())
 	}
 	EmailConfig = &EmailConfiguration{}
+	if err := env.Parse(EmailConfig); err != nil {
+		utils.Logger.Fatal(err.Error())
+	}
+	BitcoinRPCConfig = &BitcoinRPCConfiguration{}
 	if err := env.Parse(EmailConfig); err != nil {
 		utils.Logger.Fatal(err.Error())
 	}
