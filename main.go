@@ -9,7 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Z-M-Huang/Tools/core"
 	"github.com/Z-M-Huang/Tools/core/account"
 	"github.com/Z-M-Huang/Tools/core/application"
 	"github.com/Z-M-Huang/Tools/core/dnslookup"
@@ -56,7 +55,7 @@ func pageStyleHandler() gin.HandlerFunc {
 		if err == nil && val != "" {
 			style = val
 		} else {
-			core.SetCookie(c, utils.PageStyleCookieKey, "default", time.Now().AddDate(100, 0, 0), false)
+			style = "default"
 		}
 		response.SetNavStyleName(getPageStyle(style))
 		c.Next()
