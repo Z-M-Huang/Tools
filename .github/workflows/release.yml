@@ -1,7 +1,7 @@
 name: Docker Release CI
 
 on:
-  release: 
+  release:
     types: [published]
 
 jobs:
@@ -9,59 +9,57 @@ jobs:
     runs-on: ubuntu-latest
     name: retag
     steps:
-    - uses: actions/checkout@v2
-    - name: Retag to latest
-      uses: Z-M-Huang/docker-retag-curl@0.1.0
-      with:
-        repo: zhironghuang/tools-web
-        old_tag: ${{ github.sha }}
-        new_tag: latest
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+      - uses: actions/checkout@v2
+      - name: Retag to latest
+        uses: Z-M-Huang/docker-retag-curl@0.1.0
+        with:
+          repo: zhironghuang/tools-web
+          old_tag: ${{ github.sha }}
+          new_tag: latest
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
   deploy:
     name: deploy
     needs: retag
     runs-on: self-hosted
-    steps:      
-    - uses: actions/checkout@v2
-    - name: Deploy
-      env:
-        DB_DRIVER: ${{ secrets.DB_DRIVER }}
-        GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-        HOST: ${{ secrets.HOST }}
-        RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
-        JWT_KEY: ${{ secrets.JWT_KEY }}
-        REDIS_ADDR: ${{ secrets.REDIS_ADDR }}
-        CONNECTION_STRING: ${{ secrets.CONNECTION_STRING }}
-        ENABLE_SITEMAP: ${{ secrets.ENABLE_SITEMAP }}
-        HTTPS: ${{ secrets.HTTPS }}
-        GIN_MODE: ${{ secrets.GIN_MODE }}
-        SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
-        EMAIL_ADDRESS: ${{ secrets.EMAIL_ADDRESS }}
-        EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
-      run: |
-        export DB_DRIVER GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET HOST RAPIDAPI_KEY JWT_KEY REDIS_ADDR CONNECTION_STRING ENABLE_SITEMAP HTTPS GIN_MODE SMTP_SERVER EMAIL_ADDRESS EMAIL_PASSWORD
-        docker stack deploy -c docker-compose.yml --with-registry-auth Tools
+    steps:
+      - uses: actions/checkout@v2
+      - name: Deploy
+        env:
+          DB_DRIVER: ${{ secrets.DB_DRIVER }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          HOST: ${{ secrets.HOST }}
+          RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
+          JWT_KEY: ${{ secrets.JWT_KEY }}
+          REDIS_ADDR: ${{ secrets.REDIS_ADDR }}
+          CONNECTION_STRING: ${{ secrets.CONNECTION_STRING }}
+          ENABLE_SITEMAP: ${{ secrets.ENABLE_SITEMAP }}
+          HTTPS: ${{ secrets.HTTPS }}
+          GIN_MODE: ${{ secrets.GIN_MODE }}
+          SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+          EMAIL_ADDRESS: ${{ secrets.EMAIL_ADDRESS }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+        run: |
+          export DB_DRIVER GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET HOST RAPIDAPI_KEY JWT_KEY REDIS_ADDR CONNECTION_STRING ENABLE_SITEMAP HTTPS GIN_MODE SMTP_SERVER EMAIL_ADDRESS EMAIL_PASSWORD
+          docker stack deploy -c docker-compose.yml --with-registry-auth Tools
 
   tweet:
     runs-on: ubuntu-latest
     name: Tweet
     needs: deploy
     steps:
-    - uses: actions/checkout@v2
-    - name: Get Commit Info
-      run: |
-        echo "::set-env name=head::$(git log -1 HEAD --pretty=format:%s)"
-        echo "::set-env name=body::$(git log -1 HEAD --pretty=format:%b)"
-    - name: Send Tweet
-      uses: Z-M-Huang/TweetOnAction@v1
-      with:
-        consumer_key: ${{ secrets.CONSUMER_KEY }}
-        consumer_secret: ${{ secrets.CONSUMER_SECRET }}
-        access_token: ${{ secrets.ACCESS_TOKEN }}
-        token_secret: ${{ secrets.TOKEN_SECRET }}
-        content: "Github:https://github.com/Z-M-Huang/Tools just released a new version.\n\n${{ env.head }}\n${{ env.body }}\n\nPlease check it out for the new features!\nhttps://tools.zh-code.com"
-    
-          
+      - uses: actions/checkout@v2
+      - name: Get Commit Info
+        run: |
+          echo "::set-env name=head::$(git log -1 HEAD --pretty=format:%s)"
+          echo "::set-env name=body::$(git log -1 HEAD --pretty=format:%b)"
+      - name: Send Tweet
+        uses: Z-M-Huang/TweetOnAction@v1
+        with:
+          consumer_key: ${{ secrets.CONSUMER_KEY }}
+          consumer_secret: ${{ secrets.CONSUMER_SECRET }}
+          access_token: ${{ secrets.ACCESS_TOKEN }}
+          token_secret: ${{ secrets.TOKEN_SECRET }}
+          content: "Github:https://github.com/Z-M-Huang/Tools just released a new version.\n\n${{ env.head }}\n${{ env.body }}\n\nPlease check it out for the new features!\nhttps://tools.zh-code.com"

@@ -2,7 +2,7 @@ name: Docker Build CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
   test:
@@ -24,31 +24,31 @@ jobs:
     name: Build
     needs: test
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js
-      uses: actions/setup-node@v1
-      with:
-        node-version: '12.x'
-    - name: Install dependencies
-      run: npm install
-    - name: Set up Docker Buildx
-      id: buildx
-      uses: crazy-max/ghaction-docker-buildx@v1
-      with:
-        buildx-version: latest
-        qemu-version: latest
-    - name: Docker Login
-      run: |
-        echo "${{ secrets.DOCKER_PASSWORD }}" > ~/cred.txt
-        cat ~/cred.txt | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
-    - name: Clean Docker cred
-      run: rm ~/cred.txt
-    - name: Build using buildx
-      run: | 
-        docker buildx build \
-          --platform linux/amd64,linux/arm/v7 --push \
-          -t zhironghuang/tools-web:${{ github.sha }} .
-    - name: Docker Logout
-      run: |
-        docker logout
-        rm ~/.docker/config.json
+      - uses: actions/checkout@v2
+      - name: Use Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: "12.x"
+      - name: Install dependencies
+        run: npm install
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: crazy-max/ghaction-docker-buildx@v1
+        with:
+          buildx-version: latest
+          qemu-version: latest
+      - name: Docker Login
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" > ~/cred.txt
+          cat ~/cred.txt | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
+      - name: Clean Docker cred
+        run: rm ~/cred.txt
+      - name: Build using buildx
+        run: |
+          docker buildx build \
+            --platform linux/amd64,linux/arm/v7,linux/arm64 --push \
+            -t zhironghuang/tools-web:${{ github.sha }} .
+      - name: Docker Logout
+        run: |
+          docker logout
+          rm ~/.docker/config.json
